@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+  <xs:element name="CommonSetting">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="UserSettingPath" type="xs:string" minOccurs="0" />
+        <xs:element name="ErrorMessagePath" type="xs:string" minOccurs="0" />
+        <xs:element name="SystemMessagePath" type="xs:string" minOccurs="0" />
+        <xs:element name="ConsumerKey" type="xs:string" minOccurs="0" />
+        <xs:element name="ConsumerSecret" type="xs:string" minOccurs="0" />
+        <xs:element name="Guid" type="xs:string" minOccurs="0" />
+        <xs:element name="MinThread" type="xs:int" minOccurs="0" />
+        <xs:element name="MaxThread" type="xs:int" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

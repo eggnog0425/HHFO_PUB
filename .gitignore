@@ -351,15 +351,10 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-# コンシューマーキー絡み
+# コンシューマーキーとかTokenとかがのってるファイルは管理から外す
 HHFO/HHFO.Config/CommonSetting.xml
 HHFO/HHFO.Config/userSetting.xml
 
-# xmlから自動生成するファイル群
+# xsdから自動生成するファイル群(csファイルはバージョン管理にのせる)
 HHFO/HHFO.Config/*.xsc
 HHFO/HHFO.Config/*.xss
-HHFO/HHFO.Config/*.cs
-
-# UserSettingはスキーマを手動で修正しているので管理にのせる
-!src/Config/UserSetting.xsd
-

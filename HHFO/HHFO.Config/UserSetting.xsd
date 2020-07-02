@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+	<xs:element name="UserSetting">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="UserAccounts" maxOccurs="unbounded" nillable="true">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="Token" type="xs:string" nillable="true" default="" />
+							<xs:element name="TokenSecret" type="xs:string" nillable="true" default="" />
+							<xs:element name="Account_id" type="xs:string" nillable="true" default=""  />
+							<xs:element name="DefaultAccount" type="xs:boolean" nillable="false" default="false" />
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

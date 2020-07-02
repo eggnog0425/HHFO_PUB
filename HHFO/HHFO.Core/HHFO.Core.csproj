@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+	<PropertyGroup>
+		<TargetFramework>netcoreapp3.1</TargetFramework>
+		<UseWPF>true</UseWPF>
+		<AssemblyName>HHFO.Core</AssemblyName>
+	</PropertyGroup>
+	<ItemGroup>
+		<Page Remove="Common\App.xaml" />
+	</ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Include="..\HHFO.Config\CommonSetting.xml" />
+		<EmbeddedResource Include="..\HHFO.Config\ErrorMessage.xml" />
+		<EmbeddedResource Include="..\HHFO.Config\SystemMessage.xml" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="CoreTweet" Version="1.0.0.483" />
+		<PackageReference Include="NLog" Version="4.7.2" />
+		<PackageReference Include="Prism.Wpf" Version="7.2.0.1422" />
+		<PackageReference Include="ReactiveProperty" Version="7.1.0" />
+	</ItemGroup>	
+	<ItemGroup>
+		<ProjectReference Include="..\HHFO.Config\HHFO.Config.csproj" />
+	</ItemGroup>
+</Project>

@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="CommonSetting.xml" />
+    <None Remove="ErrorMessage.xml" />
+    <None Remove="SystemMessage.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="CommonSetting.xml" />
+    <EmbeddedResource Include="ErrorMessage.xml" />
+    <EmbeddedResource Include="SystemMessage.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="UserSetting.xml">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

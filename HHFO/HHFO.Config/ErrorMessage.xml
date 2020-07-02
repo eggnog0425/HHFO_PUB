@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ErrorMessage>
+	<UnAuthrizeCreateFile>
+		"書込権限がないためファイルの作成に失敗しました。ディレクトリが読み取り専用になっていたり、対象ファイルを開いていたりしないか確認してください。\r\n対象ファイル: {0}"
+	</UnAuthrizeCreateFile>
+	<UnAuthrizeCreateDir>
+		"書込権限がないためディレクトリの作成に失敗しました。ディレクトリが読取専用になっていないかご確認ください。\r\n対象ディレクトリ: {0}"
+	</UnAuthrizeCreateDir>
+	<UnExpectedExceptionCreateDir>
+		"ディレクトリの作成ができませんでした。\r\n対象ディレクトリ: {0}"
+	</UnExpectedExceptionCreateDir>
+</ErrorMessage>

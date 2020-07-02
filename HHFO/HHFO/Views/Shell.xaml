@@ -1,0 +1,10 @@
+﻿<Window x:Class="HHFO.Views.Shell"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:prism="http://www.codeplex.com/prism"
+        prism:ViewModelLocator.AutoWireViewModel="True"
+        Title="Shell" Height="300" Width="300">
+    <Grid>
+        <ContentControl prism:RegionManager.RegionName="Main" />
+    </Grid>
+</Window>
