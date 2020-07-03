@@ -1,21 +1,23 @@
-﻿using Prism.Ioc;
-using HHFO.Views;
-using System.Windows;
-using Prism.Modularity;
-using HHFO.Modules.ModuleName;
-using HHFO.Services.Interfaces;
-using HHFO.Services;
-using NLog;
-using System;
-using System.Threading;
-using System.Reflection;
-using System.Xml;
-using NLog.Config;
-using System.IO;
+﻿using HHFO.Config;
 using HHFO.Core;
-using HHFO.Config;
+using HHFO.Core.Common;
+using HHFO.Modules.ModuleName;
+using HHFO.Services;
+using HHFO.Services.Interfaces;
+using HHFO.ViewModels;
+using HHFO.Views;
+using NLog;
+using NLog.Config;
 using Prism.DryIoc;
+using Prism.Ioc;
+using Prism.Modularity;
 using Prism.Mvvm;
+using System;
+using System.IO;
+using System.Reflection;
+using System.Threading;
+using System.Windows;
+using System.Xml;
 using Unity;
 
 namespace HHFO
@@ -26,33 +28,36 @@ namespace HHFO
     public partial class App
     {
         private static Logger logger = LogManager.GetCurrentClassLogger();
-        private IUnityContainer Container { get; } = new UnityContainer();
+
+        protected override Window CreateShell()
+        {
+            return Container.Resolve<Shell>();
+        }
+
+        protected override void RegisterTypes(IContainerRegistry containerRegistry)
+        {
+        }
 
         private void ApplicationStartUp(object sender, StartupEventArgs e)
-        {   
-            var commonSetting = HHFO.Core.CommonSetting.Value;
-            var userSettingPath = commonSetting.UserSettingPath;
-
+        {
             try
             {
-                if (!File.Exists(userSettingPath))
+                var settingUtils = new SettingUtils();
+                if (settingUtils.getUserSetting() == null)
                 {
-                    var dir = Path.GetDirectoryName(userSettingPath);
-                    var fileUtils = new FileUtils();
-                    fileUtils.createDirectory(dir);
-
-                    var userSetting = new UserSetting();
-                    fileUtils.CreateXml<UserSetting>(userSettingPath, userSetting);
+                    if (!settingUtils.createUserSetting(out var message))
+                    {
+                        throw new Exception(message);
+                    }
                 }
             }
-            catch (Exception unExpected)
+            catch (Exception exception)
             {
-                logger.Error(unExpected.Message);
-                logger.Error(unExpected.StackTrace);
+                logger.Error(exception.Message);
+                logger.Error(exception.StackTrace);
+                MessageBox.Show("花発多風雨の起動に失敗しました");
                 System.Windows.Application.Current.Shutdown(1);
             }
-
-            new Bootstrapper().Run();
         }
     }
 }

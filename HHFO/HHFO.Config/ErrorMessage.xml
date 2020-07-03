@@ -9,4 +9,7 @@
 	<UnExpectedExceptionCreateDir>
 		"ディレクトリの作成ができませんでした。\r\n対象ディレクトリ: {0}"
 	</UnExpectedExceptionCreateDir>
+	<UnExpectedExceptionCreateXml>
+		"Xmlファイルの作成ができませんでした。\r\n対象ファイル: {0}"
+	</UnExpectedExceptionCreateXml>
 </ErrorMessage>

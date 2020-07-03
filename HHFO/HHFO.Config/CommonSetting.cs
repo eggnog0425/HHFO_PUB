@@ -28,7 +28,7 @@ namespace HHFO.Config {
         
         private string errorMessagePathField;
         
-        private string systemMessagePathField;
+        private string dispMessagePathField;
         
         private string consumerKeyField;
         
@@ -43,6 +43,8 @@ namespace HHFO.Config {
         private int maxThreadField;
         
         private bool maxThreadFieldSpecified;
+        
+        private string titleField;
         
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
@@ -68,12 +70,12 @@ namespace HHFO.Config {
         
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
-        public string SystemMessagePath {
+        public string DispMessagePath {
             get {
-                return this.systemMessagePathField;
+                return this.dispMessagePathField;
             }
             set {
-                this.systemMessagePathField = value;
+                this.dispMessagePathField = value;
             }
         }
         
@@ -151,6 +153,17 @@ namespace HHFO.Config {
             }
             set {
                 this.maxThreadFieldSpecified = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        public string Title {
+            get {
+                return this.titleField;
+            }
+            set {
+                this.titleField = value;
             }
         }
     }

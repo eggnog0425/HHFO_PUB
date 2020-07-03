@@ -1,4 +1,4 @@
-﻿using HHFO.Config;
+﻿using HHFO.Core.Common;
 using NLog;
 using System;
 using System.Collections.Generic;
@@ -7,11 +7,10 @@ using System.IO;
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
-using HHFO.Core;
 
 namespace HHFO.Core
 {
-    public class FileUtils
+    internal class FileUtils
     {
         private static Logger Logger;
 
@@ -20,7 +19,7 @@ namespace HHFO.Core
             Logger = LogManager.GetCurrentClassLogger();
         }
 
-        public (bool success, String dispErrMessage) CreateXml<T>(string path, T data)
+        internal bool CreateOrUpdateXml<T>(string path, T data, out string message)
         {
             try
             {
@@ -30,34 +29,36 @@ namespace HHFO.Core
                     XmlSerializer serializer = new XmlSerializer(data.GetType());
                     serializer.Serialize(sw, data);
                 }
-                return (true, null);
+                message = null;
+                return true;
             }
             catch (UnauthorizedAccessException)
             {
-                return (false, string.Format(ErrorMessage.value.UnAuthrizeCreateFile, path));
+                message = string.Format(new SettingUtils().getErrorMessage().UnAuthrizeCreateFile, path);
+                return false;
             }
         }
 
-        public T ReadXml<T>(string path, Type obj)
+        internal T ReadXml<T>(string path)
         {
             using (var sr = new StreamReader(path, Encoding.UTF8))
             using (var xmlReader = XmlReader.Create(sr))
             {
-                XmlSerializer serializer = new XmlSerializer(obj);
+                XmlSerializer serializer = new XmlSerializer(typeof(T));
                 return (T)serializer.Deserialize(xmlReader);
             }
         }
-        public T ReadXml<T>(Stream stream, Type obj)
+        internal T ReadXml<T>(Stream stream)
         {
             using (var sr = new StreamReader(stream, Encoding.UTF8))
             using (var xmlReader = XmlReader.Create(sr))
             {
-                XmlSerializer serializer = new XmlSerializer(obj);
+                XmlSerializer serializer = new XmlSerializer(typeof(T));
                 return (T)serializer.Deserialize(xmlReader);
             }
         }
 
-        public (bool b, string message) createDirectory(string path)
+        internal bool createDirectory(string path, out string message)
         {
             try
             {
@@ -65,14 +66,16 @@ namespace HHFO.Core
                 {
                     Directory.CreateDirectory(path);
                 }
-                return (true, null);
+                message = null;
+                return true;
             }
             catch (UnauthorizedAccessException e)
             {
                 Logger.Error("ディレクトリ作成失敗");
                 Logger.Error("エラー内容: " + e.Message);
                 Logger.Error(e.StackTrace);
-                return (false, string.Format(ErrorMessage.value.UnAuthrizeCreateDir, path));
+                message = string.Format(new SettingUtils().getErrorMessage().UnAuthrizeCreateDir, path);
+                return false;
 
             }
             catch (Exception e)
@@ -80,19 +83,10 @@ namespace HHFO.Core
                 Logger.Error("ディレクトリ作成失敗");
                 Logger.Error("エラー内容: " + e.Message);
                 Logger.Error(e.StackTrace);
-                return (false, string.Format(ErrorMessage.value.UnExpectedExceptionCreateDir, path));
+                message = string.Format(new SettingUtils().getErrorMessage().UnExpectedExceptionCreateDir, path);
+                return false;
             }
         }
 
-        public UserSetting getUserSetting()
-        {
-            var commonSetting = CommonSetting.Value;
-            using (var sr = new StreamReader(commonSetting.UserSettingPath, Encoding.UTF8))
-            using (var xmlReader = XmlReader.Create(sr))
-            {
-                XmlSerializer serializer = new XmlSerializer(typeof(HHFO.Config.UserSetting));
-                return (UserSetting)serializer.Deserialize(xmlReader);
-            }
-        }
     }
 }

@@ -11,32 +11,27 @@
 // 
 // このソース コードは xsd によって自動生成されました。Version=4.8.3928.0 です。
 // 
-namespace HHFO.Config
-{
+namespace HHFO.Config {
     using System.Xml.Serialization;
-
-
+    
+    
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true)]
-    [System.Xml.Serialization.XmlRootAttribute(Namespace = "", IsNullable = false)]
-    public partial class SystemMessage
-    {
-
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true)]
+    [System.Xml.Serialization.XmlRootAttribute(Namespace="", IsNullable=false)]
+    public partial class DispMessage {
+        
         private object[] itemsField;
-
+        
         /// <remarks/>
-        public object[] Items
-        {
-            get
-            {
+        public object[] Items {
+            get {
                 return this.itemsField;
             }
-            set
-            {
+            set {
                 this.itemsField = value;
             }
         }

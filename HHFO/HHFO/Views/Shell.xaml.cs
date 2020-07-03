@@ -6,7 +6,7 @@ namespace HHFO.Views
     /// <summary>
     /// Shell.xaml の相互作用ロジック
     /// </summary>
-    public partial class Shell : Window
+    public partial class Shell : MahApps.Metro.Controls.MetroWindow
     {
         public Shell()
         {

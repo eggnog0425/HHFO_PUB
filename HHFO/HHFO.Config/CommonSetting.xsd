@@ -5,12 +5,13 @@
       <xs:sequence>
         <xs:element name="UserSettingPath" type="xs:string" minOccurs="0" />
         <xs:element name="ErrorMessagePath" type="xs:string" minOccurs="0" />
-        <xs:element name="SystemMessagePath" type="xs:string" minOccurs="0" />
+        <xs:element name="DispMessagePath" type="xs:string" minOccurs="0" />
         <xs:element name="ConsumerKey" type="xs:string" minOccurs="0" />
         <xs:element name="ConsumerSecret" type="xs:string" minOccurs="0" />
         <xs:element name="Guid" type="xs:string" minOccurs="0" />
         <xs:element name="MinThread" type="xs:int" minOccurs="0" />
         <xs:element name="MaxThread" type="xs:int" minOccurs="0" />
+		<xs:element name="Title" type="xs:string" minOccurs="0" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
