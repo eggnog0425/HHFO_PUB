@@ -12,6 +12,7 @@
 	<ItemGroup>
 		<PackageReference Include="CoreTweet" Version="1.0.0.483" />
 		<PackageReference Include="NLog" Version="4.7.2" />
+		<PackageReference Include="Prism.Unity" Version="7.2.0.1422" />
 		<PackageReference Include="Prism.Wpf" Version="7.2.0.1422" />
 		<PackageReference Include="ReactiveProperty" Version="7.1.0" />
 	</ItemGroup>	

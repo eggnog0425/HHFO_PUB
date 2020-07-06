@@ -1,9 +1,6 @@
 ﻿using HHFO.Config;
 using HHFO.Core;
 using HHFO.Core.Common;
-using HHFO.Modules.ModuleName;
-using HHFO.Services;
-using HHFO.Services.Interfaces;
 using HHFO.ViewModels;
 using HHFO.Views;
 using NLog;
@@ -38,6 +35,10 @@ namespace HHFO
         {
         }
 
+        protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)
+        {
+            moduleCatalog.AddModule<HHFO.Menu.MenuModule>();
+        }
         private void ApplicationStartUp(object sender, StartupEventArgs e)
         {
             try

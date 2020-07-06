@@ -7,6 +7,6 @@ namespace HHFO.Models
 {
     public interface IAuth
     {
-        public bool isAuthed { get; protected set; }
+        public bool HasAuthenticated { get; protected set; }
     }
 }

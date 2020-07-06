@@ -1,16 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Windows.Navigation;
 
 namespace HHFO.Models
 {
     class Auth : IAuth
     {
-        bool IAuth.isAuthed
+        private bool hasAuthenticated = false;
+
+        bool IAuth.HasAuthenticated
         {
-            get => 
+            get => hasAuthenticated;
+            set => this.hasAuthenticated = value;
+
         }
 
         // Token
+
     }
 }

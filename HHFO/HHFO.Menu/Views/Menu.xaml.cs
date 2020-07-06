@@ -13,14 +13,11 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace HHFO.Modules.ModuleName.Views
+namespace HHFO.Menu.Views
 {
-    /// <summary>
-    /// Interaction logic for ViewA.xaml
-    /// </summary>
-    public partial class ViewA : UserControl
+    public partial class Menu : UserControl
     {
-        public ViewA()
+        public Menu()
         {
             InitializeComponent();
         }
