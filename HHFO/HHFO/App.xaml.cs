@@ -1,6 +1,7 @@
 ﻿using HHFO.Config;
 using HHFO.Core;
 using HHFO.Core.Common;
+using HHFO.Models;
 using HHFO.ViewModels;
 using HHFO.Views;
 using NLog;
@@ -33,6 +34,8 @@ namespace HHFO
 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
+            containerRegistry.Register<HHFO.Models.AbstractMenu, HHFO.Models.Menu>();
+
         }
 
         protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)

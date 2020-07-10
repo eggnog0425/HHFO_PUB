@@ -15,7 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Config", "Config", "{B97C9B
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HHFO.Config", "HHFO\HHFO.Config\HHFO.Config.csproj", "{E0901069-421E-46C3-B26E-526348236822}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HHFO.Menu", "HHFO\HHFO.Menu\HHFO.Menu.csproj", "{C33E7023-EDCD-49AA-9D8E-40B90F8AA05D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HHFO.Menu", "HHFO\HHFO.Menu\HHFO.Menu.csproj", "{C33E7023-EDCD-49AA-9D8E-40B90F8AA05D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

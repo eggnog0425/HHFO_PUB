@@ -15,14 +15,19 @@
         Background="{DynamicResource MaterialDesignPaper}"
         FontFamily="{DynamicResource MaterialDesignFont}"
         Title="{Binding Title}" Height="600" Width="800">
+    <interactivity:Interaction.Triggers>
+        <interactivity:EventTrigger EventName="Loaded">
+            <reactiveInteractivity:EventToReactiveCommand Command="{Binding OnLoaded, Mode=OneWay}" />
+        </interactivity:EventTrigger>
+    </interactivity:Interaction.Triggers>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="9*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="2*"/>
-            <ColumnDefinition Width="8*"/>
+            <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="7*"/>
         </Grid.ColumnDefinitions>
 
         <ContentControl Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" prism:RegionManager.RegionName="MenuSpace">

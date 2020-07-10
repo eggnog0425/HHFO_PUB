@@ -14,4 +14,7 @@
     <PackageReference Include="ReactiveProperty" Version="7.1.0" />
     <PackageReference Include="ReactiveProperty.WPF" Version="7.1.0" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\HHFO.Core\HHFO.Core.csproj" />
+  </ItemGroup>
 </Project>
