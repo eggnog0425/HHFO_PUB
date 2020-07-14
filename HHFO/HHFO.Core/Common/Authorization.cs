@@ -28,7 +28,7 @@ namespace HHFO.Models
         {
             if(Token == null)
             {
-                throw new UnauthorizedAccessException("You have'n create token.");
+                throw new UnauthorizedAccessException("You have not create a token.");
             }
             return Token;
         }

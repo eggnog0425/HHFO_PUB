@@ -10,6 +10,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -23,12 +24,11 @@ namespace HHFO.Menu.ViewModels
         public ReactiveProperty<String> ListsLabel { get; }
         public ReactiveProperty<bool> HasOpen { get; }
         public ReactiveProperty<int> MenuWidth { get; }
-
-        public ReactiveProperty<IReadOnlyList<CoreTweet.List>> Lists { get; set; }
-        public ReadOnlyReactiveCollection<String> ListNames { get; }
+        public ReactiveProperty<IReadOnlyList<CoreTweet.List>> Lists { get; }
 
         private AbstractMenu Menu;
         public ReactiveCommand<RoutedEventArgs> ExpandedLists { get; } = new ReactiveCommand<RoutedEventArgs>();
+        public ReactiveCommand<RoutedEventArgs> CollapsedLists { get; } = new ReactiveCommand<RoutedEventArgs>();
 
         private CompositeDisposable Disposable { get; } = new CompositeDisposable();
 
@@ -41,24 +41,31 @@ namespace HHFO.Menu.ViewModels
                                  .AddTo(this.Disposable);
             MenuWidth = this.Menu.ToReactivePropertyAsSynchronized(m => m.MenuWidth)
                                  .AddTo(this.Disposable);
-            Lists = this.Menu.ToReactivePropertyAsSynchronized(m => m.Lists)
-                             .AddTo(this.Disposable);
+            Lists = this.Menu.ToReactivePropertyAsSynchronized(m=>m.Lists)
+                                 .AddTo(this.Disposable);
 
             ExpandedLists.Subscribe(_ =>
             {
-                ChangeMenuWidth();
-            }) ;
-
-            ListNames = (Menu.Lists ?? Enumerable.Empty<CoreTweet.List>())
-                .Select(l => l.Name)
-                .ToObservable()
-                .ToReadOnlyReactiveCollection();
+                FetchLists();
+                SpreadMenu();
+            });
+            CollapsedLists.Subscribe(_ =>
+            {
+                ShrinkMenu();
+            });
         }
 
-
-        private void ChangeMenuWidth()
+        private void SpreadMenu()
         {
-            this.Menu.ChangeMenuWidth();
+            Menu.SpreadMenu();
+        }
+        private void ShrinkMenu()
+        {
+            Menu.ShrinkMenu();
+        }
+        private void FetchLists()
+        {
+            Menu.FetchList();
         }
     }
 

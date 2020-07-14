@@ -38,10 +38,20 @@
                     <interactivity:EventTrigger EventName="Expanded">
                         <reactiveInteractivity:EventToReactiveCommand Command="{Binding ExpandedLists, Mode=OneWay}"/>
                     </interactivity:EventTrigger>
+
+                    <interactivity:EventTrigger EventName="Collapsed">
+                        <reactiveInteractivity:EventToReactiveCommand Command="{Binding CollapsedLists, Mode=OneWay}"/>
+                    </interactivity:EventTrigger>
                 </interactivity:Interaction.Triggers>
-                <StackPanel>
-                    <ItemsControl ItemsSource="{Binding ListNames, UpdateSourceTrigger=PropertyChanged}"></ItemsControl>
-                </StackPanel>
+                <ListBox ItemsSource="{Binding Lists.Value}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <TextBlock Text ="{Binding Name}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
             </Expander>
         </StackPanel>
     </Grid>

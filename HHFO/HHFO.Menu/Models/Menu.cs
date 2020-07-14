@@ -3,6 +3,7 @@ using ImTools;
 using Prism.Mvvm;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Windows;
 
@@ -21,7 +22,7 @@ namespace HHFO.Models
             homeLabel = "Home";
             listLabel = "List";
             menuWidth = 1;
-            lists = null;
+            Lists = new List<CoreTweet.List>();
         }
         public override int MenuWidth
         {
@@ -45,24 +46,23 @@ namespace HHFO.Models
             protected set => SetProperty(ref lists, value, "Lists");
         }
 
-        public override void ChangeMenuWidth()
+        public override void SpreadMenu()
         {
-            int i;
-            if (menuWidth == 1)
-            {
-                i = 2;
-            }
-            else
-            {
-                i = 1;
-            }
-            this.SetProperty(ref menuWidth, i, "MenuWidth");
+            MenuWidth++;
+        }
+
+        public override void ShrinkMenu()
+        {
+            MenuWidth--;
         }
 
         public override void FetchList()
         {
-            var token = Authorization.GetToken();
-            lists = token.Lists.List();
+            //var token = Authorization.GetToken();
+            //lists = token.Lists.List();
+            var lists = Enumerable.Range(1, 20).Select(x => new CoreTweet.List() { Name = "リスト" + x }).ToList();
+            Lists = new ListedResponse<CoreTweet.List>(lists);
+            this.RaisePropertyChanged(nameof(Lists));
         }
     }
 }
