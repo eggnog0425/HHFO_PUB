@@ -11,33 +11,18 @@ namespace HHFO.Models
 {
     public class Menu: AbstractMenu
     {
-        // todo:最終的には文字列じゃなくてベクタアイコンにする
-        private string homeLabel;
-        private string listLabel;
-        private int menuWidth;
+        private int width;
         private IReadOnlyList<CoreTweet.List> lists;
 
         public Menu()
         {
-            homeLabel = "Home";
-            listLabel = "List";
-            menuWidth = 1;
+            width = 1;
             Lists = new List<CoreTweet.List>();
         }
-        public override int MenuWidth
+        public override int Width
         {
-            get => menuWidth;
-            protected set => SetProperty(ref this.menuWidth, value, "MenuWidth");
-        }
-        public override string HomeLabel
-        {
-            get => homeLabel;
-            protected set => SetProperty(ref this.homeLabel, value, "Home");
-        }
-        public override string ListLabel
-        {
-            get => listLabel;
-            protected  set => SetProperty(ref this.listLabel, value, "List");
+            get => width;
+            protected set => SetProperty(ref this.width, value, "Width");
         }
 
         public override IReadOnlyList<CoreTweet.List> Lists
@@ -45,17 +30,6 @@ namespace HHFO.Models
             get => lists;
             protected set => SetProperty(ref lists, value, "Lists");
         }
-
-        public override void SpreadMenu()
-        {
-            MenuWidth++;
-        }
-
-        public override void ShrinkMenu()
-        {
-            MenuWidth--;
-        }
-
         public override void FetchList()
         {
             //var token = Authorization.GetToken();

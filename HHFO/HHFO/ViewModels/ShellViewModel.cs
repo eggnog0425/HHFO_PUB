@@ -11,7 +11,6 @@ using System;
 using System.Reactive.Disposables;
 using System.Runtime.CompilerServices;
 using System.Windows;
-using System.Windows.Forms;
 using Unity;
 using CoreTweet;
 using CoreTweet.Rest;
@@ -27,16 +26,24 @@ namespace HHFO.ViewModels
         public ReactiveCommand clickListButton { get; } = new ReactiveCommand();
         public string Title { get; } = new SettingUtils().getCommonSetting().Title;
         public ReactiveCommand OnLoaded { get; }
+        public ReactiveCommand OpenAuthFlyOut { get; } = new ReactiveCommand();
+        public ReactiveProperty<bool> IsOpenFlyOut { get; } = new ReactiveProperty<bool>(false);
 
         public ShellViewModel(IRegionManager regionManager) 
         {
-            this.Disposable = new CompositeDisposable();
-            this.OnLoaded = new ReactiveCommand()
+            Disposable = new CompositeDisposable();
+            OnLoaded = new ReactiveCommand()
                 .AddTo(this.Disposable);
-            this.OnLoaded.Subscribe(_ =>
+
+            OnLoaded.Subscribe(_ =>
             {
+                if (!Authed())
+                {
+                    OpenAuth();
+                }
             }
             );
+            OpenAuthFlyOut.Subscribe(_ => OpenAuth());
         }
 
         public void Dispose()
@@ -55,6 +62,11 @@ namespace HHFO.ViewModels
                                   .Where(a => a.Token != null && a.TokenSecret != null)
                                   .FirstOrDefault();
             return (defaultAccount != null);
+        }
+
+        private void OpenAuth()
+        {
+            IsOpenFlyOut.Value = true;
         }
     }
 }

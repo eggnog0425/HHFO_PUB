@@ -23,36 +23,44 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="{Binding MenuWidth.Value}">
-            <Button Name ="Home" Content="{Binding HomeLabel.Value}"/>
-            <Expander
-                Name ="Lists" Header="{Binding ListsLabel.Value}">
-                <interactivity:Interaction.Triggers>
-                    <interactivity:EventTrigger EventName="Expanded">
-                        <reactiveInteractivity:EventToReactiveCommand Command="{Binding ExpandedLists, Mode=OneWay}"/>
-                    </interactivity:EventTrigger>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="{Binding Width.Value}">
 
-                    <interactivity:EventTrigger EventName="Collapsed">
-                        <reactiveInteractivity:EventToReactiveCommand Command="{Binding CollapsedLists, Mode=OneWay}"/>
-                    </interactivity:EventTrigger>
-                </interactivity:Interaction.Triggers>
-                <ListBox ItemsSource="{Binding Lists.Value}">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel>
-                                <TextBlock Text ="{Binding Name}"/>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-            </Expander>
-        </StackPanel>
+            <StackPanel Cursor="Hand">
+                <TextBlock Name="Home" Text="{Binding Home}" FontSize="16" Padding="8,8,24,6"/>
+
+                <Expander Name ="List"
+                          FontSize="16"
+                          Margin="0"
+                          Padding="0"
+                          Header="{Binding List}"
+                          materialDesign:ExpanderAssist.DownHeaderPadding="8,6,24,6">
+                    <interactivity:Interaction.Triggers>
+                        <interactivity:EventTrigger EventName="Expanded">
+                            <reactiveInteractivity:EventToReactiveCommand Command="{Binding ExpandedLists, Mode=OneWay}"/>
+                        </interactivity:EventTrigger>
+                    </interactivity:Interaction.Triggers>
+                    <ItemsControl ItemsSource="{Binding Lists.Value}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <interactivity:Interaction.Triggers>
+                                        <interactivity:EventTrigger EventName="MouseDown">
+                                            <reactiveInteractivity:EventToReactiveCommand Command="{Binding aaa}" />
+                                        </interactivity:EventTrigger>
+                                    </interactivity:Interaction.Triggers>
+                                    <TextBlock Text="{Binding Name}" Padding="8,8,24,6" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Expander>
+                <TextBlock Name ="Auth" Text = "{Binding Auth}" FontSize="16" Padding="8,6,24,6"/>
+            </StackPanel>
+
+        </ScrollViewer>
     </Grid>
 </UserControl>

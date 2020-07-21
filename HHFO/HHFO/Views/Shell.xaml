@@ -20,6 +20,21 @@
             <reactiveInteractivity:EventToReactiveCommand Command="{Binding OnLoaded, Mode=OneWay}" />
         </interactivity:EventTrigger>
     </interactivity:Interaction.Triggers>
+    <mahApps:MetroWindow.Flyouts>
+        <mahApps:FlyoutsControl>
+            <mahApps:Flyout x:Name="Auth"
+                             Height="300"
+                             Header="Auth"
+                             Position="Top"
+                            IsOpen="{Binding IsOpenFlyOut.Value}">
+                <Button Width="75"
+                        Margin="10"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        Content="Button" />
+            </mahApps:Flyout>
+        </mahApps:FlyoutsControl>
+    </mahApps:MetroWindow.Flyouts>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>

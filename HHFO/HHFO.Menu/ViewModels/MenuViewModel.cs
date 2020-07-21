@@ -20,48 +20,33 @@ namespace HHFO.Menu.ViewModels
 {
     public class MenuViewModel : BindableBase
     {
-        public ReactiveProperty<String> HomeLabel { get; }
-        public ReactiveProperty<String> ListsLabel { get; }
+        public string Home { get; } = "Home";
+        public string List { get; } = "List";
+        public string Auth { get; } = "Auth";
         public ReactiveProperty<bool> HasOpen { get; }
-        public ReactiveProperty<int> MenuWidth { get; }
-        public ReactiveProperty<IReadOnlyList<CoreTweet.List>> Lists { get; }
+        public ReadOnlyReactiveProperty<int> Width { get; }
+        public ReadOnlyReactiveProperty<IReadOnlyList<CoreTweet.List>> Lists { get; }
 
         private AbstractMenu Menu;
         public ReactiveCommand<RoutedEventArgs> ExpandedLists { get; } = new ReactiveCommand<RoutedEventArgs>();
-        public ReactiveCommand<RoutedEventArgs> CollapsedLists { get; } = new ReactiveCommand<RoutedEventArgs>();
+        public ReactiveCommand<System.Windows.Forms.MouseEventArgs> aaa { get; } = new ReactiveCommand<System.Windows.Forms.MouseEventArgs>();
 
         private CompositeDisposable Disposable { get; } = new CompositeDisposable();
 
         public MenuViewModel(AbstractMenu Menu)
         {
             this.Menu = Menu;
-            HomeLabel = this.Menu.ToReactivePropertyAsSynchronized(m => m.HomeLabel)
-                                 .AddTo(this.Disposable);
-            ListsLabel = this.Menu.ToReactivePropertyAsSynchronized(m => m.ListLabel)
-                                 .AddTo(this.Disposable);
-            MenuWidth = this.Menu.ToReactivePropertyAsSynchronized(m => m.MenuWidth)
-                                 .AddTo(this.Disposable);
-            Lists = this.Menu.ToReactivePropertyAsSynchronized(m=>m.Lists)
-                                 .AddTo(this.Disposable);
+            Width = this.Menu.ObserveProperty(m => m.Width)
+                .ToReadOnlyReactiveProperty();
+            Lists = this.Menu.ObserveProperty(m => m.Lists)
+                .ToReadOnlyReactiveProperty();
 
             ExpandedLists.Subscribe(_ =>
             {
                 FetchLists();
-                SpreadMenu();
             });
-            CollapsedLists.Subscribe(_ =>
-            {
-                ShrinkMenu();
-            });
-        }
 
-        private void SpreadMenu()
-        {
-            Menu.SpreadMenu();
-        }
-        private void ShrinkMenu()
-        {
-            Menu.ShrinkMenu();
+            aaa.Subscribe(e => MessageBox.Show(e.Button.ToString()));
         }
         private void FetchLists()
         {
