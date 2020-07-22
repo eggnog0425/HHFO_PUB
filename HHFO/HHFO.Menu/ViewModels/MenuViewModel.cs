@@ -2,6 +2,7 @@
 using CoreTweet.Core;
 using HHFO.Models;
 using ImTools;
+using NLog;
 using Prism.Mvvm;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
@@ -15,6 +16,7 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace HHFO.Menu.ViewModels
 {
@@ -23,13 +25,12 @@ namespace HHFO.Menu.ViewModels
         public string Home { get; } = "Home";
         public string List { get; } = "List";
         public string Auth { get; } = "Auth";
-        public ReactiveProperty<bool> HasOpen { get; }
         public ReadOnlyReactiveProperty<int> Width { get; }
         public ReadOnlyReactiveProperty<IReadOnlyList<CoreTweet.List>> Lists { get; }
 
         private AbstractMenu Menu;
         public ReactiveCommand<RoutedEventArgs> ExpandedLists { get; } = new ReactiveCommand<RoutedEventArgs>();
-        public ReactiveCommand<System.Windows.Forms.MouseEventArgs> aaa { get; } = new ReactiveCommand<System.Windows.Forms.MouseEventArgs>();
+        public ReactiveCommand<System.Windows.Input.MouseButtonEventArgs> Aaa { get; } = new ReactiveCommand<System.Windows.Input.MouseButtonEventArgs>();
 
         private CompositeDisposable Disposable { get; } = new CompositeDisposable();
 
@@ -46,7 +47,10 @@ namespace HHFO.Menu.ViewModels
                 FetchLists();
             });
 
-            aaa.Subscribe(e => MessageBox.Show(e.Button.ToString()));
+            Aaa.Subscribe(e => {
+                Logger logger = LogManager.GetCurrentClassLogger();
+                MessageBox.Show(((TextBlock)e.Source).Tag.ToString());
+            });
         }
         private void FetchLists()
         {

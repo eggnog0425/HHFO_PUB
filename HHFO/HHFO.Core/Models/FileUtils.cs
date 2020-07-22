@@ -1,4 +1,4 @@
-﻿using HHFO.Core.Common;
+﻿using HHFO.Models;
 using NLog;
 using System;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
 
-namespace HHFO.Core
+namespace HHFO.Models
 {
     internal class FileUtils
     {

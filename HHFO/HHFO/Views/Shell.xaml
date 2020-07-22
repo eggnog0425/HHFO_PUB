@@ -14,7 +14,9 @@
         TextOptions.TextRenderingMode="Auto"
         Background="{DynamicResource MaterialDesignPaper}"
         FontFamily="{DynamicResource MaterialDesignFont}"
-        Title="{Binding Title}" Height="600" Width="800">
+        Title="{Binding Title}"
+        Height="800"
+        Width="1200">
     <interactivity:Interaction.Triggers>
         <interactivity:EventTrigger EventName="Loaded">
             <reactiveInteractivity:EventToReactiveCommand Command="{Binding OnLoaded, Mode=OneWay}" />
@@ -22,16 +24,74 @@
     </interactivity:Interaction.Triggers>
     <mahApps:MetroWindow.Flyouts>
         <mahApps:FlyoutsControl>
-            <mahApps:Flyout x:Name="Auth"
-                             Height="300"
-                             Header="Auth"
-                             Position="Top"
-                            IsOpen="{Binding IsOpenFlyOut.Value}">
-                <Button Width="75"
-                        Margin="10"
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Top"
-                        Content="Button" />
+            <mahApps:Flyout Name="Auth"
+                            Position="Left"
+                            Header="Twitter認証"
+                            Width="800"
+                            IsOpen="{Binding OpenFlyOut.Value}"
+                            CloseButtonVisibility="Hidden"
+                            FontSize="18"
+                            >
+                <StackPanel>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="0"
+                                   Grid.ColumnSpan="5"
+                                   Margin="10"
+                                   HorizontalAlignment="Left"
+                                   Text="認証ボタンを押すとブラウザを起動します。内容を確認してTwitterの認証を行ってください。"/>
+                        <Button Grid.Row="1"
+                                Grid.Column="3"
+                                Margin="10"
+                                FontSize="18"
+                                Content="認証"
+                                Command="{Binding OpenBrowser}"/>
+                        <TextBlock Grid.Row="2"
+                                   Grid.Column="0"
+                                   Grid.ColumnSpan="5"
+                                   Margin="10,20,10,10"
+                                   Text="認証後PINコードが表示されるので、下の入力欄にPINコードを入力してOKボタンを押してください。"
+                                   />
+                        <TextBox Grid.Row="3"
+                                 Grid.Column="0"
+                                 Grid.ColumnSpan="3"
+                                 Margin="10"
+                                 Name="Pin"
+                                 Text="{Binding Pin.Value}"/>
+                        <Button Grid.Row="3"
+                                Grid.Column="3"
+                                Width="Auto"
+                                Margin="10"
+                                FontSize="18"
+                                Name="OK"
+                                Content="OK"
+                                Command="{Binding InitialAuth}"
+                                />
+                        <TextBlock Grid.Row="4"
+                                   Grid.Column="0"
+                                   Grid.ColumnSpan="3"
+                                   Margin="10"
+                                   Text="PINコードが間違っています。PINコードを再度入力してください。"
+                                   Foreground="#f44336"
+                                   Visibility="{Binding PinError.Value, FallbackValue=Collapsed}"
+                                   />
+
+                    </Grid>
+                </StackPanel>
             </mahApps:Flyout>
         </mahApps:FlyoutsControl>
     </mahApps:MetroWindow.Flyouts>
@@ -45,7 +105,10 @@
             <ColumnDefinition Width="7*"/>
         </Grid.ColumnDefinitions>
 
-        <ContentControl Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" prism:RegionManager.RegionName="MenuSpace">
-        </ContentControl>
+        <ContentControl Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" prism:RegionManager.RegionName="MenuSpace"/>
+        <ContentControl Grid.Row="0" Grid.Column="1" prism:RegionManager.RegionName="TabSpace"/>
+        <ContentControl Grid.Row="1" Grid.Column="1" prism:RegionManager.RegionName="MainSpace"/>
+        
+
     </Grid>
 </mahApps:MetroWindow>      

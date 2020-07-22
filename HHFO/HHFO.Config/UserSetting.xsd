@@ -8,7 +8,7 @@
 						<xs:sequence>
 							<xs:element name="Token" type="xs:string" nillable="true" default="" />
 							<xs:element name="TokenSecret" type="xs:string" nillable="true" default="" />
-							<xs:element name="Account_id" type="xs:string" nillable="true" default=""  />
+							<xs:element name="AccountId" type="xs:string" nillable="true" default=""  />
 							<xs:element name="DefaultAccount" type="xs:boolean" nillable="false" default="false" />
 						</xs:sequence>
 					</xs:complexType>

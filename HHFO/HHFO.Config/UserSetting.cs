@@ -50,14 +50,14 @@ namespace HHFO.Config {
         
         private string tokenSecretField;
         
-        private string account_idField;
+        private string accountIdField;
         
         private bool defaultAccountField;
         
         public UserSettingUserAccounts() {
             this.tokenField = "";
             this.tokenSecretField = "";
-            this.account_idField = "";
+            this.accountIdField = "";
             this.defaultAccountField = false;
         }
         
@@ -85,12 +85,12 @@ namespace HHFO.Config {
         
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute(Form=System.Xml.Schema.XmlSchemaForm.Unqualified, IsNullable=true)]
-        public string Account_id {
+        public string AccountId {
             get {
-                return this.account_idField;
+                return this.accountIdField;
             }
             set {
-                this.account_idField = value;
+                this.accountIdField = value;
             }
         }
         

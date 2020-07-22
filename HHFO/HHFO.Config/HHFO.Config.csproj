@@ -17,10 +17,4 @@
     <EmbeddedResource Include="DispMessage.xml" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="UserSetting.xml">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
 </Project>

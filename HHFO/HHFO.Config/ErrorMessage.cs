@@ -30,6 +30,8 @@ namespace HHFO.Config {
         
         private string unExpectedExceptionCreateDirField;
         
+        private string unExpectedExceptionCreateXmlField;
+        
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
         public string UnAuthrizeCreateFile {
@@ -60,6 +62,17 @@ namespace HHFO.Config {
             }
             set {
                 this.unExpectedExceptionCreateDirField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        public string UnExpectedExceptionCreateXml {
+            get {
+                return this.unExpectedExceptionCreateXmlField;
+            }
+            set {
+                this.unExpectedExceptionCreateXmlField = value;
             }
         }
     }

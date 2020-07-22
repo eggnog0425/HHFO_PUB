@@ -6,7 +6,7 @@ using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
 using HHFO.Config;
-namespace HHFO.Core.Common
+namespace HHFO.Models
 {
     public class SettingUtils
     {

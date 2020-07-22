@@ -35,9 +35,6 @@
 		<ProjectReference Include="..\HHFO.Core\HHFO.Core.csproj" />
 		<ProjectReference Include="..\HHFO.Menu\HHFO.Menu.csproj" />
 	</ItemGroup>
-	<ItemGroup>
-	  <Folder Include="Models\" />
-	</ItemGroup>
 
 	<PropertyGroup>
 		<Nullable>warnings</Nullable>

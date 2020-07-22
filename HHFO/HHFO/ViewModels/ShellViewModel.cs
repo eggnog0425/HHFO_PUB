@@ -1,6 +1,4 @@
 ﻿using DryIoc.Messages;
-using HHFO.Core;
-using HHFO.Core.Common;
 using HHFO.Models;
 using Prism.Events;
 using Prism.Mvvm;
@@ -15,6 +13,7 @@ using Unity;
 using CoreTweet;
 using CoreTweet.Rest;
 using System.Linq;
+using System.Diagnostics;
 
 namespace HHFO.ViewModels
 {
@@ -23,27 +22,56 @@ namespace HHFO.ViewModels
 
         private CompositeDisposable Disposable { get; }
 
-        public ReactiveCommand clickListButton { get; } = new ReactiveCommand();
         public string Title { get; } = new SettingUtils().getCommonSetting().Title;
+        private Authorization Auth { get; set; }
+
         public ReactiveCommand OnLoaded { get; }
-        public ReactiveCommand OpenAuthFlyOut { get; } = new ReactiveCommand();
-        public ReactiveProperty<bool> IsOpenFlyOut { get; } = new ReactiveProperty<bool>(false);
+        public ReactiveCommand OpenBrowser { get; }
+        public ReactiveCommand InitialAuth { get; }
+
+
+        public ReactiveProperty<bool> OpenFlyOut { get; } = new ReactiveProperty<bool>(false);
+        public ReactiveProperty<String> Pin { get; set; } = new ReactiveProperty<string>();
+        public ReactiveProperty<Visibility> PinError { get; } = new ReactiveProperty<Visibility>(Visibility.Collapsed);
 
         public ShellViewModel(IRegionManager regionManager) 
         {
             Disposable = new CompositeDisposable();
             OnLoaded = new ReactiveCommand()
-                .AddTo(this.Disposable);
+                .AddTo(Disposable);
+            OpenBrowser = new ReactiveCommand()
+                .AddTo(Disposable);
+            InitialAuth = new ReactiveCommand()
+                .AddTo(Disposable);
 
             OnLoaded.Subscribe(_ =>
             {
-                if (!Authed())
+                if (!Authorization.Authed())
                 {
-                    OpenAuth();
+                    OpenFlyOut.Value = true;
                 }
             }
             );
-            OpenAuthFlyOut.Subscribe(_ => OpenAuth());
+
+            OpenBrowser.Subscribe(_ =>
+            {
+                Auth = new Authorization();
+                Auth.OpenAuthPage();
+            }
+            );
+
+            InitialAuth.Subscribe(_ =>
+            {
+                if (Auth != null && Auth.InitialAuth(Pin.Value))
+                {
+                    OpenFlyOut.Value = false;
+                }
+                else
+                {
+                    PinError.Value = Visibility.Visible;
+                }
+            }
+            );
         }
 
         public void Dispose()
@@ -51,22 +79,6 @@ namespace HHFO.ViewModels
             this.Disposable.Dispose();
         }
 
-        private bool Authed()
-        {
-            var account = new SettingUtils().getUserSetting().UserAccounts;
-            if(account == null || account.Length == 0)
-            {
-                return false;
-            }
-            var defaultAccount = account.Where(a => a.DefaultAccount)
-                                  .Where(a => a.Token != null && a.TokenSecret != null)
-                                  .FirstOrDefault();
-            return (defaultAccount != null);
-        }
 
-        private void OpenAuth()
-        {
-            IsOpenFlyOut.Value = true;
-        }
     }
 }

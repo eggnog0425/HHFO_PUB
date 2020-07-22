@@ -1,6 +1,4 @@
 ﻿using HHFO.Config;
-using HHFO.Core;
-using HHFO.Core.Common;
 using HHFO.Models;
 using HHFO.ViewModels;
 using HHFO.Views;
@@ -17,6 +15,7 @@ using System.Threading;
 using System.Windows;
 using System.Xml;
 using Unity;
+using System.Linq;
 
 namespace HHFO
 {
@@ -47,12 +46,20 @@ namespace HHFO
             try
             {
                 var settingUtils = new SettingUtils();
-                if (settingUtils.getUserSetting() == null)
+                var userSetting = settingUtils.getUserSetting();
+                if (userSetting == null)
                 {
                     if (!settingUtils.createUserSetting(out var message))
                     {
                         throw new Exception(message);
                     }
+                }
+                var defaultAccont = userSetting?.UserAccounts?.FirstOrDefault(ua => ua.DefaultAccount);
+                if(defaultAccont != null)
+                {
+                    var token = defaultAccont.Token;
+                    var tokenSecret = defaultAccont.TokenSecret;
+                    Authorization.GetToken(token: token, tokenSecret: tokenSecret);
                 }
             }
             catch (Exception exception)
