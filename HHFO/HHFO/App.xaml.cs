@@ -34,12 +34,14 @@ namespace HHFO
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
             containerRegistry.Register<HHFO.Models.AbstractMenu, HHFO.Models.Menu>();
-
+            containerRegistry.Register<CommonViewSetting>();
         }
 
         protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)
         {
             moduleCatalog.AddModule<HHFO.Menu.MenuModule>();
+            moduleCatalog.AddModule<HHFO.Tweets.TweetsModule>();
+            moduleCatalog.AddModule<HHFO.Tweet.TweetModule>();
         }
         private void ApplicationStartUp(object sender, StartupEventArgs e)
         {
@@ -49,7 +51,7 @@ namespace HHFO
                 var userSetting = settingUtils.getUserSetting();
                 if (userSetting == null)
                 {
-                    if (!settingUtils.createUserSetting(out var message))
+                    if (!settingUtils.CreateUserSetting(out var message))
                     {
                         throw new Exception(message);
                     }
@@ -66,7 +68,7 @@ namespace HHFO
             {
                 logger.Error(exception.Message);
                 logger.Error(exception.StackTrace);
-                MessageBox.Show("花発多風雨の起動に失敗しました");
+                MessageBox.Show("起動に失敗しました");
                 System.Windows.Application.Current.Shutdown(1);
             }
         }

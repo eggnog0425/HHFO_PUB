@@ -9,7 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HHFO.Services.Interfaces\HHFO.Services.Interfaces.csproj" />
+    <ProjectReference Include="..\Services.Interfaces\HHFO.Services.Interfaces.csproj" />
   </ItemGroup>
 
 </Project>

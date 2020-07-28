@@ -32,8 +32,10 @@
 	  </Page>
 	</ItemGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\HHFO.Core\HHFO.Core.csproj" />
-		<ProjectReference Include="..\HHFO.Menu\HHFO.Menu.csproj" />
+		<ProjectReference Include="..\Core\HHFO.Core.csproj" />
+		<ProjectReference Include="..\Menu\HHFO.Menu.csproj" />
+		<ProjectReference Include="..\Tweets\HHFO.Tweets.csproj" />
+		<ProjectReference Include="..\Tweet\HHFO.Tweet.csproj" />
 	</ItemGroup>
 
 	<PropertyGroup>

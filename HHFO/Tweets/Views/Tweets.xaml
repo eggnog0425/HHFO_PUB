@@ -1,0 +1,11 @@
+﻿<UserControl x:Class="HHFO.Views.Tweets"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:prism="http://prismlibrary.com/"             
+             prism:ViewModelLocator.AutoWireViewModel="True">
+    <Grid>
+        <TabControl ItemsSource="{Binding Tabs.Value}">
+            
+        </TabControl>
+    </Grid>
+</UserControl>
