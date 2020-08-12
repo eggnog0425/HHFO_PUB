@@ -1,11 +1,57 @@
 ﻿<UserControl x:Class="HHFO.Views.Tweets"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:prism="http://prismlibrary.com/"             
-             prism:ViewModelLocator.AutoWireViewModel="True">
+             xmlns:prism="http://www.codeplex.com/prism"
+             prism:ViewModelLocator.AutoWireViewModel="True"
+             xmlns:mahApps="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:interactivity="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:reactiveInteractivity="clr-namespace:Reactive.Bindings.Interactivity;assembly=ReactiveProperty.WPF"
+             TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+             TextElement.FontWeight="Regular"
+             TextElement.FontSize="13"
+             TextOptions.TextFormattingMode="Ideal"
+             TextOptions.TextRenderingMode="Auto"
+             Background="{DynamicResource MaterialDesignPaper}"
+             FontFamily="{DynamicResource MaterialDesignFont}">
     <Grid>
-        <TabControl ItemsSource="{Binding Tabs.Value}">
-            
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TabControl Grid.Row="0" ItemsSource ="{Binding Tabs}">
+            <TabControl.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding Id}" />
+                </DataTemplate>
+            </TabControl.ItemTemplate>
+            <TabControl.ContentTemplate>
+                <DataTemplate>
+                    <ListView ItemsSource="{Binding Statuses}"
+                              Height="600"> 
+                        <interactivity:Interaction.Triggers>
+                            <interactivity:EventTrigger EventName="MouseDown">
+                                <reactiveInteractivity:EventToReactiveCommand Command="{Binding hogehoge, Mode=OneWay}" />
+                            </interactivity:EventTrigger>
+                        </interactivity:Interaction.Triggers>
+                            <ListView.View>
+                                <GridView AllowsColumnReorder="False">
+                                    <GridViewColumn Header="ユーザID"
+                                                Width="100"
+                                                DisplayMemberBinding="{Binding User.ScreenName}"/>
+                                    <GridViewColumn Header="ユーザ名"
+                                                Width="100"
+                                                DisplayMemberBinding="{Binding User.Name}"/>
+
+                                    <GridViewColumn Header="ツイート"
+                                                Width="500"
+                                                DisplayMemberBinding="{Binding Text}"/>
+                                </GridView>
+                            </ListView.View>
+                    </ListView>
+                </DataTemplate>
+            </TabControl.ContentTemplate>
         </TabControl>
     </Grid>
 </UserControl>

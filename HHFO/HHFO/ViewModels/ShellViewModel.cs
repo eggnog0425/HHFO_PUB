@@ -17,19 +17,21 @@ using System.Diagnostics;
 using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Windows.Controls;
+using HHFO.Core.Models;
 
 namespace HHFO.ViewModels
 {
     class ShellViewModel : BindableBase, IDisposable
     {
-
         private CompositeDisposable Disposable { get; }
 
         public string Title { get; } = new SettingUtils().GetCommonSetting().Title;
         private Authorization authorization { get; set; }
         private AbstractMenu Menu;
+        [Unity.Dependency]
+        public IListProvider ListProvider { get; set; }
 
-        public ReactiveCommand<System.Windows.Input.MouseButtonEventArgs> Aaa { get; } = new ReactiveCommand<System.Windows.Input.MouseButtonEventArgs>();
+        public ReactiveCommand<System.Windows.Input.MouseButtonEventArgs> OpenList { get; }
         public ReactiveCommand OnLoaded { get; }
         public ReactiveCommand OpenBrowser { get; }
         public ReactiveCommand InitialAuth { get; }
@@ -44,7 +46,7 @@ namespace HHFO.ViewModels
         public ReactiveProperty<string> Tweet { get; } = new ReactiveProperty<string>("test11");
         public ReadOnlyReactiveProperty<IReadOnlyList<CoreTweet.List>> Lists { get; }
 
-        public ShellViewModel(IRegionManager regionManager, AbstractMenu menu) 
+        public ShellViewModel(IRegionManager regionManager, AbstractMenu menu)
         {
             Menu = menu;
             Lists = this.Menu.ObserveProperty(m => m.Lists)
@@ -59,7 +61,7 @@ namespace HHFO.ViewModels
                 .AddTo(Disposable);
             OpenTweetSpace = new ReactiveCommand()
                 .AddTo(Disposable);
-            Aaa = new ReactiveCommand<System.Windows.Input.MouseButtonEventArgs>()
+            OpenList = new ReactiveCommand<System.Windows.Input.MouseButtonEventArgs>()
                 .AddTo(Disposable);
 
             ExpandedLists.Subscribe(_ => Menu.FetchList());
@@ -67,7 +69,11 @@ namespace HHFO.ViewModels
             OpenBrowser.Subscribe(_ => OpenBrowserAction());
             InitialAuth.Subscribe(_ => Auth());
             OpenTweetSpace.Subscribe(_ => OpenTweetSpaceAction());
-            Aaa.Subscribe(e => System.Windows.Forms.MessageBox.Show(((TextBlock)e.Source).Tag.ToString()));
+            OpenList.Subscribe(e =>
+            {
+                ListProvider.Id = ((TextBlock)e.Source).Tag.ToString();
+                ListProvider.Publish();
+            });
         }
 
         public void Dispose()

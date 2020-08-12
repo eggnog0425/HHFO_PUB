@@ -50,7 +50,7 @@
                     <StackPanel>
                         <interactivity:Interaction.Triggers>
                             <interactivity:EventTrigger EventName="MouseDown">
-                                <reactiveInteractivity:EventToReactiveCommand Command="{Binding Aaa, Mode=OneWay}" />
+                                <reactiveInteractivity:EventToReactiveCommand Command="{Binding OpenList, Mode=OneWay}" />
                             </interactivity:EventTrigger>
                         </interactivity:Interaction.Triggers>
                         <ItemsControl ItemsSource="{Binding Lists.Value}">
@@ -67,7 +67,7 @@
                 <StackPanel DataContext="{Binding ElementName=parent}">
                     <interactivity:Interaction.Triggers>
                         <interactivity:EventTrigger EventName="MouseDown">
-                            <reactiveInteractivity:EventToReactiveCommand Command="{Binding Aaa, Mode=OneWay}" />
+                            <reactiveInteractivity:EventToReactiveCommand Command="{Binding OpenList, Mode=OneWay}" />
                         </interactivity:EventTrigger>
                     </interactivity:Interaction.Triggers>
                     <TextBlock Name ="Auth" Text = "{Binding Tweet.Value}" FontSize="16" Padding="8,6,24,6"/>
