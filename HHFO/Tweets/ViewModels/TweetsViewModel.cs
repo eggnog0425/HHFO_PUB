@@ -1,6 +1,8 @@
-﻿using CoreTweet;
+﻿using ControlzEx.Standard;
+using CoreTweet;
 using HHFO.Core.Models;
 using HHFO.Models;
+using ImTools;
 using Prism.Commands;
 using Prism.Mvvm;
 using Prism.Services.Dialogs;
@@ -14,7 +16,10 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 using Unity;
+using Status = CoreTweet.Status;
 
 namespace HHFO.ViewModels
 {
@@ -25,8 +30,12 @@ namespace HHFO.ViewModels
         private ListSubscriber ListSubscriber { get; set; }
         public ReadOnlyReactiveProperty<string> ListId { get; }
         public ObservableCollection<Tab> Tabs { get; }
+        public Tab CurrentTab { get; set; }
+        private TabControl tabControl { get; set; }
 
-        public ReactiveCommand<System.Windows.Input.MouseButtonEventArgs> hogehoge { get; }
+        public ReactiveCommand<SelectionChangedEventArgs> SelectTab { get; }
+        public ReactiveCommand<EventArgs> SelectStatuses { get; }
+        public ReactiveCommand<RoutedEventArgs> OnLoaded { get; }
 
         public TweetsViewModel(ListSubscriber ListIdSubscriber)
         {
@@ -35,41 +44,54 @@ namespace HHFO.ViewModels
             ListId = this.ListSubscriber.Id.ToReadOnlyReactiveProperty();
             Tabs = new ObservableCollection<Tab>();
 
-            hogehoge = new ReactiveCommand<System.Windows.Input.MouseButtonEventArgs>()
+            SelectStatuses = new ReactiveCommand<EventArgs>()
+                .AddTo(Disposable);
+            SelectTab = new ReactiveCommand<SelectionChangedEventArgs>()
+                .AddTo(Disposable);
+            OnLoaded = new ReactiveCommand<RoutedEventArgs>()
                 .AddTo(Disposable);
 
+            OnLoaded.Subscribe(e => OnLoadedAction(e));
             ListId.Subscribe(e => OpenList(e));
-            //hogehoge.Subscribe(e => { MessageBox.Show(((System.Windows.Forms.ListViewItem)e.Source).Tag.GetType().ToString()); });
-            hogehoge.Subscribe(e => { MessageBox.Show(e.GetType().ToString()); });
+            SelectStatuses.Subscribe(e => SelectStatusesAction(e));
+            SelectTab.Subscribe(e => SelectTabAction(e));
         }
 
-        public void hogehogeAction()
+        private void OnLoadedAction(RoutedEventArgs e)
         {
-
+            tabControl = (TabControl)e.Source;
         }
+
+        private void SelectStatusesAction(EventArgs e)
+        {
+            e.GetType();
+        }
+
+        private void SelectTabAction(SelectionChangedEventArgs e)
+        {
+            if (!(e.Source is TabControl))
+            {
+                return;
+            }
+            var tabContorol = (TabControl)e.Source;
+            CurrentTab = (Tab)tabContorol.SelectedItem;
+        }
+
         private void OpenList(string id)
         {
             if (string.IsNullOrWhiteSpace(id))
             {
                 return;
             }
-            var tab = AddTab();
             try
             {
-                tab.init(id);
+                var tab = new Tab(id, (DataGrid)tabControl.SelectedContent);
+                Tabs.Add(tab);
             }
             catch (TwitterException)
             {
                 MessageBox.Show("リストの取得に失敗しました。");
-                Tabs.Remove(tab);   
             }
-        }
-
-        private Tab AddTab()
-        {
-            var tab = new Tab();
-            Tabs.Add(tab);
-            return tab;
         }
 
         public void Dispose()

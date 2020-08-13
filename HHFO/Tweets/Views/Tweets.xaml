@@ -2,6 +2,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:prism="http://www.codeplex.com/prism"
+             xmlns:local="clr-namespace:HHFO.ViewModels"
              prism:ViewModelLocator.AutoWireViewModel="True"
              xmlns:mahApps="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
@@ -13,14 +14,21 @@
              TextOptions.TextFormattingMode="Ideal"
              TextOptions.TextRenderingMode="Auto"
              Background="{DynamicResource MaterialDesignPaper}"
-             FontFamily="{DynamicResource MaterialDesignFont}">
+             FontFamily="{DynamicResource MaterialDesignFont}"
+             Name="TweetsRoot">
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+        <interactivity:Interaction.Triggers>
+            <interactivity:EventTrigger EventName="Loaded">
+                <reactiveInteractivity:EventToReactiveCommand Command="{Binding OnLoaded, Mode=OneWay}" />
+            </interactivity:EventTrigger>
+        </interactivity:Interaction.Triggers>
 
-        <TabControl Grid.Row="0" ItemsSource ="{Binding Tabs}">
+        <TabControl  ItemsSource ="{Binding Tabs}" Name="DataGrid">
+            <interactivity:Interaction.Triggers>
+                <interactivity:EventTrigger EventName="SelectionChanged" >
+                    <reactiveInteractivity:EventToReactiveCommand Command="{Binding Path=DataContext.SelectTab, ElementName=TweetsRoot, Mode=OneWay}"/>
+                </interactivity:EventTrigger>
+            </interactivity:Interaction.Triggers>
             <TabControl.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding Id}" />
@@ -28,30 +36,32 @@
             </TabControl.ItemTemplate>
             <TabControl.ContentTemplate>
                 <DataTemplate>
-                    <ListView ItemsSource="{Binding Statuses}"
-                              Height="600"> 
+                    <DataGrid Height="600" ItemsSource="{Binding Statuses}">
                         <interactivity:Interaction.Triggers>
-                            <interactivity:EventTrigger EventName="MouseDown">
-                                <reactiveInteractivity:EventToReactiveCommand Command="{Binding hogehoge, Mode=OneWay}" />
+                            <interactivity:EventTrigger EventName="Loaded" >
+                                <reactiveInteractivity:EventToReactiveCommand Command="{Binding Path=DataContext.DataGridLoaded, ElementName=TweetsRoot, Mode=OneWay}"/>
+                            </interactivity:EventTrigger>
+
+                            <interactivity:EventTrigger EventName="CurrentCellChanged" >
+                                <reactiveInteractivity:EventToReactiveCommand Command="{Binding Path=DataContext.SelectStatuses, ElementName=TweetsRoot, Mode=OneWay}"/>
                             </interactivity:EventTrigger>
                         </interactivity:Interaction.Triggers>
-                            <ListView.View>
-                                <GridView AllowsColumnReorder="False">
-                                    <GridViewColumn Header="ユーザID"
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ユーザID"
                                                 Width="100"
-                                                DisplayMemberBinding="{Binding User.ScreenName}"/>
-                                    <GridViewColumn Header="ユーザ名"
+                                                Binding="{Binding User.ScreenName}"/>
+                            <DataGridTextColumn Header="ユーザ名"
                                                 Width="100"
-                                                DisplayMemberBinding="{Binding User.Name}"/>
+                                                Binding="{Binding User.Name}"/>
 
-                                    <GridViewColumn Header="ツイート"
+                            <DataGridTextColumn Header="ツイート"
                                                 Width="500"
-                                                DisplayMemberBinding="{Binding Text}"/>
-                                </GridView>
-                            </ListView.View>
-                    </ListView>
+                                                Binding="{Binding Text}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
                 </DataTemplate>
             </TabControl.ContentTemplate>
         </TabControl>
+        <ListView ItemsSource="{Binding CurrentTab.SelectedStatus}"/>
     </Grid>
 </UserControl>
