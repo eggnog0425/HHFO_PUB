@@ -16,36 +16,40 @@ namespace HHFO.Models
     {
         public string Id { get; private set; }
         public string Name { get; private set; }
-        private ObservableCollection<Status> statuses { get; set; } = new ObservableCollection<Status>();
-        public ReadOnlyReactiveCollection<Status> Statuses { get; private set; }
-        private DataGrid DataGrid { get; set; }
-        public ReadOnlyReactiveCollection<Status> SelectedStatuses { get; private set; }
+        private IEnumerable<Status> Tweets { get; set; }
+        private ObservableCollection<Status> showTweets { get; set; } = new ObservableCollection<Status>();
+        public ReadOnlyReactiveCollection<Status> ShowTweets { get; private set; }
 
-        public Tab(string id, DataGrid dataGrid)
+        public Tab(string id)
         {
             this.Id = id;
             var token = Authorization.GetToken();
-            this.Name = token.Lists.Show(list_id => id).Name;
-            var statuses = token.Lists.Statuses(list_id => id);
-            AddStatuses(statuses.AsEnumerable());
-            Statuses = this.statuses.ToReadOnlyReactiveCollection();
-            DataGrid = dataGrid;
-            SelectedStatuses = DataGrid.SelectedItems
-                                       .OfType<Status>()
-                                       .ToObservable()
-                                       .ToReadOnlyReactiveCollection();
+            this.Name = token.Lists.Show(list_id => id, tweet_mode => "extended").Name;
+            Tweets = token.Lists.Statuses(list_id => id, tweet_mode => "extended").AsEnumerable();
+            Add(Tweets);
+            ShowTweets = this.showTweets.ToReadOnlyReactiveCollection();
         }
 
-        internal void AddStatuses(IEnumerable<Status> stats)
+        private void Add(IEnumerable<Status> stats)
         {
-            statuses.AddRange(stats);
+            showTweets.AddRange(stats);
         }
 
-        internal void RemoveStatuses(IEnumerable<Status> stats)
+        private void Clear()
         {
-            foreach (var stat in stats)
+            showTweets.Clear();
+        }
+        internal void ShowAll()
+        {
+            Clear();
+            Add(Tweets);
+        }
+        internal void Filter(params Func<Status, bool>[] predicates)
+        {
+            Clear();
+            foreach (var predicate in predicates)
             {
-                statuses.Remove(stat);
+                Add(Tweets.Where(predicate));
             }
         }
     }

@@ -32,6 +32,8 @@ namespace HHFO.Config {
         
         private string unExpectedExceptionCreateXmlField;
         
+        private string unExpectedErrorGetDataGridField;
+        
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
         public string UnAuthrizeCreateFile {
@@ -73,6 +75,17 @@ namespace HHFO.Config {
             }
             set {
                 this.unExpectedExceptionCreateXmlField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Form=System.Xml.Schema.XmlSchemaForm.Unqualified)]
+        public string UnExpectedErrorGetDataGrid {
+            get {
+                return this.unExpectedErrorGetDataGridField;
+            }
+            set {
+                this.unExpectedErrorGetDataGridField = value;
             }
         }
     }

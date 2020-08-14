@@ -33,7 +33,6 @@ namespace HHFO
 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            containerRegistry.Register<HHFO.Models.AbstractMenu, HHFO.Models.Menu>();
             containerRegistry.Register<IListProvider, ListProvider>();
             containerRegistry.Register<ListSubscriber, ListSubscriber>();
             containerRegistry.Register<CommonViewSetting>();

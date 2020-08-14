@@ -18,6 +18,7 @@ using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Windows.Controls;
 using HHFO.Core.Models;
+using System.Collections.ObjectModel;
 
 namespace HHFO.ViewModels
 {
@@ -27,8 +28,6 @@ namespace HHFO.ViewModels
 
         public string Title { get; } = new SettingUtils().GetCommonSetting().Title;
         private Authorization authorization { get; set; }
-        private AbstractMenu Menu;
-        [Unity.Dependency]
         public IListProvider ListProvider { get; set; }
 
         public ReactiveCommand<System.Windows.Input.MouseButtonEventArgs> OpenList { get; }
@@ -42,16 +41,14 @@ namespace HHFO.ViewModels
         public ReactiveProperty<String> Pin { get; set; } = new ReactiveProperty<string>();
         public ReactiveProperty<Visibility> PinError { get; } = new ReactiveProperty<Visibility>(Visibility.Collapsed);
         public ReactiveProperty<Visibility> MenuVisibility { get; } = new ReactiveProperty<Visibility>(Visibility.Hidden);
+
         public ReactiveProperty<Visibility> TweetVisibility { get; } = new ReactiveProperty<Visibility>(Visibility.Collapsed);
         public ReactiveProperty<string> Tweet { get; } = new ReactiveProperty<string>("test11");
-        public ReadOnlyReactiveProperty<IReadOnlyList<CoreTweet.List>> Lists { get; }
+        public ObservableCollection<CoreTweet.List> Lists { get; private set; } = new ObservableCollection<CoreTweet.List>();
+        public ReactiveProperty<double> TweetAreaHeight { get; private set; } = new ReactiveProperty<double>(0.0d);
 
-        public ShellViewModel(IRegionManager regionManager, AbstractMenu menu)
+        public ShellViewModel(IRegionManager regionManager, IListProvider listProvider)
         {
-            Menu = menu;
-            Lists = this.Menu.ObserveProperty(m => m.Lists)
-                .ToReadOnlyReactiveProperty();
-
             Disposable = new CompositeDisposable();
             OnLoaded = new ReactiveCommand()
                 .AddTo(Disposable);
@@ -63,8 +60,9 @@ namespace HHFO.ViewModels
                 .AddTo(Disposable);
             OpenList = new ReactiveCommand<System.Windows.Input.MouseButtonEventArgs>()
                 .AddTo(Disposable);
+            ListProvider = listProvider;
 
-            ExpandedLists.Subscribe(_ => Menu.FetchList());
+            ExpandedLists.Subscribe(_ => FetchTwitterLists());
             OnLoaded.Subscribe(_ => Loaded());
             OpenBrowser.Subscribe(_ => OpenBrowserAction());
             InitialAuth.Subscribe(_ => Auth());
@@ -119,11 +117,26 @@ namespace HHFO.ViewModels
                 if (TweetVisibility.Value == Visibility.Visible)
                 {
                     TweetVisibility.Value = Visibility.Collapsed;
+                    TweetAreaHeight.Value = 0.0d;
                 }
                 else
                 {
                     TweetVisibility.Value = Visibility.Visible;
+                    TweetAreaHeight.Value = 100.0d;
                 }
+            }
+        }
+        private void FetchTwitterLists()
+        {
+            try
+            {
+                Lists.Clear();
+                var token = Authorization.GetToken();
+                Lists.AddRange(token.Lists.List().AsEnumerable());
+            }
+            catch (TwitterException)
+            {
+                // APIリミットとかサーバエラーはどうしようもないので握りつぶす
             }
         }
     }

@@ -29,8 +29,8 @@
         </Grid.ColumnDefinitions>
         <ScrollViewer
             VerticalScrollBarVisibility="Auto" 
-            Grid.Row="0" Grid.Column="0" 
-            Grid.ColumnSpan="{Binding Width.Value}"
+            Grid.Row="0"
+            Grid.Column="0" 
             >
 
             <StackPanel Cursor="Hand">
@@ -53,7 +53,7 @@
                                 <reactiveInteractivity:EventToReactiveCommand Command="{Binding OpenList, Mode=OneWay}" />
                             </interactivity:EventTrigger>
                         </interactivity:Interaction.Triggers>
-                        <ItemsControl ItemsSource="{Binding Lists.Value}">
+                        <ItemsControl ItemsSource="{Binding Lists}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel>

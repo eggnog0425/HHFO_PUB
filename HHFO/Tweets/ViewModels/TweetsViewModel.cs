@@ -3,6 +3,8 @@ using CoreTweet;
 using HHFO.Core.Models;
 using HHFO.Models;
 using ImTools;
+using MahApps.Metro.Controls;
+using NLog;
 using Prism.Commands;
 using Prism.Mvvm;
 using Prism.Services.Dialogs;
@@ -25,17 +27,32 @@ namespace HHFO.ViewModels
 {
     public class TweetsViewModel : BindableBase, IDisposable
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
         private CompositeDisposable Disposable { get; }
-
         private ListSubscriber ListSubscriber { get; set; }
-        public ReadOnlyReactiveProperty<string> ListId { get; }
-        public ObservableCollection<Tab> Tabs { get; }
-        public Tab CurrentTab { get; set; }
-        private TabControl tabControl { get; set; }
 
-        public ReactiveCommand<SelectionChangedEventArgs> SelectTab { get; }
+        private TabControl TabControl { get; set; }
+        private Grid Grid { get; set; }
+
+        private ReadOnlyReactiveProperty<string> ListId { get; }
+        public ObservableCollection<Tab> Tabs { get; }
+
+        public ReactiveProperty<double> DataGridHeight { get; set; } = new ReactiveProperty<double>(1.0d);
+        public ReactiveProperty<double> DataGridWidth { get; set; } = new ReactiveProperty<double>(1.0d);
+        public const double CheckBoxHeight = 30.0d;
+        public const double DataGridHeightMargin = 45.0d;
+
+        public ReactiveCommand OnSizeChanged { get; }
         public ReactiveCommand<EventArgs> SelectStatuses { get; }
         public ReactiveCommand<RoutedEventArgs> OnLoaded { get; }
+
+        private bool IsFilteredLink = false;
+        private bool IsFilteredImages = false;
+        private bool IsFilteredVideos = false;
+
+        private Func<Status, bool> FilterLink = tweet => tweet.Entities.Urls != null && tweet.Entities.Urls.Length != 0;
+        //private Func<Status, bool> FilterImages =  tweet => tweet.ExtendedEntities != null && tweet.ExtendedEntities.Media[0].Type == ";
+        //private Func<Status, bool> FilterVideos
 
         public TweetsViewModel(ListSubscriber ListIdSubscriber)
         {
@@ -44,22 +61,43 @@ namespace HHFO.ViewModels
             ListId = this.ListSubscriber.Id.ToReadOnlyReactiveProperty();
             Tabs = new ObservableCollection<Tab>();
 
-            SelectStatuses = new ReactiveCommand<EventArgs>()
+            OnSizeChanged = new ReactiveCommand()
                 .AddTo(Disposable);
-            SelectTab = new ReactiveCommand<SelectionChangedEventArgs>()
+            SelectStatuses = new ReactiveCommand<EventArgs>()
                 .AddTo(Disposable);
             OnLoaded = new ReactiveCommand<RoutedEventArgs>()
                 .AddTo(Disposable);
 
+            OnSizeChanged.Subscribe(_ => OnSizeChangedAction());
+            ListId.Subscribe(e => OpenListAction(e));
             OnLoaded.Subscribe(e => OnLoadedAction(e));
-            ListId.Subscribe(e => OpenList(e));
             SelectStatuses.Subscribe(e => SelectStatusesAction(e));
-            SelectTab.Subscribe(e => SelectTabAction(e));
+        }
+
+        private void ChangeDataGridSize()
+        {
+            DataGridHeight.Value = Grid.ActualHeight - CheckBoxHeight - DataGridHeightMargin;
+            DataGridWidth.Value = Grid.ActualWidth;
+        }
+
+        private void OnSizeChangedAction()
+        {
+            ChangeDataGridSize();
         }
 
         private void OnLoadedAction(RoutedEventArgs e)
         {
-            tabControl = (TabControl)e.Source;
+            Grid = (Grid)e.Source;
+            ChangeDataGridSize();
+
+            foreach (var item in Grid.Children)
+            {
+                if (item is TabControl)
+                {
+                    TabControl = (TabControl)item;
+                    return;
+                }
+            }
         }
 
         private void SelectStatusesAction(EventArgs e)
@@ -67,30 +105,40 @@ namespace HHFO.ViewModels
             e.GetType();
         }
 
-        private void SelectTabAction(SelectionChangedEventArgs e)
-        {
-            if (!(e.Source is TabControl))
-            {
-                return;
-            }
-            var tabContorol = (TabControl)e.Source;
-            CurrentTab = (Tab)tabContorol.SelectedItem;
-        }
-
-        private void OpenList(string id)
+        private void OpenListAction (string id)
         {
             if (string.IsNullOrWhiteSpace(id))
             {
                 return;
             }
+
             try
             {
-                var tab = new Tab(id, (DataGrid)tabControl.SelectedContent);
-                Tabs.Add(tab);
+                var tab = Tabs.FirstOrDefault(t => t.Id == id);
+                if (tab == null)
+                {
+                    tab = new Tab(id);
+                    Tabs.Add(tab);
+                }
+                SelectTabByVM(id);
             }
             catch (TwitterException)
             {
                 MessageBox.Show("リストの取得に失敗しました。");
+            }
+        }
+
+        private void SelectTabByVM(string id)
+        {
+            var i = 0;
+            foreach (Tab item in TabControl.Items)
+            {
+                if (item.Id == id)
+                {
+                    TabControl.SelectedIndex = i;
+                    return;
+                }
+                i++;
             }
         }
 

@@ -7,6 +7,7 @@
         <xs:element name="UnAuthrizeCreateDir" type="xs:string" minOccurs="0" />
         <xs:element name="UnExpectedExceptionCreateDir" type="xs:string" minOccurs="0" />
 		  <xs:element name="UnExpectedExceptionCreateXml" type="xs:string" minOccurs="0" />
+		  <xs:element name="UnExpectedErrorGetDataGrid" type="xs:string" minOccurs="0" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
