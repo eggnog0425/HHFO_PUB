@@ -28,7 +28,7 @@
     </interactivity:Interaction.Triggers>
     <mahApps:MetroWindow.Flyouts>
         <mahApps:FlyoutsControl>
-            <mahApps:Flyout Name="AuthFlyOut"
+            <mahApps:Flyout Name="Auth"
                             Position="Left"
                             Header="Twitter認証"
                             Width="800"
@@ -36,6 +36,7 @@
                             CloseButtonVisibility="Hidden"
                             FontSize="18"
                             >
+                <local:AuthFlyOut/>
             </mahApps:Flyout>
             <mahApps:Flyout Name="TweetFlyOut"
                             Position="Bottom"

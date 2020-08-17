@@ -3,7 +3,65 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:prism="http://prismlibrary.com/"             
              prism:ViewModelLocator.AutoWireViewModel="False">
-    <Grid>
-             
-    </Grid>
+
+    <StackPanel>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Row="0"
+                                   Grid.Column="0"
+                                   Grid.ColumnSpan="5"
+                                   Margin="10"
+                                   HorizontalAlignment="Left"
+                                   Text="認証ボタンを押すとブラウザを起動します。内容を確認してTwitterの認証を行ってください。"/>
+            <Button Grid.Row="1"
+                                Grid.Column="3"
+                                Margin="10"
+                                FontSize="18"
+                                Content="認証"
+                                Command="{Binding OpenBrowser}"/>
+            <TextBlock Grid.Row="2"
+                                   Grid.Column="0"
+                                   Grid.ColumnSpan="5"
+                                   Margin="10,20,10,10"
+                                   Text="認証後PINコードが表示されるので、下の入力欄にPINコードを入力してOKボタンを押してください。"
+                                   />
+            <TextBox Grid.Row="3"
+                                 Grid.Column="0"
+                                 Grid.ColumnSpan="3"
+                                 Margin="10"
+                                 Name="Pin"
+                                 Text="{Binding Pin.Value}"/>
+            <Button Grid.Row="3"
+                                Grid.Column="3"
+                                Width="Auto"
+                                Margin="10"
+                                FontSize="18"
+                                Name="OK"
+                                Content="OK"
+                                Command="{Binding InitialAuth}"
+                                />
+            <TextBlock Grid.Row="4"
+                                   Grid.Column="0"
+                                   Grid.ColumnSpan="3"
+                                   Margin="10"
+                                   Text="PINコードが間違っています。PINコードを再度入力してください。"
+                                   Foreground="#f44336"
+                                   Visibility="{Binding PinError.Value, FallbackValue=Collapsed}"
+                                   />
+
+        </Grid>
+    </StackPanel>
 </UserControl>
