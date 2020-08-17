@@ -42,7 +42,6 @@ namespace HHFO
         {
             moduleCatalog.AddModule<HHFO.Menu.MenuModule>();
             moduleCatalog.AddModule<HHFO.Tweets.TweetsModule>();
-            moduleCatalog.AddModule<HHFO.Tweet.TweetModule>();
         }
         private void ApplicationStartUp(object sender, StartupEventArgs e)
         {

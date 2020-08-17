@@ -30,12 +30,17 @@
 	  <Page Include="Views\Shell.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </Page>
+		<Page Include="Views\TweetFlyOut.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</Page>
+		<Page Include="Views\AuthFlyOut.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</Page>
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Core\HHFO.Core.csproj" />
 		<ProjectReference Include="..\Menu\HHFO.Menu.csproj" />
 		<ProjectReference Include="..\Tweets\HHFO.Tweets.csproj" />
-		<ProjectReference Include="..\Tweet\HHFO.Tweet.csproj" />
 	</ItemGroup>
 
 	<PropertyGroup>

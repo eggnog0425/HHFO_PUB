@@ -3,11 +3,11 @@
 namespace HHFO.Views
 {
     /// <summary>
-    /// Interaction logic for Tweet
+    /// Interaction logic for TweetFlyOut
     /// </summary>
-    public partial class Tweet : UserControl
+    public partial class TweetFlyOut : UserControl
     {
-        public Tweet()
+        public TweetFlyOut()
         {
             InitializeComponent();
         }

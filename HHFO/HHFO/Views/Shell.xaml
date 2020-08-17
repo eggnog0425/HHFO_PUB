@@ -7,6 +7,7 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:interactivity="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:reactiveInteractivity="clr-namespace:Reactive.Bindings.Interactivity;assembly=ReactiveProperty.WPF"
+        xmlns:local="clr-namespace:HHFO.Views"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Regular"
         TextElement.FontSize="13"
@@ -27,7 +28,7 @@
     </interactivity:Interaction.Triggers>
     <mahApps:MetroWindow.Flyouts>
         <mahApps:FlyoutsControl>
-            <mahApps:Flyout Name="Auth"
+            <mahApps:Flyout Name="AuthFlyOut"
                             Position="Left"
                             Header="Twitter認証"
                             Width="800"
@@ -35,69 +36,22 @@
                             CloseButtonVisibility="Hidden"
                             FontSize="18"
                             >
-                <StackPanel>
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Row="0"
-                                   Grid.Column="0"
-                                   Grid.ColumnSpan="5"
-                                   Margin="10"
-                                   HorizontalAlignment="Left"
-                                   Text="認証ボタンを押すとブラウザを起動します。内容を確認してTwitterの認証を行ってください。"/>
-                        <Button Grid.Row="1"
-                                Grid.Column="3"
-                                Margin="10"
-                                FontSize="18"
-                                Content="認証"
-                                Command="{Binding OpenBrowser}"/>
-                        <TextBlock Grid.Row="2"
-                                   Grid.Column="0"
-                                   Grid.ColumnSpan="5"
-                                   Margin="10,20,10,10"
-                                   Text="認証後PINコードが表示されるので、下の入力欄にPINコードを入力してOKボタンを押してください。"
-                                   />
-                        <TextBox Grid.Row="3"
-                                 Grid.Column="0"
-                                 Grid.ColumnSpan="3"
-                                 Margin="10"
-                                 Name="Pin"
-                                 Text="{Binding Pin.Value}"/>
-                        <Button Grid.Row="3"
-                                Grid.Column="3"
-                                Width="Auto"
-                                Margin="10"
-                                FontSize="18"
-                                Name="OK"
-                                Content="OK"
-                                Command="{Binding InitialAuth}"
-                                />
-                        <TextBlock Grid.Row="4"
-                                   Grid.Column="0"
-                                   Grid.ColumnSpan="3"
-                                   Margin="10"
-                                   Text="PINコードが間違っています。PINコードを再度入力してください。"
-                                   Foreground="#f44336"
-                                   Visibility="{Binding PinError.Value, FallbackValue=Collapsed}"
-                                   />
-
-                    </Grid>
-                </StackPanel>
+            </mahApps:Flyout>
+            <mahApps:Flyout Name="TweetFlyOut"
+                            Position="Bottom"
+                            Header="tweet"
+                            IsAutoCloseEnabled="true"
+                            Width="Auto"
+                            Height="Auto"
+                            IsOpen="false"
+                            CloseButtonVisibility="Visible"
+                            FontSize="18"
+                            >
+                <local:TweetFlyOut/>
             </mahApps:Flyout>
         </mahApps:FlyoutsControl>
     </mahApps:MetroWindow.Flyouts>
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height ="*"/>
