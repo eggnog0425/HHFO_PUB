@@ -48,30 +48,23 @@
                         </interactivity:EventTrigger>
                     </interactivity:Interaction.Triggers>
                     <StackPanel>
-                        <interactivity:Interaction.Triggers>
-                            <interactivity:EventTrigger EventName="MouseDown">
-                                <reactiveInteractivity:EventToReactiveCommand Command="{Binding OpenList, Mode=OneWay}" />
-                            </interactivity:EventTrigger>
-                        </interactivity:Interaction.Triggers>
                         <ItemsControl ItemsSource="{Binding Lists}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel>
-                                        <TextBlock Name="Name" Text="{Binding Name}" Padding="8,8,24,6" Tag="{Binding Id}" />
+                                        <TextBlock Name="Name" Text="{Binding Name}" Padding="8,8,24,6" Tag="{Binding Id}">
+                                            <interactivity:Interaction.Triggers>
+                                                <interactivity:EventTrigger EventName="MouseDown">
+                                                    <reactiveInteractivity:EventToReactiveCommand Command="{Binding DataContext.OpenList, Mode=OneWay, ElementName=parent}" />
+                                                </interactivity:EventTrigger>
+                                            </interactivity:Interaction.Triggers>
+                                        </TextBlock>
                                     </StackPanel>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                     </StackPanel>
                 </Expander>
-                <StackPanel DataContext="{Binding ElementName=parent}">
-                    <interactivity:Interaction.Triggers>
-                        <interactivity:EventTrigger EventName="MouseDown">
-                            <reactiveInteractivity:EventToReactiveCommand Command="{Binding OpenList, Mode=OneWay}" />
-                        </interactivity:EventTrigger>
-                    </interactivity:Interaction.Triggers>
-                    <TextBlock Name ="Auth" Text = "{Binding Tweet.Value}" FontSize="16" Padding="8,6,24,6"/>
-                </StackPanel>
             </StackPanel>
 
         </ScrollViewer>

@@ -32,7 +32,7 @@
                             Position="Left"
                             Header="Twitter認証"
                             Width="800"
-                            IsOpen="{Binding OpenFlyOut.Value}"
+                            IsOpen="{Binding IsOpenAuthFlyOut.Value, FallbackValue=false}"
                             CloseButtonVisibility="Hidden"
                             FontSize="18"
                             >

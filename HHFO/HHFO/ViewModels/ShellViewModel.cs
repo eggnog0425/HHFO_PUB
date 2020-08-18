@@ -22,7 +22,7 @@ using System.Collections.ObjectModel;
 
 namespace HHFO.ViewModels
 {
-    class ShellViewModel : BindableBase, IDisposable
+    public partial class ShellViewModel : BindableBase, IDisposable
     {
         private CompositeDisposable Disposable { get; }
 
@@ -34,16 +34,16 @@ namespace HHFO.ViewModels
         public ReactiveCommand OnLoaded { get; }
         public ReactiveCommand OpenBrowser { get; }
         public ReactiveCommand InitialAuth { get; }
-        public ReactiveCommand OpenTweetSpace { get; }
+        public ReactiveCommand OpenTweetFlyOut { get; }
         public ReactiveCommand<RoutedEventArgs> ExpandedLists { get; } = new ReactiveCommand<RoutedEventArgs>();
 
-        public ReactiveProperty<bool> OpenFlyOut { get; } = new ReactiveProperty<bool>(false);
+        public ReactiveProperty<bool> IsOpenTweetFlyOut { get; } = new ReactiveProperty<bool>(false);
+        public ReactiveProperty<bool> IsOpenAuthFlyOut { get; } = new ReactiveProperty<bool>(false);
         public ReactiveProperty<String> Pin { get; set; } = new ReactiveProperty<string>();
         public ReactiveProperty<Visibility> PinError { get; } = new ReactiveProperty<Visibility>(Visibility.Collapsed);
         public ReactiveProperty<Visibility> MenuVisibility { get; } = new ReactiveProperty<Visibility>(Visibility.Hidden);
 
-        public ReactiveProperty<Visibility> TweetVisibility { get; } = new ReactiveProperty<Visibility>(Visibility.Collapsed);
-        public ReactiveProperty<string> Tweet { get; } = new ReactiveProperty<string>("test11");
+        public ReactiveProperty<string> Tweet { get; } = new ReactiveProperty<string>("");
         public ObservableCollection<CoreTweet.List> Lists { get; private set; } = new ObservableCollection<CoreTweet.List>();
         public ReactiveProperty<double> TweetAreaHeight { get; private set; } = new ReactiveProperty<double>(0.0d);
 
@@ -56,7 +56,7 @@ namespace HHFO.ViewModels
                 .AddTo(Disposable);
             InitialAuth = new ReactiveCommand()
                 .AddTo(Disposable);
-            OpenTweetSpace = new ReactiveCommand()
+            OpenTweetFlyOut = new ReactiveCommand()
                 .AddTo(Disposable);
             OpenList = new ReactiveCommand<System.Windows.Input.MouseButtonEventArgs>()
                 .AddTo(Disposable);
@@ -66,7 +66,7 @@ namespace HHFO.ViewModels
             OnLoaded.Subscribe(_ => Loaded());
             OpenBrowser.Subscribe(_ => OpenBrowserAction());
             InitialAuth.Subscribe(_ => Auth());
-            OpenTweetSpace.Subscribe(_ => OpenTweetSpaceAction());
+            OpenTweetFlyOut.Subscribe(_ => OpenTweetFlyOutAction());
             OpenList.Subscribe(e =>
             {
                 ListProvider.Id = ((TextBlock)e.Source).Tag.ToString();
@@ -83,7 +83,7 @@ namespace HHFO.ViewModels
         {
             if (!Authorization.Authed())
             {
-                OpenFlyOut.Value = true;
+                IsOpenAuthFlyOut.Value = true;
             }
             else
             {
@@ -101,7 +101,7 @@ namespace HHFO.ViewModels
         {
             if (authorization != null && authorization.InitialAuth(Pin.Value))
             {
-                OpenFlyOut.Value = false;
+                IsOpenAuthFlyOut.Value = false;
                 MenuVisibility.Value = Visibility.Visible;
             }
             else
@@ -110,20 +110,11 @@ namespace HHFO.ViewModels
             }
         }
 
-        private void OpenTweetSpaceAction()
+        private void OpenTweetFlyOutAction()
         {
-            lock (TweetVisibility) 
-            { 
-                if (TweetVisibility.Value == Visibility.Visible)
-                {
-                    TweetVisibility.Value = Visibility.Collapsed;
-                    TweetAreaHeight.Value = 0.0d;
-                }
-                else
-                {
-                    TweetVisibility.Value = Visibility.Visible;
-                    TweetAreaHeight.Value = 100.0d;
-                }
+            lock (IsOpenTweetFlyOut)
+            {
+
             }
         }
         private void FetchTwitterLists()

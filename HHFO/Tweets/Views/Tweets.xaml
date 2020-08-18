@@ -26,7 +26,13 @@
             </interactivity:EventTrigger>
         </interactivity:Interaction.Triggers>
 
-        <TabControl  ItemsSource ="{Binding Tabs}">
+        <TabControl ItemsSource ="{Binding Tabs}">
+            <interactivity:Interaction.Triggers>
+                <interactivity:EventTrigger EventName="SelectionChanged">
+                    <reactiveInteractivity:EventToReactiveCommand Command="{Binding OnCurrentTabChanged, Mode=OneWay}" />
+                </interactivity:EventTrigger>
+            </interactivity:Interaction.Triggers>
+
             <TabControl.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding Name}" />
@@ -34,53 +40,48 @@
             </TabControl.ItemTemplate>
             <TabControl.ContentTemplate>
                 <DataTemplate>
-                    <StackPanel>
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="{Binding DataContext.CheckBoxHeight, ElementName=TweetsRoot}"/>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                            </Grid.ColumnDefinitions>
-                            <CheckBox Grid.Row="0" Content="URLつきのTweetのみ"></CheckBox>
-                            <DataGrid
-                                      Height="{Binding DataContext.DataGridHeight.Value, FallbackValue=100, ElementName=TweetsRoot, Mode=OneWay}"
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="{Binding DataContext.CheckBoxHeight,  ElementName=TweetsRoot}"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <CheckBox Grid.Row="0" 
+                                      Grid.Column="0"
+                                      Content="リンクつきのTweetのみ表示する" 
+                                      IsChecked="{Binding IsFilteredLink.Value, Mode=OneWay}" 
+                                      Command="{Binding DataContext.CheckFilterLink, ElementName=TweetsRoot}">
+                        </CheckBox>
+                        <DataGrid Height="{Binding DataContext.DataGridHeight.Value, FallbackValue=100, ElementName=TweetsRoot, Mode=OneWay}"
                                       Width="{Binding DataContext.DataGridWidth.Value, FallbackValue=100, ElementName=TweetsRoot,  Mode=OneWay}"
                                       VerticalScrollBarVisibility="Visible"
                                       HorizontalScrollBarVisibility="Visible"
                                       Grid.Row="1"
                                       Grid.Column="0"
-                                      Grid.ColumnSpan="3"
+                                      Grid.ColumnSpan="4"
                                       ItemsSource="{Binding ShowTweets}"
                                       Name ="DataGrid" 
                                       AlternatingRowBackground="White" 
                                       AlternationCount="2">
-                                <interactivity:Interaction.Triggers>
-                                    <interactivity:EventTrigger EventName="Loaded" >
-                                        <reactiveInteractivity:EventToReactiveCommand Command="{Binding Path=DataContext.DataGridLoaded, ElementName=TweetsRoot, Mode=OneWay}"/>
-                                    </interactivity:EventTrigger>
-                                    <interactivity:EventTrigger EventName="CurrentCellChanged" >
-                                        <reactiveInteractivity:EventToReactiveCommand Command="{Binding Path=DataContext.SelectStatuses, ElementName=TweetsRoot, Mode=OneWay}"/>
-                                    </interactivity:EventTrigger>
-                                </interactivity:Interaction.Triggers>
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="ユーザID"
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="ユーザID"
                                                 Width="100"
                                                 Binding="{Binding User.ScreenName}"/>
-                                    <DataGridTextColumn Header="ユーザ名"
+                                <DataGridTextColumn Header="ユーザ名"
                                                 Width="100"
                                                 Binding="{Binding User.Name}"/>
 
-                                    <DataGridTextColumn Header="ツイート"
+                                <DataGridTextColumn Header="ツイート"
                                                 Width="500"
                                                 Binding="{Binding FullText}"/>
-                                </DataGrid.Columns>
-                            </DataGrid>
-                        </Grid>
-                    </StackPanel>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
                 </DataTemplate>
             </TabControl.ContentTemplate>
         </TabControl>

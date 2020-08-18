@@ -1,5 +1,7 @@
 ﻿using CoreTweet;
 using ImTools;
+using NLog.Filters;
+using Prism.Mvvm;
 using Reactive.Bindings;
 using System;
 using System.Collections.Generic;
@@ -12,44 +14,90 @@ using System.Windows.Controls;
 
 namespace HHFO.Models
 {
-    public class Tab
+    public abstract class Tab : BindableBase
     {
-        public string Id { get; private set; }
-        public string Name { get; private set; }
-        private IEnumerable<Status> Tweets { get; set; }
-        private ObservableCollection<Status> showTweets { get; set; } = new ObservableCollection<Status>();
-        public ReadOnlyReactiveCollection<Status> ShowTweets { get; private set; }
+        public string Id { get; protected set; }
+        public string Name { get; protected set; }
+        public ReactiveProperty<bool> IsFilteredLink { get; private set; } = new ReactiveProperty<bool>(false);
+        public ReactiveProperty<bool> IsSearchedAnd { get; private set; } = new ReactiveProperty<bool>(false);
 
-        public Tab(string id)
+        protected Tokens Token { get; set; }
+        protected List<Status> Tweets { get; set; } = new List<Status>();
+        protected ObservableCollection<Status> showTweets { get; set; } = new ObservableCollection<Status>();
+        public ReadOnlyReactiveCollection<Status> ShowTweets { get; protected set; }
+        public ObservableCollection<Func<Status, bool>> Predicates { get; protected set; } = new ObservableCollection<Func<Status, bool>>();
+
+        private Func<Status, bool> FilterLink = tweet => tweet?.Entities?.Urls?.Length != 0;
+        private Func<Status, bool> FilterImages = tweet => tweet.ExtendedEntities?.Media?[0]?.Type?.ToLower() == "photo";
+        private Func<Status, bool> FilterVideos = tweet => tweet.ExtendedEntities?.Media?[0]?.Type?.ToLower() == "video";
+        private Func<Status, bool> FilterRTs = tweet => tweet.IsRetweeted ?? false;
+
+        public Tab()
         {
-            this.Id = id;
-            var token = Authorization.GetToken();
-            this.Name = token.Lists.Show(list_id => id, tweet_mode => "extended").Name;
-            Tweets = token.Lists.Statuses(list_id => id, tweet_mode => "extended").AsEnumerable();
-            Add(Tweets);
-            ShowTweets = this.showTweets.ToReadOnlyReactiveCollection();
+            Token = Authorization.GetToken();
+            ShowTweets = showTweets.ToReadOnlyReactiveCollection();
+            Predicates.CollectionChanged += OnPredicatesChanged;
         }
 
-        private void Add(IEnumerable<Status> stats)
+        protected void AddShow(IEnumerable<Status> stats)
         {
-            showTweets.AddRange(stats);
+            var filteredStats = Filter(stats);
+            showTweets.AddRange(filteredStats);
         }
 
-        private void Clear()
+        protected void OnPredicatesChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            Reflesh();
+        }
+
+        protected void Clear()
         {
             showTweets.Clear();
         }
-        internal void ShowAll()
+        internal void Reflesh()
         {
             Clear();
-            Add(Tweets);
+            AddShow(Tweets);
         }
-        internal void Filter(params Func<Status, bool>[] predicates)
+
+        protected abstract void AddTweets();
+
+        protected IEnumerable<Status> Filter(IEnumerable<Status> stats)
         {
-            Clear();
-            foreach (var predicate in predicates)
+            if (Predicates == null || Predicates.Count() == 0)
             {
-                Add(Tweets.Where(predicate));
+                return stats;
+            }
+
+            var ret = new List<Status>();
+            if (IsSearchedAnd.Value)
+            {
+                ret.AddRange(stats);
+                foreach (var predicate in Predicates)
+                {
+                    ret = ret.Where(predicate).ToList();
+                }
+            }
+            else
+            {
+                foreach (var predicate in Predicates)
+                {
+                    ret.AddRange(stats.Where(predicate));
+                }
+            }
+            return ret;
+        }
+
+        public void OnCheckFilterLinkAction()
+        {
+            IsFilteredLink.Value = !IsFilteredLink.Value;
+            if (IsFilteredLink.Value)
+            {
+                Predicates.Add(FilterLink);
+            }
+            else
+            {
+                Predicates.Remove(FilterLink);
             }
         }
     }
