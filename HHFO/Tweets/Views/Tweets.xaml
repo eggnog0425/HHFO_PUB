@@ -35,7 +35,21 @@
 
             <TabControl.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock Text="{Binding Name}" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0"
+                                   Text="{Binding Name}"
+                                   FontSize="16"
+                                   TextAlignment="Center"/>
+                        <materialDesign:PackIcon Grid.Column="1" 
+                                                 HorizontalAlignment="Center"
+                                                 VerticalAlignment="Center"
+                                                 Kind="Close"
+                                                 Tag="{Binding Id}"/>
+                    </Grid>
                 </DataTemplate>
             </TabControl.ItemTemplate>
             <TabControl.ContentTemplate>
@@ -53,9 +67,27 @@
                         </Grid.ColumnDefinitions>
                         <CheckBox Grid.Row="0" 
                                       Grid.Column="0"
-                                      Content="リンクつきのTweetのみ表示する" 
+                                      Content="リンクつきの呟きのみ表示する" 
                                       IsChecked="{Binding IsFilteredLink.Value, Mode=OneWay}" 
                                       Command="{Binding DataContext.CheckFilterLink, ElementName=TweetsRoot}">
+                        </CheckBox>
+                        <CheckBox Grid.Row="0" 
+                                      Grid.Column="1"
+                                      Content="画像つきの呟きのみ表示する" 
+                                      IsChecked="{Binding IsFilteredImages.Value, Mode=OneWay}" 
+                                      Command="{Binding DataContext.CheckFilterImages, ElementName=TweetsRoot}">
+                        </CheckBox>
+                        <CheckBox Grid.Row="0" 
+                                      Grid.Column="2"
+                                      Content="動画つきの呟きのみ表示する" 
+                                      IsChecked="{Binding IsFilteredVideos.Value, Mode=OneWay}" 
+                                      Command="{Binding DataContext.CheckFilterVideos, ElementName=TweetsRoot}">
+                        </CheckBox>
+                        <CheckBox Grid.Row="0" 
+                                      Grid.Column="3"
+                                      Content="リツイートされた呟きのみ表示する" 
+                                      IsChecked="{Binding IsFilteredRetweeted.Value, Mode=OneWay}" 
+                                      Command="{Binding DataContext.CheckFilterRetweeted, ElementName=TweetsRoot}">
                         </CheckBox>
                         <DataGrid Height="{Binding DataContext.DataGridHeight.Value, FallbackValue=100, ElementName=TweetsRoot, Mode=OneWay}"
                                       Width="{Binding DataContext.DataGridWidth.Value, FallbackValue=100, ElementName=TweetsRoot,  Mode=OneWay}"

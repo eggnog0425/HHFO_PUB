@@ -3,10 +3,12 @@ using ImTools;
 using NLog.Filters;
 using Prism.Mvvm;
 using Reactive.Bindings;
+using Reactive.Bindings.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Text;
 using System.Windows;
@@ -14,12 +16,19 @@ using System.Windows.Controls;
 
 namespace HHFO.Models
 {
-    public abstract class Tab : BindableBase
+    public abstract class Tab : BindableBase, IDisposable
     {
+        private CompositeDisposable Disposable { get; }
+
         public string Id { get; protected set; }
         public string Name { get; protected set; }
+
+        // チェックボックス・ラジオボタンの状態
         public ReactiveProperty<bool> IsFilteredLink { get; private set; } = new ReactiveProperty<bool>(false);
-        public ReactiveProperty<bool> IsSearchedAnd { get; private set; } = new ReactiveProperty<bool>(false);
+        public ReactiveProperty<bool> IsFilteredImages { get; private set; } = new ReactiveProperty<bool>(false);
+        public ReactiveProperty<bool> IsFilteredVideos { get; private set; } = new ReactiveProperty<bool>(false);
+        public ReactiveProperty<bool> IsFilteredRetweeted { get; private set; } = new ReactiveProperty<bool>(false);
+        public ReactiveProperty<bool> IsAndSearch { get; private set; } = new ReactiveProperty<bool>(false);
 
         protected Tokens Token { get; set; }
         protected List<Status> Tweets { get; set; } = new List<Status>();
@@ -30,20 +39,17 @@ namespace HHFO.Models
         private Func<Status, bool> FilterLink = tweet => tweet?.Entities?.Urls?.Length != 0;
         private Func<Status, bool> FilterImages = tweet => tweet.ExtendedEntities?.Media?[0]?.Type?.ToLower() == "photo";
         private Func<Status, bool> FilterVideos = tweet => tweet.ExtendedEntities?.Media?[0]?.Type?.ToLower() == "video";
-        private Func<Status, bool> FilterRTs = tweet => tweet.IsRetweeted ?? false;
+        private Func<Status, bool> FilterRetweeted = tweet => tweet.RetweetedStatus != null;
 
         public Tab()
         {
+            Disposable = new CompositeDisposable();
             Token = Authorization.GetToken();
-            ShowTweets = showTweets.ToReadOnlyReactiveCollection();
+            ShowTweets = showTweets.ToReadOnlyReactiveCollection().AddTo(Disposable);
             Predicates.CollectionChanged += OnPredicatesChanged;
         }
 
-        protected void AddShow(IEnumerable<Status> stats)
-        {
-            var filteredStats = Filter(stats);
-            showTweets.AddRange(filteredStats);
-        }
+        protected abstract void AddTweets();
 
         protected void OnPredicatesChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
@@ -54,13 +60,18 @@ namespace HHFO.Models
         {
             showTweets.Clear();
         }
+
         internal void Reflesh()
         {
             Clear();
             AddShow(Tweets);
         }
 
-        protected abstract void AddTweets();
+        protected void AddShow(IEnumerable<Status> stats)
+        {
+            var filteredStats = Filter(stats);
+            showTweets.AddRange(filteredStats);
+        }
 
         protected IEnumerable<Status> Filter(IEnumerable<Status> stats)
         {
@@ -69,20 +80,20 @@ namespace HHFO.Models
                 return stats;
             }
 
-            var ret = new List<Status>();
-            if (IsSearchedAnd.Value)
+            var ret = Enumerable.Empty<Status>();
+            if (IsAndSearch.Value)
             {
-                ret.AddRange(stats);
+                ret = ret.Concat(stats);
                 foreach (var predicate in Predicates)
                 {
-                    ret = ret.Where(predicate).ToList();
+                    ret = ret.Where(predicate);
                 }
             }
             else
             {
                 foreach (var predicate in Predicates)
                 {
-                    ret.AddRange(stats.Where(predicate));
+                    ret = ret.Union(stats.Where(predicate));
                 }
             }
             return ret;
@@ -90,15 +101,47 @@ namespace HHFO.Models
 
         public void OnCheckFilterLinkAction()
         {
-            IsFilteredLink.Value = !IsFilteredLink.Value;
-            if (IsFilteredLink.Value)
+            var isFiltered = !IsFilteredLink.Value;
+            IsFilteredLink.Value = isFiltered;
+            ChangePredicates(isFiltered, FilterLink);
+        }
+
+        public void OnCheckFilterImagesAction()
+        {
+            var isFiltered = !IsFilteredImages.Value;
+            IsFilteredImages.Value = isFiltered;
+            ChangePredicates(isFiltered, FilterImages);
+        }
+
+        public void OnCheckFilterVideosAction()
+        {
+            var isFiltered = !IsFilteredVideos.Value;
+            IsFilteredVideos.Value = isFiltered;
+            ChangePredicates(isFiltered, FilterVideos);
+        }
+
+        public void OnCheckFilterRetweetedAction()
+        {
+            var isFiltered = !IsFilteredRetweeted.Value;
+            IsFilteredRetweeted.Value = isFiltered;
+            ChangePredicates(isFiltered, FilterRetweeted);
+        }
+
+        private void ChangePredicates(bool isFiltered, Func<Status, bool> func)
+        {
+            if (isFiltered)
             {
-                Predicates.Add(FilterLink);
+                Predicates.Add(func);
             }
             else
             {
-                Predicates.Remove(FilterLink);
+                Predicates.Remove(func);
             }
+        }
+
+        public void Dispose()
+        {
+            this.Disposable.Dispose();
         }
     }
 }

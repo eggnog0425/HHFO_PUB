@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Windows.Controls;
 using HHFO.Core.Models;
 using System.Collections.ObjectModel;
+using System.Windows.Input;
 
 namespace HHFO.ViewModels
 {
@@ -67,11 +68,13 @@ namespace HHFO.ViewModels
             OpenBrowser.Subscribe(_ => OpenBrowserAction());
             InitialAuth.Subscribe(_ => Auth());
             OpenTweetFlyOut.Subscribe(_ => OpenTweetFlyOutAction());
-            OpenList.Subscribe(e =>
-            {
-                ListProvider.Id = ((TextBlock)e.Source).Tag.ToString();
-                ListProvider.Publish();
-            });
+            OpenList.Subscribe(e => OpenListAction(e));
+        }
+
+        private void OpenListAction(MouseButtonEventArgs e)
+        {
+            ListProvider.Id = ((TextBlock)e.Source).Tag.ToString();
+            ListProvider.Publish();
         }
 
         public void Dispose()

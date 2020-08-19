@@ -46,8 +46,14 @@ namespace HHFO.ViewModels
 
         public ReactiveCommand OnSizeChanged { get; }
         public ReactiveCommand<RoutedEventArgs> OnLoaded { get; }
-        public ReactiveCommand CheckFilterLink { get; }
         public ReactiveCommand<SelectionChangedEventArgs> OnCurrentTabChanged { get; }
+        public ReactiveCommand<System.Windows.Input.MouseButtonEventArgs> OnTabClose { get; }
+
+        // チェックボックス・ラジオボタン押下時のコマンド
+        public ReactiveCommand CheckFilterLink { get; }
+        public ReactiveCommand CheckFilterImages{ get; }
+        public ReactiveCommand CheckFilterVideos { get; }
+        public ReactiveCommand CheckFilterRetweeted { get; }
 
         public TweetsViewModel(ListSubscriber ListIdSubscriber)
         {
@@ -60,16 +66,36 @@ namespace HHFO.ViewModels
                 .AddTo(Disposable);
             OnLoaded = new ReactiveCommand<RoutedEventArgs>()
                 .AddTo(Disposable);
+            OnCurrentTabChanged = new ReactiveCommand<SelectionChangedEventArgs>()
+                .AddTo(Disposable);
+            OnTabClose = new ReactiveCommand<System.Windows.Input.MouseButtonEventArgs>()
+                .AddTo(Disposable);
+
             CheckFilterLink = new ReactiveCommand()
                 .AddTo(Disposable);
-            OnCurrentTabChanged = new ReactiveCommand<SelectionChangedEventArgs>()
+            CheckFilterImages = new ReactiveCommand()
+                .AddTo(Disposable);
+            CheckFilterVideos = new ReactiveCommand()
+                .AddTo(Disposable);
+            CheckFilterRetweeted = new ReactiveCommand()
                 .AddTo(Disposable);
 
             OnSizeChanged.Subscribe(_ => OnSizeChangedAction());
             ListId.Subscribe(e => OpenListAction(e));
             OnLoaded.Subscribe(e => OnLoadedAction(e));
-            CheckFilterLink.Subscribe(_ => CurrentTab.OnCheckFilterLinkAction());
             OnCurrentTabChanged.Subscribe(e => OnCurrentTabChangedAction());
+            OnTabClose.Subscribe(e => OnTabCloseAction(e));
+
+            CheckFilterLink.Subscribe(_ => CurrentTab.OnCheckFilterLinkAction());
+            CheckFilterImages.Subscribe(_ => CurrentTab.OnCheckFilterImagesAction());
+            CheckFilterVideos.Subscribe(_ => CurrentTab.OnCheckFilterVideosAction());
+            CheckFilterRetweeted.Subscribe(_ => CurrentTab.OnCheckFilterRetweetedAction());
+        }
+
+        private void OnTabCloseAction(MouseButtonEventArgs e)
+        {
+            var hoge = e.Source.GetType().ToString();
+
         }
 
         private void OnCurrentTabChangedAction()
