@@ -16,7 +16,8 @@
              Background="{DynamicResource MaterialDesignPaper}"
              FontFamily="{DynamicResource MaterialDesignFont}"
              Name="TweetsRoot">
-    <Grid>
+
+    <Grid Name="RootGrid">
         <interactivity:Interaction.Triggers>
             <interactivity:EventTrigger EventName="Loaded">
                 <reactiveInteractivity:EventToReactiveCommand Command="{Binding OnLoaded, Mode=OneWay}" />
@@ -26,7 +27,7 @@
             </interactivity:EventTrigger>
         </interactivity:Interaction.Triggers>
 
-        <TabControl ItemsSource ="{Binding Tabs}">
+        <TabControl Margin="0" ItemsSource ="{Binding Tabs}" Background="Transparent">
             <interactivity:Interaction.Triggers>
                 <interactivity:EventTrigger EventName="SelectionChanged">
                     <reactiveInteractivity:EventToReactiveCommand Command="{Binding OnCurrentTabChanged, Mode=OneWay}" />
@@ -35,85 +36,134 @@
 
             <TabControl.ItemTemplate>
                 <DataTemplate>
-                    <Grid>
+                    <Grid Margin="0" >
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0"
                                    Text="{Binding Name}"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
                                    FontSize="16"
                                    TextAlignment="Center"/>
-                        <materialDesign:PackIcon Grid.Column="1" 
+                        <Button Grid.Column="1"
+                                Width="Auto" 
+                                Margin="0" 
+                                Padding="0" 
+                                HorizontalAlignment="Center"
+                                Style="{StaticResource MaterialDesignFlatButton}"
+                                
+                                ToolTip="Icon">
+                            <materialDesign:PackIcon Grid.Column="1" 
                                                  HorizontalAlignment="Center"
                                                  VerticalAlignment="Center"
                                                  Kind="Close"
+                                                 Foreground="#FFBEBEBE"
+                                                 Background="Transparent"
                                                  Tag="{Binding Id}"/>
+                        </Button>
                     </Grid>
                 </DataTemplate>
             </TabControl.ItemTemplate>
+
             <TabControl.ContentTemplate>
                 <DataTemplate>
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="{Binding DataContext.CheckBoxHeight,  ElementName=TweetsRoot}"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <CheckBox Grid.Row="0" 
-                                      Grid.Column="0"
-                                      Content="リンクつきの呟きのみ表示する" 
-                                      IsChecked="{Binding IsFilteredLink.Value, Mode=OneWay}" 
-                                      Command="{Binding DataContext.CheckFilterLink, ElementName=TweetsRoot}">
-                        </CheckBox>
-                        <CheckBox Grid.Row="0" 
-                                      Grid.Column="1"
-                                      Content="画像つきの呟きのみ表示する" 
-                                      IsChecked="{Binding IsFilteredImages.Value, Mode=OneWay}" 
-                                      Command="{Binding DataContext.CheckFilterImages, ElementName=TweetsRoot}">
-                        </CheckBox>
-                        <CheckBox Grid.Row="0" 
-                                      Grid.Column="2"
-                                      Content="動画つきの呟きのみ表示する" 
-                                      IsChecked="{Binding IsFilteredVideos.Value, Mode=OneWay}" 
-                                      Command="{Binding DataContext.CheckFilterVideos, ElementName=TweetsRoot}">
-                        </CheckBox>
-                        <CheckBox Grid.Row="0" 
-                                      Grid.Column="3"
-                                      Content="リツイートされた呟きのみ表示する" 
-                                      IsChecked="{Binding IsFilteredRetweeted.Value, Mode=OneWay}" 
-                                      Command="{Binding DataContext.CheckFilterRetweeted, ElementName=TweetsRoot}">
-                        </CheckBox>
+                    <StackPanel Height="{Binding ActualHeight, ElementName=RootGrid}">
+                        <Expander IsExpanded="{Binding DataContext.IsExpandedHeader.Value, ElementName=TweetsRoot}">
+                            <interactivity:Interaction.Triggers>
+                                <interactivity:EventTrigger EventName="Expanded">
+                                    <reactiveInteractivity:EventToReactiveCommand Command="{Binding DataContext.OnExpandedCheckArea
+                                        , Mode=OneWay
+                                        , ElementName=TweetsRoot}"/>
+                                </interactivity:EventTrigger>
+                                <interactivity:EventTrigger EventName="Collapsed">
+                                    <reactiveInteractivity:EventToReactiveCommand Command="{Binding DataContext.OnCollapsedCheckArea
+                                        , Mode=OneWay
+                                        , ElementName=TweetsRoot}"/>
+                                </interactivity:EventTrigger>
+                            </interactivity:Interaction.Triggers>
+                            <Expander.Header>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <CheckBox Grid.Column="0"
+                                        Content="リンクつきの呟きのみ表示する" 
+                                        IsChecked="{Binding IsFilteredLink.Value, Mode=OneWay}" 
+                                        Command="{Binding OnCheckFilterLink, Mode=OneWay}">
+                                    </CheckBox>
+                                    <CheckBox Grid.Column="1"
+                                        Content="画像つきの呟きのみ表示する" 
+                                        IsChecked="{Binding IsFilteredImages.Value, Mode=OneWay}" 
+                                        Command="{Binding OnCheckFilterImages, Mode=OneWay}">
+                                    </CheckBox>
+                                    <CheckBox Grid.Column="2"
+                                        Content="動画つきの呟きのみ表示する" 
+                                        IsChecked="{Binding IsFilteredVideos.Value, Mode=OneWay}" 
+                                        Command="{Binding OnCheckFilterVideos, Mode=OneWay}">
+                                    </CheckBox>
+                                    <CheckBox Grid.Column="3"
+                                        Content="リツイートされた呟きのみ表示する" 
+                                        IsChecked="{Binding IsFilteredRetweeted.Value, Mode=OneWay}" 
+                                        Command="{Binding OnCheckFilterRetweeted, Mode=OneWay}">
+                                    </CheckBox>
+                                </Grid>
+                            </Expander.Header>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <RadioButton Content="いずれかの条件を満たす呟きを表示する"
+                                             Grid.Row="1"
+                                             Grid.Column="0"
+                                             IsChecked="{Binding IsOrSearch.Value, Mode=OneWay}"
+                                             Command="{Binding OnClickOrSearch, Mode=OneWay}"/>
+                                <RadioButton Content="全ての条件を満たす呟きを表示する"
+                                             Grid.Row="1"
+                                             Grid.Column="1"
+                                             IsChecked ="{Binding Path=IsOrSearch.Value, Converter={StaticResource ReverseBool}, Mode=OneWay}"
+                                             Command="{Binding OnClickAndSearch, Mode=OneWay}"/>
+                            </Grid>
+                        </Expander>
                         <DataGrid Height="{Binding DataContext.DataGridHeight.Value, FallbackValue=100, ElementName=TweetsRoot, Mode=OneWay}"
-                                      Width="{Binding DataContext.DataGridWidth.Value, FallbackValue=100, ElementName=TweetsRoot,  Mode=OneWay}"
-                                      VerticalScrollBarVisibility="Visible"
-                                      HorizontalScrollBarVisibility="Visible"
-                                      Grid.Row="1"
-                                      Grid.Column="0"
-                                      Grid.ColumnSpan="4"
-                                      ItemsSource="{Binding ShowTweets}"
-                                      Name ="DataGrid" 
-                                      AlternatingRowBackground="White" 
-                                      AlternationCount="2">
+                                  Width="{Binding DataContext.DataGridWidth.Value, FallbackValue=100, ElementName=TweetsRoot,  Mode=OneWay}"
+                                  VerticalScrollBarVisibility="Visible"
+                                  HorizontalScrollBarVisibility="Visible"
+                                  Padding="5"
+                                  ItemsSource="{Binding ShowTweets}"
+                                  VerticalAlignment="Top"
+                                  HorizontalAlignment="Left"
+                                  Name ="DataGrid" 
+                                  IsReadOnly="True">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="ユーザID"
                                                 Width="100"
-                                                Binding="{Binding User.ScreenName}"/>
+                                                Binding="{Binding User.ScreenName}">
+                                </DataGridTextColumn>
                                 <DataGridTextColumn Header="ユーザ名"
                                                 Width="100"
+                                                ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}"
                                                 Binding="{Binding User.Name}"/>
 
                                 <DataGridTextColumn Header="ツイート"
                                                 Width="500"
-                                                Binding="{Binding FullText}"/>
+                                                Binding="{Binding FullText}">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style>
+                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                            <Setter Property="TextBlock.TextAlignment" Value="Center"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
                             </DataGrid.Columns>
                         </DataGrid>
-                    </Grid>
+                    </StackPanel>
                 </DataTemplate>
             </TabControl.ContentTemplate>
         </TabControl>

@@ -27,9 +27,10 @@ namespace HHFO.ViewModels
 {
     public class TweetsViewModel : BindableBase, IDisposable
     {
-        public double CheckBoxHeight { get; } = 30.0d;
+        public double CheckBoxHeight { get; } = 40.0d;
         public double RadioButtonHeight { get; } = 30.0d;
-        public const double DataGridHeightMargin = 45.0d;
+        public ReactiveProperty<double> HeaderHeight { get; private set; }
+        public ReactiveProperty<bool> IsExpandedHeader { get; private set; } = new ReactiveProperty<bool>(true);
 
         private static Logger logger = LogManager.GetCurrentClassLogger();
         private CompositeDisposable Disposable { get; }
@@ -43,24 +44,22 @@ namespace HHFO.ViewModels
         public ObservableCollection<Tab> Tabs { get; }
         public ReactiveProperty<double> DataGridHeight { get; set; } = new ReactiveProperty<double>(1.0d);
         public ReactiveProperty<double> DataGridWidth { get; set; } = new ReactiveProperty<double>(1.0d);
+        public ReactiveProperty<bool> IsOpenCheckBoxArea { get; set; } = new ReactiveProperty<bool>(true);
 
         public ReactiveCommand OnSizeChanged { get; }
         public ReactiveCommand<RoutedEventArgs> OnLoaded { get; }
         public ReactiveCommand<SelectionChangedEventArgs> OnCurrentTabChanged { get; }
         public ReactiveCommand<System.Windows.Input.MouseButtonEventArgs> OnTabClose { get; }
-
-        // チェックボックス・ラジオボタン押下時のコマンド
-        public ReactiveCommand CheckFilterLink { get; }
-        public ReactiveCommand CheckFilterImages{ get; }
-        public ReactiveCommand CheckFilterVideos { get; }
-        public ReactiveCommand CheckFilterRetweeted { get; }
-
+        public ReactiveCommand OnExpandedCheckArea { get; }
+        public ReactiveCommand OnCollapsedCheckArea { get; }
+        
         public TweetsViewModel(ListSubscriber ListIdSubscriber)
         {
             Disposable = new CompositeDisposable();
             this.ListSubscriber = ListIdSubscriber;
             ListId = this.ListSubscriber.Id.ToReadOnlyReactiveProperty();
             Tabs = new ObservableCollection<Tab>();
+            HeaderHeight = new ReactiveProperty<double>(CheckBoxHeight + RadioButtonHeight);
 
             OnSizeChanged = new ReactiveCommand()
                 .AddTo(Disposable);
@@ -70,32 +69,42 @@ namespace HHFO.ViewModels
                 .AddTo(Disposable);
             OnTabClose = new ReactiveCommand<System.Windows.Input.MouseButtonEventArgs>()
                 .AddTo(Disposable);
-
-            CheckFilterLink = new ReactiveCommand()
+            OnExpandedCheckArea = new ReactiveCommand()
                 .AddTo(Disposable);
-            CheckFilterImages = new ReactiveCommand()
-                .AddTo(Disposable);
-            CheckFilterVideos = new ReactiveCommand()
-                .AddTo(Disposable);
-            CheckFilterRetweeted = new ReactiveCommand()
+            OnCollapsedCheckArea = new ReactiveCommand()
                 .AddTo(Disposable);
 
             OnSizeChanged.Subscribe(_ => OnSizeChangedAction());
-            ListId.Subscribe(e => OpenListAction(e));
-            OnLoaded.Subscribe(e => OnLoadedAction(e));
-            OnCurrentTabChanged.Subscribe(e => OnCurrentTabChangedAction());
-            OnTabClose.Subscribe(e => OnTabCloseAction(e));
+            ListId.Subscribe(e => OpenListTabAction(e))
+                .AddTo(Disposable);
+            OnLoaded.Subscribe(e => OnLoadedAction(e))
+                .AddTo(Disposable);
+            OnCurrentTabChanged.Subscribe(e => OnCurrentTabChangedAction())
+                .AddTo(Disposable);
+            OnTabClose.Subscribe(e => OnTabCloseAction(e))
+                .AddTo(Disposable);
+            OnExpandedCheckArea.Subscribe(_ => OnExpandedCheckAreaAction())
+                .AddTo(Disposable);
+            OnCollapsedCheckArea.Subscribe(_ => OnCollapsedCheckAreaAction())
+                .AddTo(Disposable);
+        }
 
-            CheckFilterLink.Subscribe(_ => CurrentTab.OnCheckFilterLinkAction());
-            CheckFilterImages.Subscribe(_ => CurrentTab.OnCheckFilterImagesAction());
-            CheckFilterVideos.Subscribe(_ => CurrentTab.OnCheckFilterVideosAction());
-            CheckFilterRetweeted.Subscribe(_ => CurrentTab.OnCheckFilterRetweetedAction());
+        private void OnExpandedCheckAreaAction()
+        {
+            IsExpandedHeader.Value = true;
+            HeaderHeight.Value = CheckBoxHeight + RadioButtonHeight;
+            ChangeDataGridSize();
+        }
+        private void OnCollapsedCheckAreaAction()
+        {
+            IsExpandedHeader.Value = false;
+            HeaderHeight.Value = CheckBoxHeight;
+            ChangeDataGridSize();
         }
 
         private void OnTabCloseAction(MouseButtonEventArgs e)
         {
             var hoge = e.Source.GetType().ToString();
-
         }
 
         private void OnCurrentTabChangedAction()
@@ -103,16 +112,18 @@ namespace HHFO.ViewModels
             CurrentTab = (Tab)TabControl.SelectedItem;
         }
 
-
         private void ChangeDataGridSize()
         {
-            DataGridHeight.Value = Grid.ActualHeight - CheckBoxHeight - DataGridHeightMargin;
+            DataGridHeight.Value = Grid.ActualHeight - CheckBoxHeight - HeaderHeight.Value;
             DataGridWidth.Value = Grid.ActualWidth;
         }
 
         private void OnSizeChangedAction()
         {
-            ChangeDataGridSize();
+            if (CurrentTab != null)
+            {
+                ChangeDataGridSize();
+            }
         }
 
         private void OnLoadedAction(RoutedEventArgs e)
@@ -130,7 +141,7 @@ namespace HHFO.ViewModels
             }
         }
 
-        private void OpenListAction (string id)
+        private void OpenListTabAction (string id)
         {
             if (string.IsNullOrWhiteSpace(id))
             {
