@@ -70,72 +70,59 @@
             <TabControl.ContentTemplate>
                 <DataTemplate>
                     <StackPanel Height="{Binding ActualHeight, ElementName=RootGrid}">
-                        <Expander IsExpanded="{Binding DataContext.IsExpandedHeader.Value, ElementName=TweetsRoot}">
-                            <interactivity:Interaction.Triggers>
-                                <interactivity:EventTrigger EventName="Expanded">
-                                    <reactiveInteractivity:EventToReactiveCommand Command="{Binding DataContext.OnExpandedCheckArea
-                                        , Mode=OneWay
-                                        , ElementName=TweetsRoot}"/>
-                                </interactivity:EventTrigger>
-                                <interactivity:EventTrigger EventName="Collapsed">
-                                    <reactiveInteractivity:EventToReactiveCommand Command="{Binding DataContext.OnCollapsedCheckArea
-                                        , Mode=OneWay
-                                        , ElementName=TweetsRoot}"/>
-                                </interactivity:EventTrigger>
-                            </interactivity:Interaction.Triggers>
-                            <Expander.Header>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="{Binding DataContext.HeaderHeight, ElementName=TweetRoot}"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1.05*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
 
-                                    <CheckBox Grid.Column="0"
-                                        Content="リンクつきの呟きのみ表示する" 
-                                        IsChecked="{Binding IsFilteredLink.Value, Mode=OneWay}" 
-                                        Command="{Binding OnCheckFilterLink, Mode=OneWay}">
-                                    </CheckBox>
-                                    <CheckBox Grid.Column="1"
-                                        Content="画像つきの呟きのみ表示する" 
-                                        IsChecked="{Binding IsFilteredImages.Value, Mode=OneWay}" 
-                                        Command="{Binding OnCheckFilterImages, Mode=OneWay}">
-                                    </CheckBox>
-                                    <CheckBox Grid.Column="2"
-                                        Content="動画つきの呟きのみ表示する" 
-                                        IsChecked="{Binding IsFilteredVideos.Value, Mode=OneWay}" 
-                                        Command="{Binding OnCheckFilterVideos, Mode=OneWay}">
-                                    </CheckBox>
-                                    <CheckBox Grid.Column="3"
-                                        Content="リツイートされた呟きのみ表示する" 
-                                        IsChecked="{Binding IsFilteredRetweeted.Value, Mode=OneWay}" 
-                                        Command="{Binding OnCheckFilterRetweeted, Mode=OneWay}">
-                                    </CheckBox>
-                                </Grid>
-                            </Expander.Header>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <RadioButton Content="いずれかの条件を満たす呟きを表示する"
-                                             Grid.Row="1"
-                                             Grid.Column="0"
-                                             IsChecked="{Binding IsOrSearch.Value, Mode=OneWay}"
-                                             Command="{Binding OnClickOrSearch, Mode=OneWay}"/>
-                                <RadioButton Content="全ての条件を満たす呟きを表示する"
-                                             Grid.Row="1"
-                                             Grid.Column="1"
-                                             IsChecked ="{Binding Path=IsOrSearch.Value, Converter={StaticResource ReverseBool}, Mode=OneWay}"
-                                             Command="{Binding OnClickAndSearch, Mode=OneWay}"/>
-                            </Grid>
-                        </Expander>
+                            <CheckBox Grid.Row="0"
+                                      Grid.Column="0"
+                                      Content="リンクつきの呟きのみ表示する" 
+                                      IsChecked="{Binding IsFilteredLink.Value, Mode=OneWay}" 
+                                      Command="{Binding OnCheckFilterLink, Mode=OneWay}">
+                            </CheckBox>
+                            <CheckBox Grid.Row="0" 
+                                      Grid.Column="1"
+                                      Content="画像つきの呟きのみ表示する" 
+                                      IsChecked="{Binding IsFilteredImages.Value, Mode=OneWay}" 
+                                      Command="{Binding OnCheckFilterImages, Mode=OneWay}">
+                            </CheckBox>
+                            <CheckBox Grid.Row="0" 
+                                      Grid.Column="2"
+                                      Content="動画つきの呟きのみ表示する" 
+                                      IsChecked="{Binding IsFilteredVideos.Value, Mode=OneWay}" 
+                                      Command="{Binding OnCheckFilterVideos, Mode=OneWay}">
+                            </CheckBox>
+                            <CheckBox Grid.Row="0" 
+                                      Grid.Column="3"
+                                      Content="リツイートされた呟きのみ表示する" 
+                                      IsChecked="{Binding IsFilteredRetweeted.Value, Mode=OneWay}" 
+                                      Command="{Binding OnCheckFilterRetweeted, Mode=OneWay}">
+                            </CheckBox>
+                            <RadioButton Content="いずれかの条件を満たす呟きを表示する"
+                                         Grid.Row="1"
+                                         Grid.Column="0"
+                                         IsChecked="{Binding IsOrSearch.Value, Mode=OneWay}"
+                                         Command="{Binding OnClickOrSearch, Mode=OneWay}"/>
+                            <RadioButton Content="全ての条件を満たす呟きを表示する"
+                                         Grid.Row="1"
+                                         Grid.Column="1"
+                                         IsChecked ="{Binding Path=IsOrSearch.Value, Converter={StaticResource ReverseBool}, Mode=OneWay}"
+                                         Command="{Binding OnClickAndSearch, Mode=OneWay}"/>
+
+                        </Grid>
                         <DataGrid Height="{Binding DataContext.DataGridHeight.Value, FallbackValue=100, ElementName=TweetsRoot, Mode=OneWay}"
                                   Width="{Binding DataContext.DataGridWidth.Value, FallbackValue=100, ElementName=TweetsRoot,  Mode=OneWay}"
                                   VerticalScrollBarVisibility="Visible"
                                   HorizontalScrollBarVisibility="Visible"
-                                  Padding="5"
+                                  Padding="5,5,5,15"
                                   ItemsSource="{Binding ShowTweets}"
                                   VerticalAlignment="Top"
                                   HorizontalAlignment="Left"

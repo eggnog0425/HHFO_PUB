@@ -27,9 +27,9 @@ namespace HHFO.ViewModels
 {
     public class TweetsViewModel : BindableBase, IDisposable
     {
-        public double CheckBoxHeight { get; } = 40.0d;
-        public double RadioButtonHeight { get; } = 30.0d;
-        public ReactiveProperty<double> HeaderHeight { get; private set; }
+        private const double CheckBoxHeight = 48.0d;
+        private const double RadioButtonHeight = 16.0d;
+        public double HeaderHeight { get; private set; }
         public ReactiveProperty<bool> IsExpandedHeader { get; private set; } = new ReactiveProperty<bool>(true);
 
         private static Logger logger = LogManager.GetCurrentClassLogger();
@@ -50,8 +50,6 @@ namespace HHFO.ViewModels
         public ReactiveCommand<RoutedEventArgs> OnLoaded { get; }
         public ReactiveCommand<SelectionChangedEventArgs> OnCurrentTabChanged { get; }
         public ReactiveCommand<System.Windows.Input.MouseButtonEventArgs> OnTabClose { get; }
-        public ReactiveCommand OnExpandedCheckArea { get; }
-        public ReactiveCommand OnCollapsedCheckArea { get; }
         
         public TweetsViewModel(ListSubscriber ListIdSubscriber)
         {
@@ -59,7 +57,7 @@ namespace HHFO.ViewModels
             this.ListSubscriber = ListIdSubscriber;
             ListId = this.ListSubscriber.Id.ToReadOnlyReactiveProperty();
             Tabs = new ObservableCollection<Tab>();
-            HeaderHeight = new ReactiveProperty<double>(CheckBoxHeight + RadioButtonHeight);
+            HeaderHeight = CheckBoxHeight + RadioButtonHeight;
 
             OnSizeChanged = new ReactiveCommand()
                 .AddTo(Disposable);
@@ -68,10 +66,6 @@ namespace HHFO.ViewModels
             OnCurrentTabChanged = new ReactiveCommand<SelectionChangedEventArgs>()
                 .AddTo(Disposable);
             OnTabClose = new ReactiveCommand<System.Windows.Input.MouseButtonEventArgs>()
-                .AddTo(Disposable);
-            OnExpandedCheckArea = new ReactiveCommand()
-                .AddTo(Disposable);
-            OnCollapsedCheckArea = new ReactiveCommand()
                 .AddTo(Disposable);
 
             OnSizeChanged.Subscribe(_ => OnSizeChangedAction());
@@ -83,23 +77,6 @@ namespace HHFO.ViewModels
                 .AddTo(Disposable);
             OnTabClose.Subscribe(e => OnTabCloseAction(e))
                 .AddTo(Disposable);
-            OnExpandedCheckArea.Subscribe(_ => OnExpandedCheckAreaAction())
-                .AddTo(Disposable);
-            OnCollapsedCheckArea.Subscribe(_ => OnCollapsedCheckAreaAction())
-                .AddTo(Disposable);
-        }
-
-        private void OnExpandedCheckAreaAction()
-        {
-            IsExpandedHeader.Value = true;
-            HeaderHeight.Value = CheckBoxHeight + RadioButtonHeight;
-            ChangeDataGridSize();
-        }
-        private void OnCollapsedCheckAreaAction()
-        {
-            IsExpandedHeader.Value = false;
-            HeaderHeight.Value = CheckBoxHeight;
-            ChangeDataGridSize();
         }
 
         private void OnTabCloseAction(MouseButtonEventArgs e)
@@ -114,7 +91,7 @@ namespace HHFO.ViewModels
 
         private void ChangeDataGridSize()
         {
-            DataGridHeight.Value = Grid.ActualHeight - CheckBoxHeight - HeaderHeight.Value;
+            DataGridHeight.Value = Grid.ActualHeight - HeaderHeight;
             DataGridWidth.Value = Grid.ActualWidth;
         }
 
