@@ -1,5 +1,6 @@
 ﻿using DryIoc.Messages;
 using HHFO.Models;
+using HHFO.Models.Logic.EventAggregator.Tweet;
 using Prism.Events;
 using Prism.Mvvm;
 using Prism.Regions;
@@ -17,7 +18,6 @@ using System.Diagnostics;
 using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Windows.Controls;
-using HHFO.Core.Models;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 
@@ -35,9 +35,9 @@ namespace HHFO.ViewModels
         public ReactiveCommand OnLoaded { get; }
         public ReactiveCommand OpenBrowser { get; }
         public ReactiveCommand InitialAuth { get; }
-        public ReactiveCommand OpenTweetFlyOut { get; }
         public ReactiveCommand<RoutedEventArgs> ExpandedLists { get; } = new ReactiveCommand<RoutedEventArgs>();
 
+        public static TweetRoutedCommand TweetRoutedCommand { get; } = new TweetRoutedCommand();
         public ReactiveProperty<bool> IsOpenTweetFlyOut { get; } = new ReactiveProperty<bool>(false);
         public ReactiveProperty<bool> IsOpenAuthFlyOut { get; } = new ReactiveProperty<bool>(false);
         public ReactiveProperty<String> Pin { get; set; } = new ReactiveProperty<string>();
@@ -48,6 +48,8 @@ namespace HHFO.ViewModels
         public ObservableCollection<CoreTweet.List> Lists { get; private set; } = new ObservableCollection<CoreTweet.List>();
         public ReactiveProperty<double> TweetAreaHeight { get; private set; } = new ReactiveProperty<double>(0.0d);
 
+        private bool IsOpenSetting { get; set; } = true;
+
         public ShellViewModel(IRegionManager regionManager, IListProvider listProvider)
         {
             Disposable = new CompositeDisposable();
@@ -57,8 +59,6 @@ namespace HHFO.ViewModels
                 .AddTo(Disposable);
             InitialAuth = new ReactiveCommand()
                 .AddTo(Disposable);
-            OpenTweetFlyOut = new ReactiveCommand()
-                .AddTo(Disposable);
             OpenList = new ReactiveCommand<System.Windows.Input.MouseButtonEventArgs>()
                 .AddTo(Disposable);
             ListProvider = listProvider;
@@ -67,7 +67,6 @@ namespace HHFO.ViewModels
             OnLoaded.Subscribe(_ => Loaded());
             OpenBrowser.Subscribe(_ => OpenBrowserAction());
             InitialAuth.Subscribe(_ => Auth());
-            OpenTweetFlyOut.Subscribe(_ => OpenTweetFlyOutAction());
             OpenList.Subscribe(e => OpenListAction(e));
         }
 
@@ -113,12 +112,9 @@ namespace HHFO.ViewModels
             }
         }
 
-        private void OpenTweetFlyOutAction()
+        public void OpenTweetFlyOutAction(object sender, ExecutedRoutedEventArgs args)
         {
-            lock (IsOpenTweetFlyOut)
-            {
-
-            }
+                IsOpenTweetFlyOut.Value = !IsOpenTweetFlyOut.Value;
         }
         private void FetchTwitterLists()
         {
@@ -133,5 +129,7 @@ namespace HHFO.ViewModels
                 // APIリミットとかサーバエラーはどうしようもないので握りつぶす
             }
         }
+
+        public void CanOpenTweetFlyOut(object sender, CanExecuteRoutedEventArgs e) => e.CanExecute = !IsOpenSetting;
     }
 }

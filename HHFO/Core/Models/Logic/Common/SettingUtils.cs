@@ -63,7 +63,7 @@ namespace HHFO.Models
 
         public CommonSetting GetCommonSetting()
         {
-            var path = "HHFO.Core.CommonSetting.xml";
+            var path = "HHFO.CommonSetting.xml";
             var assembly = Assembly.GetExecutingAssembly();
             using (var stream = assembly.GetManifestResourceStream(path))
             {

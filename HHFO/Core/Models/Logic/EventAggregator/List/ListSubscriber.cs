@@ -1,5 +1,4 @@
-﻿using HHFO.Core.Models;
-using Prism.Events;
+﻿using Prism.Events;
 using Prism.Mvvm;
 using Reactive.Bindings;
 using System;

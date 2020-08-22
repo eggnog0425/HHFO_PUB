@@ -3,6 +3,7 @@
 		<TargetFramework>netcoreapp3.1</TargetFramework>
 		<UseWPF>true</UseWPF>
 		<AssemblyName>HHFO.Core</AssemblyName>
+		<RootNamespace>HHFO</RootNamespace>
 	</PropertyGroup>
 	<ItemGroup>
 		<EmbeddedResource Include="..\Config\CommonSetting.xml" />

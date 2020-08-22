@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:prism="http://www.codeplex.com/prism"
              xmlns:local="clr-namespace:HHFO.ViewModels"
+             xmlns:views="clr-namespace:HHFO.Views"
              prism:ViewModelLocator.AutoWireViewModel="True"
              xmlns:mahApps="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
@@ -15,19 +16,20 @@
              TextOptions.TextRenderingMode="Auto"
              Background="{DynamicResource MaterialDesignPaper}"
              FontFamily="{DynamicResource MaterialDesignFont}"
-             Name="TweetsRoot">
+             Name="rootControl">
 
-    <Grid Name="RootGrid">
+    <Grid>
         <interactivity:Interaction.Triggers>
             <interactivity:EventTrigger EventName="Loaded">
                 <reactiveInteractivity:EventToReactiveCommand Command="{Binding OnLoaded, Mode=OneWay}" />
             </interactivity:EventTrigger>
-            <interactivity:EventTrigger EventName="SizeChanged">
-                <reactiveInteractivity:EventToReactiveCommand Command="{Binding OnSizeChanged, Mode=OneWay}" />
-            </interactivity:EventTrigger>
         </interactivity:Interaction.Triggers>
 
-        <TabControl Margin="0" ItemsSource ="{Binding Tabs}" Background="Transparent">
+        <TabControl 
+            Margin="0" 
+            ItemsSource ="{Binding Tabs}" 
+            Background="Transparent" 
+            Name="TabControl">
             <interactivity:Interaction.Triggers>
                 <interactivity:EventTrigger EventName="SelectionChanged">
                     <reactiveInteractivity:EventToReactiveCommand Command="{Binding OnCurrentTabChanged, Mode=OneWay}" />
@@ -36,7 +38,7 @@
 
             <TabControl.ItemTemplate>
                 <DataTemplate>
-                    <Grid Margin="0" >
+                    <Grid Margin="0" Height="25">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
@@ -52,6 +54,7 @@
                                 Margin="0" 
                                 Padding="0" 
                                 HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
                                 Style="{StaticResource MaterialDesignFlatButton}"
                                 
                                 ToolTip="Icon">
@@ -69,20 +72,28 @@
 
             <TabControl.ContentTemplate>
                 <DataTemplate>
-                    <StackPanel Height="{Binding ActualHeight, ElementName=RootGrid}">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="{Binding DataContext.HeaderHeight, ElementName=TweetRoot}"/>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="1.05*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
+                    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                        <interactivity:Interaction.Triggers>
+                            <interactivity:EventTrigger EventName="Loaded">
+                                <reactiveInteractivity:EventToReactiveCommand Command="{Binding DataContext.OnContentLoaded, Mode=OneWay, ElementName=rootControl}" />
+                            </interactivity:EventTrigger>
+                            <interactivity:EventTrigger EventName="SizeChanged">
+                                <reactiveInteractivity:EventToReactiveCommand Command="{Binding DataContext.OnSizeChanged, Mode=OneWay, ElementName=rootControl}" />
+                        </interactivity:EventTrigger>
+                        </interactivity:Interaction.Triggers>
 
-                            <CheckBox Grid.Row="0"
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.05*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <CheckBox Grid.Row="0"
                                       Grid.Column="0"
                                       Content="リンクつきの呟きのみ表示する" 
                                       IsChecked="{Binding IsFilteredLink.Value, Mode=OneWay}" 
@@ -116,41 +127,15 @@
                                          Grid.Column="1"
                                          IsChecked ="{Binding Path=IsOrSearch.Value, Converter={StaticResource ReverseBool}, Mode=OneWay}"
                                          Command="{Binding OnClickAndSearch, Mode=OneWay}"/>
-
-                        </Grid>
-                        <DataGrid Height="{Binding DataContext.DataGridHeight.Value, FallbackValue=100, ElementName=TweetsRoot, Mode=OneWay}"
-                                  Width="{Binding DataContext.DataGridWidth.Value, FallbackValue=100, ElementName=TweetsRoot,  Mode=OneWay}"
-                                  VerticalScrollBarVisibility="Visible"
-                                  HorizontalScrollBarVisibility="Visible"
-                                  Padding="5,5,5,15"
-                                  ItemsSource="{Binding ShowTweets}"
-                                  VerticalAlignment="Top"
-                                  HorizontalAlignment="Left"
-                                  Name ="DataGrid" 
-                                  IsReadOnly="True">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="ユーザID"
-                                                Width="100"
-                                                Binding="{Binding User.ScreenName}">
-                                </DataGridTextColumn>
-                                <DataGridTextColumn Header="ユーザ名"
-                                                Width="100"
-                                                ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}"
-                                                Binding="{Binding User.Name}"/>
-
-                                <DataGridTextColumn Header="ツイート"
-                                                Width="500"
-                                                Binding="{Binding FullText}">
-                                    <DataGridTextColumn.ElementStyle>
-                                        <Style>
-                                            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
-                                            <Setter Property="TextBlock.TextAlignment" Value="Center"/>
-                                        </Style>
-                                    </DataGridTextColumn.ElementStyle>
-                                </DataGridTextColumn>
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </StackPanel>
+                        <views:NormalTweetsGrid Visibility="{Binding NormalGridVisibility.Value,Mode=OneWay}" x:Name="NormalTweetView"
+                                                Grid.Row="2"
+                                                Grid.Column="0"
+                                                Grid.ColumnSpan="4"/>
+                        <views:MediaTweetsGrid Visibility="{Binding MediaGridVisibility.Value, Mode=OneWay}" x:Name="MediaTweetView"
+                                               Grid.Row="2"
+                                               Grid.Column="0"
+                                               Grid.ColumnSpan="4"/>
+                    </Grid>
                 </DataTemplate>
             </TabControl.ContentTemplate>
         </TabControl>

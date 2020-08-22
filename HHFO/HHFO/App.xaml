@@ -25,6 +25,7 @@
                 <!-- commons -->
                 <ResourceDictionary>
                     <models:BoolConverter x:Key="ReverseBool"/>
+                    <models:ThumbnailConverter x:Key="ConvertThumb"/>
                 </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

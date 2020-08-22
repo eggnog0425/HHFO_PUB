@@ -1,6 +1,5 @@
 ﻿using ControlzEx.Standard;
 using CoreTweet;
-using HHFO.Core.Models;
 using HHFO.Models;
 using ImTools;
 using MahApps.Metro.Controls;
@@ -27,27 +26,25 @@ namespace HHFO.ViewModels
 {
     public class TweetsViewModel : BindableBase, IDisposable
     {
-        private const double CheckBoxHeight = 48.0d;
-        private const double RadioButtonHeight = 16.0d;
-        public double HeaderHeight { get; private set; }
         public ReactiveProperty<bool> IsExpandedHeader { get; private set; } = new ReactiveProperty<bool>(true);
 
         private static Logger logger = LogManager.GetCurrentClassLogger();
         private CompositeDisposable Disposable { get; }
         private ListSubscriber ListSubscriber { get; set; }
-        private Tab CurrentTab { get; set; }
+        public Tab CurrentTab { get; private set; }
 
+        private FrameworkElement ParentElement { get; set; }
         private TabControl TabControl { get; set; }
-        private Grid Grid { get; set; }
 
         private ReadOnlyReactiveProperty<string> ListId { get; }
         public ObservableCollection<Tab> Tabs { get; }
-        public ReactiveProperty<double> DataGridHeight { get; set; } = new ReactiveProperty<double>(1.0d);
-        public ReactiveProperty<double> DataGridWidth { get; set; } = new ReactiveProperty<double>(1.0d);
+        public ReactiveProperty<double> DataGridHeight { get; set; } = new ReactiveProperty<double>(0.0d);
+        public ReactiveProperty<double> DataGridWidth { get; set; } = new ReactiveProperty<double>(0.0d);
         public ReactiveProperty<bool> IsOpenCheckBoxArea { get; set; } = new ReactiveProperty<bool>(true);
 
-        public ReactiveCommand OnSizeChanged { get; }
+        public ReactiveCommand<SizeChangedEventArgs> OnSizeChanged { get; }
         public ReactiveCommand<RoutedEventArgs> OnLoaded { get; }
+        public ReactiveCommand<RoutedEventArgs> OnContentLoaded { get; }
         public ReactiveCommand<SelectionChangedEventArgs> OnCurrentTabChanged { get; }
         public ReactiveCommand<System.Windows.Input.MouseButtonEventArgs> OnTabClose { get; }
         
@@ -57,26 +54,34 @@ namespace HHFO.ViewModels
             this.ListSubscriber = ListIdSubscriber;
             ListId = this.ListSubscriber.Id.ToReadOnlyReactiveProperty();
             Tabs = new ObservableCollection<Tab>();
-            HeaderHeight = CheckBoxHeight + RadioButtonHeight;
 
-            OnSizeChanged = new ReactiveCommand()
+            OnSizeChanged = new ReactiveCommand<SizeChangedEventArgs>()
                 .AddTo(Disposable);
             OnLoaded = new ReactiveCommand<RoutedEventArgs>()
+                .AddTo(Disposable);
+            OnContentLoaded = new ReactiveCommand<RoutedEventArgs>()
                 .AddTo(Disposable);
             OnCurrentTabChanged = new ReactiveCommand<SelectionChangedEventArgs>()
                 .AddTo(Disposable);
             OnTabClose = new ReactiveCommand<System.Windows.Input.MouseButtonEventArgs>()
                 .AddTo(Disposable);
 
-            OnSizeChanged.Subscribe(_ => OnSizeChangedAction());
+            OnSizeChanged.Subscribe(e => OnSizeChangedAction(e));
             ListId.Subscribe(e => OpenListTabAction(e))
                 .AddTo(Disposable);
             OnLoaded.Subscribe(e => OnLoadedAction(e))
+                .AddTo(Disposable);
+            OnContentLoaded.Subscribe(e => OnContentLoadedAction(e))
                 .AddTo(Disposable);
             OnCurrentTabChanged.Subscribe(e => OnCurrentTabChangedAction())
                 .AddTo(Disposable);
             OnTabClose.Subscribe(e => OnTabCloseAction(e))
                 .AddTo(Disposable);
+        }
+
+        private void OnContentLoadedAction(RoutedEventArgs e)
+        {
+            ChangeDataGridSize((FrameworkElement)e.OriginalSource);
         }
 
         private void OnTabCloseAction(MouseButtonEventArgs e)
@@ -89,30 +94,37 @@ namespace HHFO.ViewModels
             CurrentTab = (Tab)TabControl.SelectedItem;
         }
 
-        private void ChangeDataGridSize()
+        private void ChangeDataGridSize(FrameworkElement parent)
         {
-            DataGridHeight.Value = Grid.ActualHeight - HeaderHeight;
-            DataGridWidth.Value = Grid.ActualWidth;
+            var otherHeight = 0.0d;
+            foreach(var item in parent.GetChildObjects()) {
+                if (item is FrameworkElement)
+                {
+                    FrameworkElement element = item as FrameworkElement;
+                    if (element.Name != "NormalTweetView" && element.Name != "MediaTweetView")
+                    {
+                        otherHeight += element.ActualHeight;
+                    }
+                }
+            }
+            DataGridHeight.Value = parent.ActualHeight - otherHeight;
+            DataGridWidth.Value = parent.ActualWidth;
         }
 
-        private void OnSizeChangedAction()
+        private void OnSizeChangedAction(SizeChangedEventArgs e)
         {
-            if (CurrentTab != null)
-            {
-                ChangeDataGridSize();
-            }
+            ChangeDataGridSize((FrameworkElement)e.OriginalSource);
         }
 
         private void OnLoadedAction(RoutedEventArgs e)
         {
-            Grid = (Grid)e.Source;
-            ChangeDataGridSize();
+            ParentElement = (FrameworkElement)e.OriginalSource;
 
-            foreach (var item in Grid.Children)
+            foreach (var item in ParentElement.GetChildObjects())
             {
                 if (item is TabControl)
                 {
-                    TabControl = (TabControl)item;
+                    TabControl = item as TabControl;
                     return;
                 }
             }

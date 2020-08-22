@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace HHFO.Core.Models
+namespace HHFO.Models
 {
-    public class List
+    public class TwittertListId
     {
         public string Id { get; set; }
     }

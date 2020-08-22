@@ -35,7 +35,6 @@ namespace HHFO
         {
             containerRegistry.Register<IListProvider, ListProvider>();
             containerRegistry.Register<ListSubscriber, ListSubscriber>();
-            containerRegistry.Register<CommonViewSetting>();
         }
 
         protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)

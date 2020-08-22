@@ -9,6 +9,7 @@ using System.Reactive.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using HHFO.Models.Logic.Common;
 
 namespace HHFO.Models
 {
@@ -16,19 +17,18 @@ namespace HHFO.Models
     {
         public TabList(string id): base()
         {
-
             Id = id;
             Name = Token.Lists.Show(list_id => id, tweet_mode => "extended").Name;
-            AddTweets();
-            AddShow(Tweets);
+            FetchTweets();
         }
 
-        protected override void AddTweets()
+        protected override void FetchTweets()
         {
             var token = Authorization.GetToken();
             var newTweets = Token.Lists.Statuses(list_id => Id, tweet_mode => "extended").AsEnumerable();
-            Tweets.AddRange(newTweets);
-            AddShow(newTweets);
+            var comparer = new StatusComparer();
+            Tweets.Union(newTweets.Except(Tweets, comparer));
+            AddShow(newTweets.Except(showTweets, comparer));
         }
     }
 }

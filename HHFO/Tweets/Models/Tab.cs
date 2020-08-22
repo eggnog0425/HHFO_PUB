@@ -1,4 +1,5 @@
 ﻿using CoreTweet;
+using HHFO.Models.Logic.Common;
 using ImTools;
 using NLog.Filters;
 using Prism.Mvvm;
@@ -13,6 +14,7 @@ using System.Reactive.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 
 namespace HHFO.Models
 {
@@ -31,9 +33,10 @@ namespace HHFO.Models
         public ReactiveProperty<bool> IsOrSearch { get; private set; } = new ReactiveProperty<bool>(true);
 
         protected Tokens Token { get; set; }
-        protected List<Status> Tweets { get; set; } = new List<Status>();
+        protected IEnumerable<Status> Tweets { get; set; } = Enumerable.Empty<Status>();
         protected ObservableCollection<Status> showTweets { get; set; } = new ObservableCollection<Status>();
         public ReadOnlyReactiveCollection<Status> ShowTweets { get; protected set; }
+        public ReadOnlyReactiveCollection<MediaEntity> Medias { get; protected set; }
         public ObservableCollection<Func<Status, bool>> Predicates { get; protected set; } = new ObservableCollection<Func<Status, bool>>();
 
         // チェックボックス・ラジオボタンエリアのコマンド
@@ -45,9 +48,18 @@ namespace HHFO.Models
         public ReactiveCommand OnClickAndSearch { get; }
         public ReactiveCommand IsCheckedAndSearch { get; }
 
+        /// <summary>
+        /// 自動更新用のタイマー
+        /// </summary>
+        private DispatcherTimer timer { get; set; } = new DispatcherTimer(DispatcherPriority.Normal);
+
+        // 表示形式の切替
+        public ReactiveProperty<Visibility> NormalGridVisibility { get; } = new ReactiveProperty<Visibility>(Visibility.Visible);
+        public ReactiveProperty<Visibility> MediaGridVisibility { get; } = new ReactiveProperty<Visibility>(Visibility.Collapsed);
+
         private Func<Status, bool> FilterLink = tweet => (tweet.Entities?.Urls?.Length ?? 0) != 0;
-        private Func<Status, bool> FilterImages = tweet => tweet.ExtendedEntities?.Media?[0]?.Type?.ToLower() == "photo";
-        private Func<Status, bool> FilterVideos = tweet => tweet.ExtendedEntities?.Media?[0]?.Type?.ToLower() == "video";
+        private Func<Status, bool> FilterImages = tweet => tweet.ExtendedEntities?.Media[0]?.Type == "photo" || tweet.ExtendedEntities?.Media[0]?.Type == "animated_gif";
+        private Func<Status, bool> FilterVideos = tweet => tweet.ExtendedEntities?.Media[0]?.Type == "video";
         private Func<Status, bool> FilterRetweeted = tweet => tweet.RetweetedStatus != null;
 
         public Tab()
@@ -56,8 +68,13 @@ namespace HHFO.Models
             Token = Authorization.GetToken();
             Predicates.CollectionChanged += OnPredicatesChanged;
 
+            timer.Interval = TimeSpan.FromSeconds(5.0);
+            timer.Tick += (s, e) => FetchTweets();
+            timer.Start();
+
             ShowTweets = showTweets.ToReadOnlyReactiveCollection()
                 .AddTo(Disposable);
+            Medias = showTweets.ToReadOnlyReactiveCollection(t => t.ExtendedEntities?.Media?.Aggregate((m,_) => m));
             OnCheckFilterLink = new ReactiveCommand()
                 .AddTo(Disposable);
             OnCheckFilterImages = new ReactiveCommand()
@@ -90,7 +107,7 @@ namespace HHFO.Models
                 .AddTo(Disposable);
         }
 
-        protected abstract void AddTweets();
+        protected abstract void FetchTweets();
 
         protected void OnPredicatesChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
@@ -177,6 +194,17 @@ namespace HHFO.Models
             else
             {
                 Predicates.Remove(func);
+            }
+
+            if (IsFilteredImages.Value || IsFilteredVideos.Value)
+            {
+                NormalGridVisibility.Value = Visibility.Collapsed;
+                MediaGridVisibility.Value = Visibility.Visible;
+            }
+            else
+            {
+                MediaGridVisibility.Value = Visibility.Collapsed;
+                NormalGridVisibility.Value = Visibility.Visible;
             }
         }
 

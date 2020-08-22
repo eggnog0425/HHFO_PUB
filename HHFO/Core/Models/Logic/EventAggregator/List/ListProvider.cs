@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Security.Policy;
 using System.Text;
 using Unity;
-using HHFO.Core.Models;
+using HHFO.Models;
 
 namespace HHFO.Models
 {
@@ -17,7 +17,7 @@ namespace HHFO.Models
         public string Id { get; set; }
         public void Publish()
         {
-            var list = new List { Id = this.Id};
+            var list = new TwittertListId() { Id = this.Id};
             this.EventAggregator
                 .GetEvent<ListEvent>()
                 .Publish(list);

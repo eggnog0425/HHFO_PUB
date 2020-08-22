@@ -8,6 +8,7 @@
         xmlns:interactivity="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:reactiveInteractivity="clr-namespace:Reactive.Bindings.Interactivity;assembly=ReactiveProperty.WPF"
         xmlns:local="clr-namespace:HHFO.Views"
+        xmlns:shellViewModel="clr-namespace:HHFO.ViewModels"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Regular"
         TextElement.FontSize="13"
@@ -18,9 +19,8 @@
         Title="{Binding Title}"
         Height="800"
         Width="1200">
-    <Window.InputBindings>
-        <KeyBinding Command="{Binding OpenTweetSpace}" Gesture="Shift+Enter"/>
-    </Window.InputBindings>
+    <Window.CommandBindings>
+    </Window.CommandBindings>
     <interactivity:Interaction.Triggers>
         <interactivity:EventTrigger EventName="Loaded">
             <reactiveInteractivity:EventToReactiveCommand Command="{Binding OnLoaded, Mode=OneWay}" />
@@ -56,11 +56,11 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height ="*"/>
-            <RowDefinition Height ="{Binding TweetAreaHeight.Value}"/>
+            <RowDefinition Height ="Auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="2.5*"/>
-            <ColumnDefinition Width="7.5*"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
         <ContentControl 
@@ -75,10 +75,9 @@
             Grid.RowSpan="2"
             prism:RegionManager.RegionName="MainSpace"/>
         <ContentControl
-            Grid.Row="2"
+            Grid.Row="1"
             Grid.Column="1"
-            prism:RegionManager.RegionName="TweetSpace"
-            Visibility="{Binding TweetVisibility.Value, FallbackValue=Collapsed}"/>
+            prism:RegionManager.RegionName="ButtomSpace"/>
 
     </Grid>
 </mahApps:MetroWindow>      
