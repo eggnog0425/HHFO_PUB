@@ -27,7 +27,7 @@ namespace HHFO.Models
             var token = Authorization.GetToken();
             var newTweets = Token.Lists.Statuses(list_id => Id, tweet_mode => "extended").AsEnumerable();
             var comparer = new StatusComparer();
-            Tweets.Union(newTweets.Except(Tweets, comparer));
+            FilteredTweet.Concat(newTweets.Except(FilteredTweet, comparer));
             AddShow(newTweets.Except(showTweets, comparer));
         }
     }

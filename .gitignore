@@ -352,9 +352,9 @@ MigrationBackup/
 FodyWeavers.xsd
 
 # コンシューマーキーとかTokenとかがのってるファイルは管理から外す
-HHFO/HHFO.Config/CommonSetting.xml
-HHFO/HHFO.Config/userSetting.xml
+HHFO/Config/CommonSetting.xml
+HHFO/Config/userSetting.xml
 
 # xsdから自動生成するファイル群(csファイルはバージョン管理にのせる)
-HHFO/HHFO.Config/*.xsc
-HHFO/HHFO.Config/*.xss
+HHFO/Config/*.xsc
+HHFO/Config/*.xss

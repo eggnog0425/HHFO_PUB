@@ -33,7 +33,15 @@ namespace HHFO.Models
         public ReactiveProperty<bool> IsOrSearch { get; private set; } = new ReactiveProperty<bool>(true);
 
         protected Tokens Token { get; set; }
-        protected IEnumerable<Status> Tweets { get; set; } = Enumerable.Empty<Status>();
+
+        /// <summary>
+        /// ミュート絡みの処理を済ませたTweets
+        /// </summary>
+        protected ObservableCollection<Status> FilteredTweet { get; set; } = new ObservableCollection<Status>();
+
+        /// <summary>
+        /// 画面に実際に表示されるTweets
+        /// </summary>
         protected ObservableCollection<Status> showTweets { get; set; } = new ObservableCollection<Status>();
         public ReadOnlyReactiveCollection<Status> ShowTweets { get; protected set; }
         public ReadOnlyReactiveCollection<MediaEntity> Medias { get; protected set; }
@@ -122,7 +130,7 @@ namespace HHFO.Models
         internal void Reflesh()
         {
             Clear();
-            AddShow(Tweets);
+            AddShow(FilteredTweet);
         }
 
         protected void AddShow(IEnumerable<Status> stats)
