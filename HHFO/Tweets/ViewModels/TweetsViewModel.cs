@@ -36,7 +36,7 @@ namespace HHFO.ViewModels
         private FrameworkElement ParentElement { get; set; }
         private TabControl TabControl { get; set; }
 
-        private ReadOnlyReactiveProperty<string> ListId { get; }
+        private ReadOnlyReactiveProperty<long> ListId { get; }
         public ObservableCollection<Tab> Tabs { get; }
         public ReactiveProperty<double> DataGridHeight { get; set; } = new ReactiveProperty<double>(0.0d);
         public ReactiveProperty<double> DataGridWidth { get; set; } = new ReactiveProperty<double>(0.0d);
@@ -130,9 +130,9 @@ namespace HHFO.ViewModels
             }
         }
 
-        private void OpenListTabAction (string id)
+        private void OpenListTabAction (long id)
         {
-            if (string.IsNullOrWhiteSpace(id))
+            if (id == 0)
             {
                 return;
             }
@@ -153,7 +153,7 @@ namespace HHFO.ViewModels
             }
         }
 
-        private void SelectTabByVM(string id)
+        private void SelectTabByVM(long id)
         {
             var i = 0;
             foreach (Tab item in TabControl.Items)

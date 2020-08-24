@@ -15,7 +15,7 @@ namespace HHFO.Models
 {
     public class TabList: Tab
     {
-        public TabList(string id): base()
+        public TabList(long id): base()
         {
             Id = id;
             Name = Token.Lists.Show(list_id => id, tweet_mode => "extended").Name;

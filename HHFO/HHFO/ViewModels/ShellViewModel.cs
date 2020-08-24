@@ -72,7 +72,7 @@ namespace HHFO.ViewModels
 
         private void OpenListAction(MouseButtonEventArgs e)
         {
-            ListProvider.Id = ((TextBlock)e.Source).Tag.ToString();
+            ListProvider.Id = long.Parse(((TextBlock)e.Source).Tag?.ToString() ?? "0");
             ListProvider.Publish();
         }
 

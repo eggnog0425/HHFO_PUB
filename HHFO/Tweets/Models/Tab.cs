@@ -12,6 +12,7 @@ using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
@@ -22,7 +23,7 @@ namespace HHFO.Models
     {
         private CompositeDisposable Disposable { get; }
 
-        public string Id { get; protected set; }
+        public long Id { get; protected set; }
         public string Name { get; protected set; }
 
         // チェックボックス・ラジオボタンの状態
@@ -64,11 +65,14 @@ namespace HHFO.Models
         // 表示形式の切替
         public ReactiveProperty<Visibility> NormalGridVisibility { get; } = new ReactiveProperty<Visibility>(Visibility.Visible);
         public ReactiveProperty<Visibility> MediaGridVisibility { get; } = new ReactiveProperty<Visibility>(Visibility.Collapsed);
+        public bool IsChangingShowTweets { get; private set; } = false;
+        public bool AbortChangeShowTweet { get; private set; } = false;
 
         private Func<Status, bool> FilterLink = tweet => (tweet.Entities?.Urls?.Length ?? 0) != 0;
         private Func<Status, bool> FilterImages = tweet => tweet.ExtendedEntities?.Media[0]?.Type == "photo" || tweet.ExtendedEntities?.Media[0]?.Type == "animated_gif";
         private Func<Status, bool> FilterVideos = tweet => tweet.ExtendedEntities?.Media[0]?.Type == "video";
         private Func<Status, bool> FilterRetweeted = tweet => tweet.RetweetedStatus != null;
+        private object AbortChangeShowTweetLocker = new object();
 
         public Tab()
         {
@@ -133,10 +137,69 @@ namespace HHFO.Models
             AddShow(FilteredTweet);
         }
 
-        protected void AddShow(IEnumerable<Status> stats)
+        async protected void AddShow(IEnumerable<Status> stats)
         {
-            var filteredStats = Filter(stats);
-            showTweets.AddRange(filteredStats);
+            // 追加・削除処理が走っているときは待つ
+            while (IsChangingShowTweets)
+            {
+                await Task.Delay(1);
+            }
+
+            // LINQでどーんってやったら体感速度がひどいことになったのでforeachで回す
+            foreach (var stat in stats)
+            {
+                IsChangingShowTweets = true;
+                // ユーザが途中で追加・削除処理を実行した場合処理を停止する
+                if (AbortChangeShowTweet)
+                {
+                    AbortChangeShowTweet = false;
+                    IsChangingShowTweets = false;
+                    return;
+                }
+                if (!showTweets.Any(s => s.Id == stat.Id))
+                {
+                    showTweets.Add(stat);
+                }
+            }
+            lock (AbortChangeShowTweetLocker)
+            {
+                AbortChangeShowTweet = false;
+                IsChangingShowTweets = false;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="exceptStats">ShowTweetsとフィルタ適用後のツイートの差集合</param>
+        async protected void RemoveShow(IEnumerable<Status> exceptStats)
+        {
+            // 追加・削除処理が走っているときは待つ
+            while (IsChangingShowTweets)
+            {
+                await Task.Delay(1);
+            }
+            // LINQでどーんってやったら体感速度がひどいことになったのでforeachで回す
+            foreach (var stat in exceptStats)
+            {
+                IsChangingShowTweets = true;
+                // ユーザが途中で追加・削除処理を実行した場合処理を停止する
+                if (AbortChangeShowTweet)
+                {
+                    lock (AbortChangeShowTweetLocker)
+                    {
+                        AbortChangeShowTweet = false;
+                        IsChangingShowTweets = false;
+                    }
+                    return;
+                }
+                showTweets.Remove(stat);
+            }
+            lock (AbortChangeShowTweetLocker)
+            {
+                AbortChangeShowTweet = false;
+                IsChangingShowTweets = false;
+            }
         }
 
         protected IEnumerable<Status> Filter(IEnumerable<Status> stats)
@@ -146,17 +209,18 @@ namespace HHFO.Models
                 return stats;
             }
 
-            var ret = Enumerable.Empty<Status>();
+            var pStats = stats.AsParallel().AsOrdered();
+            var ret = Enumerable.Empty<Status>().AsParallel().AsOrdered();
             if (IsOrSearch.Value)
             {
                 foreach (var predicate in Predicates)
                 {
-                    ret = ret.Union(stats.Where(predicate));
+                    ret = ret.Union(pStats);
                 }
             }
             else
             {
-                ret = ret.Concat(stats);
+                ret = ret.Concat(pStats);
                 foreach (var predicate in Predicates)
                 {
                     ret = ret.Where(predicate);
@@ -193,8 +257,19 @@ namespace HHFO.Models
             ChangePredicates(isFiltered, FilterRetweeted);
         }
 
-        private void ChangePredicates(bool isFiltered, Func<Status, bool> func)
+        async private void ChangePredicates(bool isFiltered, Func<Status, bool> func)
         {
+            while(AbortChangeShowTweet)
+            {
+                await Task.Delay(5);
+            }
+            lock(AbortChangeShowTweetLocker)
+            {
+                if (IsChangingShowTweets)
+                {
+                    AbortChangeShowTweet = true;
+                }
+            }
             if (isFiltered)
             {
                 Predicates.Add(func);

@@ -6,6 +6,6 @@ namespace HHFO.Models
 {
     public class TwittertListId
     {
-        public string Id { get; set; }
+        public long Id { get; set; }
     }
 }

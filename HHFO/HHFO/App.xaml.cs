@@ -55,6 +55,11 @@ namespace HHFO
                         throw new Exception(message);
                     }
                 }
+                var cacheDir = "/cache";
+                if (!Directory.Exists(cacheDir))
+                {
+                    Directory.CreateDirectory(cacheDir);
+                }
                 var defaultAccont = userSetting?.UserAccounts?.FirstOrDefault(ua => ua.DefaultAccount);
                 if(defaultAccont != null)
                 {

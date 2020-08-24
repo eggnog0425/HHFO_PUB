@@ -14,7 +14,7 @@ namespace HHFO.Models
         [Dependency]
         public IEventAggregator EventAggregator { get; set; }
 
-        public string Id { get; set; }
+        public long Id { get; set; }
         public void Publish()
         {
             var list = new TwittertListId() { Id = this.Id};

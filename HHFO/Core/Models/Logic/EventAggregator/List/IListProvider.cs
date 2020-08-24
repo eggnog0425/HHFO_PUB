@@ -7,7 +7,7 @@ namespace HHFO.Models
 {
     public interface IListProvider
     {
-        public string Id { get; set; }
+        public long Id { get; set; }
         void Publish();
     }
 }

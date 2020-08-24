@@ -6,9 +6,9 @@ namespace HHFO.Models.Logic.EventAggregator.Tweet
 {
     public class Tweet
     {
-        public string TweetId;
+        public long TweetId;
         public string ScreenName;
-        public string UserId;
+        public long UserId;
         public List<string> HashTag;
     }
 }
