@@ -46,6 +46,7 @@ namespace HHFO
         {
             try
             {
+                Reactive.Bindings.UIDispatcherScheduler.Initialize();
                 var settingUtils = new SettingUtils();
                 var userSetting = settingUtils.getUserSetting();
                 if (userSetting == null)

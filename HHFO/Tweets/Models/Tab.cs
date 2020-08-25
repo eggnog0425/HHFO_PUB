@@ -1,5 +1,5 @@
 ﻿using CoreTweet;
-using HHFO.Models.Logic.Common;
+using HHFO.Models.Logic.EventAggregator.Tweet;
 using ImTools;
 using NLog.Filters;
 using Prism.Mvvm;
@@ -8,6 +8,8 @@ using Reactive.Bindings.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -36,17 +38,34 @@ namespace HHFO.Models
         protected Tokens Token { get; set; }
 
         /// <summary>
-        /// ミュート絡みの処理を済ませたTweets
+        /// APIから取得した全ツイート
         /// </summary>
-        protected ObservableCollection<Status> FilteredTweet { get; set; } = new ObservableCollection<Status>();
+        private List<Tweet> tweets { get; set; } = new List<Tweet>();
+        protected List<Tweet> Tweets 
+        { 
+            get 
+            { 
+                return tweets; 
+            } 
+            set
+            {
+                tweets = value;
+                RaisePropertyChanged(nameof(Tweets));
+            }
+        }
 
         /// <summary>
         /// 画面に実際に表示されるTweets
         /// </summary>
-        protected ObservableCollection<Status> showTweets { get; set; } = new ObservableCollection<Status>();
-        public ReadOnlyReactiveCollection<Status> ShowTweets { get; protected set; }
-        public ReadOnlyReactiveCollection<MediaEntity> Medias { get; protected set; }
-        public ObservableCollection<Func<Status, bool>> Predicates { get; protected set; } = new ObservableCollection<Func<Status, bool>>();
+        public ObservableCollection<Tweet> ShowTweets { get; private set; } = new ObservableCollection<Tweet>();
+
+        protected ObservableCollection<Media> medias { get; private set; } = new ObservableCollection<Media>();
+        /// <summary>
+        /// mediasからShowTweetに含まれるIdの発言のみを抽出
+        /// </summary>
+        public ReadOnlyReactiveCollection<Media> Medias { get; private set; }
+
+        public ObservableCollection<Func<Tweet, bool>> Predicates { get; protected set; } = new ObservableCollection<Func<Tweet, bool>>();
 
         // チェックボックス・ラジオボタンエリアのコマンド
         public ReactiveCommand OnCheckFilterLink { get; }
@@ -65,28 +84,27 @@ namespace HHFO.Models
         // 表示形式の切替
         public ReactiveProperty<Visibility> NormalGridVisibility { get; } = new ReactiveProperty<Visibility>(Visibility.Visible);
         public ReactiveProperty<Visibility> MediaGridVisibility { get; } = new ReactiveProperty<Visibility>(Visibility.Collapsed);
-        public bool IsChangingShowTweets { get; private set; } = false;
-        public bool AbortChangeShowTweet { get; private set; } = false;
 
-        private Func<Status, bool> FilterLink = tweet => (tweet.Entities?.Urls?.Length ?? 0) != 0;
-        private Func<Status, bool> FilterImages = tweet => tweet.ExtendedEntities?.Media[0]?.Type == "photo" || tweet.ExtendedEntities?.Media[0]?.Type == "animated_gif";
-        private Func<Status, bool> FilterVideos = tweet => tweet.ExtendedEntities?.Media[0]?.Type == "video";
-        private Func<Status, bool> FilterRetweeted = tweet => tweet.RetweetedStatus != null;
-        private object AbortChangeShowTweetLocker = new object();
+        private Func<Tweet, bool> FilterLink = tweet => (tweet.Status.Entities?.Urls?.Length ?? 0) != 0;
+        private Func<Tweet, bool> FilterImages = tweet => tweet.Status.ExtendedEntities?.Media?[0].Type == "photo" || tweet.Status.ExtendedEntities?.Media?[0].Type == "animated_gif";
+        private Func<Tweet, bool> FilterVideos = tweet => tweet.Status.ExtendedEntities?.Media?[0].Type == "video";
+        private Func<Tweet, bool> FilterRetweeted = tweet => tweet.Status.RetweetedStatus != null;
 
         public Tab()
         {
             Disposable = new CompositeDisposable();
             Token = Authorization.GetToken();
-            Predicates.CollectionChanged += OnPredicatesChanged;
 
             timer.Interval = TimeSpan.FromSeconds(5.0);
             timer.Tick += (s, e) => FetchTweets();
             timer.Start();
 
-            ShowTweets = showTweets.ToReadOnlyReactiveCollection()
+            Medias = medias.Where(m => ShowTweets.Any(t => t.Status.Id == m.Id)).ToObservable().ToReadOnlyReactiveCollection();
+
+            this.PropertyChangedAsObservable()
+                .Where(e => e.PropertyName == nameof(Tweets))
+                .Subscribe(_ => Reflesh(Tweets))
                 .AddTo(Disposable);
-            Medias = showTweets.ToReadOnlyReactiveCollection(t => t.ExtendedEntities?.Media?.Aggregate((m,_) => m));
             OnCheckFilterLink = new ReactiveCommand()
                 .AddTo(Disposable);
             OnCheckFilterImages = new ReactiveCommand()
@@ -101,7 +119,6 @@ namespace HHFO.Models
                 .AddTo(Disposable);
             IsCheckedAndSearch = new ReactiveCommand()
                 .AddTo(Disposable);
-
 
             OnCheckFilterLink.Subscribe(_ => OnCheckFilterLinkAction())
                 .AddTo(Disposable);
@@ -121,112 +138,36 @@ namespace HHFO.Models
 
         protected abstract void FetchTweets();
 
-        protected void OnPredicatesChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        protected void Reflesh(IEnumerable<Tweet> tweets)
         {
-            Reflesh();
-        }
-
-        protected void Clear()
-        {
-            showTweets.Clear();
-        }
-
-        internal void Reflesh()
-        {
-            Clear();
-            AddShow(FilteredTweet);
-        }
-
-        async protected void AddShow(IEnumerable<Status> stats)
-        {
-            // 追加・削除処理が走っているときは待つ
-            while (IsChangingShowTweets)
+            ShowTweets.Clear();
+            foreach (var tweet in tweets)
             {
-                await Task.Delay(1);
-            }
-
-            // LINQでどーんってやったら体感速度がひどいことになったのでforeachで回す
-            foreach (var stat in stats)
-            {
-                IsChangingShowTweets = true;
-                // ユーザが途中で追加・削除処理を実行した場合処理を停止する
-                if (AbortChangeShowTweet)
-                {
-                    AbortChangeShowTweet = false;
-                    IsChangingShowTweets = false;
-                    return;
-                }
-                if (!showTweets.Any(s => s.Id == stat.Id))
-                {
-                    showTweets.Add(stat);
-                }
-            }
-            lock (AbortChangeShowTweetLocker)
-            {
-                AbortChangeShowTweet = false;
-                IsChangingShowTweets = false;
+                ShowTweets.Add(tweet);
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="exceptStats">ShowTweetsとフィルタ適用後のツイートの差集合</param>
-        async protected void RemoveShow(IEnumerable<Status> exceptStats)
-        {
-            // 追加・削除処理が走っているときは待つ
-            while (IsChangingShowTweets)
-            {
-                await Task.Delay(1);
-            }
-            // LINQでどーんってやったら体感速度がひどいことになったのでforeachで回す
-            foreach (var stat in exceptStats)
-            {
-                IsChangingShowTweets = true;
-                // ユーザが途中で追加・削除処理を実行した場合処理を停止する
-                if (AbortChangeShowTweet)
-                {
-                    lock (AbortChangeShowTweetLocker)
-                    {
-                        AbortChangeShowTweet = false;
-                        IsChangingShowTweets = false;
-                    }
-                    return;
-                }
-                showTweets.Remove(stat);
-            }
-            lock (AbortChangeShowTweetLocker)
-            {
-                AbortChangeShowTweet = false;
-                IsChangingShowTweets = false;
-            }
-        }
-
-        protected IEnumerable<Status> Filter(IEnumerable<Status> stats)
+        protected IEnumerable<Tweet> Filter(IEnumerable<Tweet> stats)
         {
             if (Predicates.Count() == 0)
             {
                 return stats;
             }
 
-            var pStats = stats.AsParallel().AsOrdered();
-            var ret = Enumerable.Empty<Status>().AsParallel().AsOrdered();
             if (IsOrSearch.Value)
             {
-                foreach (var predicate in Predicates)
-                {
-                    ret = ret.Union(pStats);
-                }
+                return Predicates.SelectMany(predicate => stats.Where(predicate))
+                                 .Distinct();
             }
             else
             {
-                ret = ret.Concat(pStats);
+                var ret = Enumerable.Empty<Tweet>().Concat(stats);
                 foreach (var predicate in Predicates)
                 {
                     ret = ret.Where(predicate);
                 }
+                return ret;
             }
-            return ret;
         }
 
         public void OnCheckFilterLinkAction()
@@ -257,19 +198,8 @@ namespace HHFO.Models
             ChangePredicates(isFiltered, FilterRetweeted);
         }
 
-        async private void ChangePredicates(bool isFiltered, Func<Status, bool> func)
+        private void ChangePredicates(bool isFiltered, Func<Tweet, bool> func)
         {
-            while(AbortChangeShowTweet)
-            {
-                await Task.Delay(5);
-            }
-            lock(AbortChangeShowTweetLocker)
-            {
-                if (IsChangingShowTweets)
-                {
-                    AbortChangeShowTweet = true;
-                }
-            }
             if (isFiltered)
             {
                 Predicates.Add(func);
@@ -278,7 +208,6 @@ namespace HHFO.Models
             {
                 Predicates.Remove(func);
             }
-
             if (IsFilteredImages.Value || IsFilteredVideos.Value)
             {
                 NormalGridVisibility.Value = Visibility.Collapsed;
@@ -289,6 +218,7 @@ namespace HHFO.Models
                 MediaGridVisibility.Value = Visibility.Collapsed;
                 NormalGridVisibility.Value = Visibility.Visible;
             }
+            Reflesh(Filter(Tweets));
         }
 
         public void OnClickOrSearchAction()
@@ -296,7 +226,7 @@ namespace HHFO.Models
             IsOrSearch.Value = true;
             if (Predicates.Count != 0)
             {
-                Reflesh();
+                Reflesh(Filter(Tweets));
             }
         }
 
@@ -305,7 +235,7 @@ namespace HHFO.Models
             IsOrSearch.Value = false;
             if (Predicates.Count != 0)
             {
-                Reflesh();
+                Reflesh(Filter(Tweets));
             }
         }
 
@@ -314,6 +244,11 @@ namespace HHFO.Models
             return !IsOrSearch.Value;
         }
 
+
+        protected Task<Media> createMedias(IEnumerable<Tweet> tweets)
+        {
+
+        }
         public void Dispose()
         {
             this.Disposable.Dispose();

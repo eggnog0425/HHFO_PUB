@@ -23,16 +23,16 @@
         <DataGrid.Columns>
             <DataGridTextColumn Header="ユーザID"
                                                 Width="100"
-                                                Binding="{Binding User.ScreenName}">
+                                                Binding="{Binding Status.User.ScreenName}">
             </DataGridTextColumn>
             <DataGridTextColumn Header="ユーザ名"
                                                 Width="100"
                                                 ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}"
-                                                Binding="{Binding User.Name}"/>
+                                                Binding="{Binding Status.User.Name}"/>
 
             <DataGridTextColumn Header="ツイート"
                                                 Width="500"
-                                                Binding="{Binding FullText}">
+                                                Binding="{Binding Status.FullText}">
                 <DataGridTextColumn.ElementStyle>
                     <Style>
                         <Setter Property="TextBlock.TextWrapping" Value="Wrap" />

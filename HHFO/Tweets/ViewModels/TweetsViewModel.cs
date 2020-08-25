@@ -29,7 +29,7 @@ namespace HHFO.ViewModels
         public ReactiveProperty<bool> IsExpandedHeader { get; private set; } = new ReactiveProperty<bool>(true);
 
         private static Logger logger = LogManager.GetCurrentClassLogger();
-        private CompositeDisposable Disposable { get; }
+        private CompositeDisposable Disposable { get; set; }
         private ListSubscriber ListSubscriber { get; set; }
         public Tab CurrentTab { get; private set; }
 

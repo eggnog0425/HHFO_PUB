@@ -9,7 +9,6 @@ using System.Reactive.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using HHFO.Models.Logic.Common;
 
 namespace HHFO.Models
 {
@@ -25,10 +24,8 @@ namespace HHFO.Models
         protected override void FetchTweets()
         {
             var token = Authorization.GetToken();
-            var newTweets = Token.Lists.Statuses(list_id => Id, tweet_mode => "extended").AsEnumerable();
-            var comparer = new StatusComparer();
-            FilteredTweet.Concat(newTweets.Except(FilteredTweet, comparer));
-            AddShow(newTweets.Except(showTweets, comparer));
+            var newTweets = Token.Lists.Statuses(list_id => Id, tweet_mode => "extended").Select(s => new Tweet(s)).AsEnumerable();
+            Tweets = newTweets.Union(Tweets).ToList();
         }
     }
 }
