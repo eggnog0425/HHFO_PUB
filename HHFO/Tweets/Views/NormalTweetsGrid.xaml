@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:HHFO.Views"
+             xmlns:modelsUi="clr-namespace:HHFO.Models.UI;assembly=HHFO.Core"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <DataGrid Height="{Binding DataContext.DataGridHeight.Value, ElementName=rootControl, Mode=OneWay}"
@@ -15,20 +16,21 @@
               VerticalAlignment="Top"
               HorizontalAlignment="Left"
               Name ="DataGrid" 
+              SelectionMode="Extended"
+              SelectionUnit="FullRow"
               IsReadOnly="True">
         <DataGrid.InputBindings>
-            <KeyBinding Command="ApplicationCommands.NotACommand" Key="Enter" Modifiers="Shift"/>
-            <KeyBinding Command="{Binding OpenTweetFlyOut}" Key="Enter" Modifiers="Shift"/>
+            <KeyBinding Command="{Binding SendReplyAction, Mode=OneWay}" Gesture="Ctrl + Shift + Enter" CommandParameter="{Binding Status}" Key="Return"/>
         </DataGrid.InputBindings>
         <DataGrid.Columns>
             <DataGridTextColumn Header="ユーザID"
                                                 Width="100"
-                                                Binding="{Binding Status.User.ScreenName}">
+                                                Binding="{Binding Status.User.Name}">
             </DataGridTextColumn>
             <DataGridTextColumn Header="ユーザ名"
                                                 Width="100"
                                                 ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}"
-                                                Binding="{Binding Status.User.Name}"/>
+                                                Binding="{Binding Status.User.ScreenName}"/>
 
             <DataGridTextColumn Header="ツイート"
                                                 Width="500"

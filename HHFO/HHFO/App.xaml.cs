@@ -16,6 +16,7 @@ using System.Windows;
 using System.Xml;
 using Unity;
 using System.Linq;
+using HHFO.Models.Logic.EventAggregator.Tweet;
 
 namespace HHFO
 {
@@ -33,8 +34,9 @@ namespace HHFO
 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            containerRegistry.Register<IListProvider, ListProvider>();
-            containerRegistry.Register<ListSubscriber, ListSubscriber>();
+            containerRegistry.Register<IListPublisher, ListPublisher>();
+            containerRegistry.Register<ITweetPublisher, TweetPublisher>();
+            containerRegistry.Register<ITweetProvider, TweetProvider>();
         }
 
         protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)
@@ -55,11 +57,6 @@ namespace HHFO
                     {
                         throw new Exception(message);
                     }
-                }
-                var cacheDir = "/cache";
-                if (!Directory.Exists(cacheDir))
-                {
-                    Directory.CreateDirectory(cacheDir);
                 }
                 var defaultAccont = userSetting?.UserAccounts?.FirstOrDefault(ua => ua.DefaultAccount);
                 if(defaultAccont != null)

@@ -1,26 +1,33 @@
 ﻿using Prism.Events;
+using Prism.Mvvm;
+using Reactive.Bindings;
 using System;
 using System.Collections.Generic;
-using System.Security.Policy;
 using System.Text;
-using Unity;
-using HHFO.Models;
 
 namespace HHFO.Models
 {
-    public class ListProvider: IListProvider
+    public class ListProvider : BindableBase
     {
-
-        [Dependency]
-        public IEventAggregator EventAggregator { get; set; }
-
-        public long Id { get; set; }
-        public void Publish()
+        private ReactiveProperty<long> id;
+        public ReactiveProperty<long> Id
         {
-            var list = new TwittertListId() { Id = this.Id};
-            this.EventAggregator
+            get { return id; }
+            private set
+            {
+                this.SetProperty(ref id, value);
+            }
+        }
+
+
+        public ListProvider(IEventAggregator eventAggregator)
+        {
+            id = new ReactiveProperty<long>();
+            eventAggregator
                 .GetEvent<ListEvent>()
-                .Publish(list);
+                .Subscribe(x => {
+                    Id.Value = x.Id;
+                    });
         }
     }
 }

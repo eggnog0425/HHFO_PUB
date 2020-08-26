@@ -20,6 +20,8 @@ using System.Collections.Generic;
 using System.Windows.Controls;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
+using MahApps.Metro.Controls;
+using HHFO.Models.UI;
 
 namespace HHFO.ViewModels
 {
@@ -29,30 +31,34 @@ namespace HHFO.ViewModels
 
         public string Title { get; } = new SettingUtils().GetCommonSetting().Title;
         private Authorization authorization { get; set; }
-        public IListProvider ListProvider { get; set; }
+        private IListPublisher ListPublisher { get; set; }
 
         public ReactiveCommand<System.Windows.Input.MouseButtonEventArgs> OpenList { get; }
         public ReactiveCommand OnLoaded { get; }
         public ReactiveCommand OpenBrowser { get; }
         public ReactiveCommand InitialAuth { get; }
-        public ReactiveCommand<RoutedEventArgs> ExpandedLists { get; } = new ReactiveCommand<RoutedEventArgs>();
+        public ReactiveCommand<RoutedEventArgs> ExpandedLists { get; }
+        public ReactiveCommand OpenTweetFlyOut { get; }
 
-        public static TweetRoutedCommand TweetRoutedCommand { get; } = new TweetRoutedCommand();
         public ReactiveProperty<bool> IsOpenTweetFlyOut { get; } = new ReactiveProperty<bool>(false);
         public ReactiveProperty<bool> IsOpenAuthFlyOut { get; } = new ReactiveProperty<bool>(false);
         public ReactiveProperty<String> Pin { get; set; } = new ReactiveProperty<string>();
         public ReactiveProperty<Visibility> PinError { get; } = new ReactiveProperty<Visibility>(Visibility.Collapsed);
         public ReactiveProperty<Visibility> MenuVisibility { get; } = new ReactiveProperty<Visibility>(Visibility.Hidden);
+        public ReactiveProperty<TweetInfo> SelectedTweet { get; private set; } = new ReactiveProperty<TweetInfo>();
+        public ReactiveProperty<string> InReplyTo { get; private set; } = new ReactiveProperty<string>("");
 
-        public ReactiveProperty<string> Tweet { get; } = new ReactiveProperty<string>("");
+        public ReactiveProperty<string> Tweet { get; set; } = new ReactiveProperty<string>("");
         public ObservableCollection<CoreTweet.List> Lists { get; private set; } = new ObservableCollection<CoreTweet.List>();
         public ReactiveProperty<double> TweetAreaHeight { get; private set; } = new ReactiveProperty<double>(0.0d);
 
-        private bool IsOpenSetting { get; set; } = true;
+        private bool IsOpenSetting { get; set; } = false;
 
-        public ShellViewModel(IRegionManager regionManager, IListProvider listProvider)
+        public ShellViewModel(IRegionManager regionManager, IListPublisher listPublisher, ITweetProvider tweetProvider)
         {
             Disposable = new CompositeDisposable();
+            ExpandedLists = new ReactiveCommand<RoutedEventArgs>()
+                .AddTo(Disposable);
             OnLoaded = new ReactiveCommand()
                 .AddTo(Disposable);
             OpenBrowser = new ReactiveCommand()
@@ -61,19 +67,31 @@ namespace HHFO.ViewModels
                 .AddTo(Disposable);
             OpenList = new ReactiveCommand<System.Windows.Input.MouseButtonEventArgs>()
                 .AddTo(Disposable);
-            ListProvider = listProvider;
+            OpenTweetFlyOut = new ReactiveCommand()
+                .AddTo(Disposable);
 
-            ExpandedLists.Subscribe(_ => FetchTwitterLists());
-            OnLoaded.Subscribe(_ => Loaded());
-            OpenBrowser.Subscribe(_ => OpenBrowserAction());
-            InitialAuth.Subscribe(_ => Auth());
-            OpenList.Subscribe(e => OpenListAction(e));
+            ListPublisher = listPublisher;
+
+            ExpandedLists.Subscribe(_ => FetchTwitterLists())
+                .AddTo(Disposable);
+            OnLoaded.Subscribe(_ => Loaded())
+                .AddTo(Disposable);
+            OpenBrowser.Subscribe(_ => OpenBrowserAction())
+                .AddTo(Disposable);
+            InitialAuth.Subscribe(_ => Auth())
+                .AddTo(Disposable);
+            OpenList.Subscribe(e => OpenListAction(e))
+                .AddTo(Disposable);
+            OpenTweetFlyOut.Subscribe(_ => OpenTweetFlyOutAction())
+                .AddTo(Disposable);
+            SelectedTweet.Subscribe(e => OpenTweetFlyOutAction(e));
+            Tweet.Subscribe(t => ClearInReplyTo());
         }
 
         private void OpenListAction(MouseButtonEventArgs e)
         {
-            ListProvider.Id = long.Parse(((TextBlock)e.Source).Tag?.ToString() ?? "0");
-            ListProvider.Publish();
+            ListPublisher.Id = long.Parse(((TextBlock)e.Source).Tag?.ToString() ?? "0");
+            ListPublisher.Publish();
         }
 
         public void Dispose()
@@ -112,10 +130,6 @@ namespace HHFO.ViewModels
             }
         }
 
-        public void OpenTweetFlyOutAction(object sender, ExecutedRoutedEventArgs args)
-        {
-                IsOpenTweetFlyOut.Value = !IsOpenTweetFlyOut.Value;
-        }
         private void FetchTwitterLists()
         {
             try
@@ -130,6 +144,38 @@ namespace HHFO.ViewModels
             }
         }
 
-        public void CanOpenTweetFlyOut(object sender, CanExecuteRoutedEventArgs e) => e.CanExecute = !IsOpenSetting;
+        public void OpenTweetFlyOutAction()       
+        {
+            IsOpenTweetFlyOut.Value = !IsOpenTweetFlyOut.Value;
+        }
+        
+        public void OpenTweetFlyOutAction(TweetInfo tweet)
+        {
+            if (tweet == null)
+            {
+                return;
+            }
+
+            IsOpenTweetFlyOut.Value = true;
+            
+            if (tweet.InReplyToScreenName == null)
+            {
+                string.Join(' ', tweet.UserScreenName, Tweet.Value);
+            }
+            else
+            {
+                string.Join(' ', tweet.UserScreenName, tweet.InReplyToScreenName, Tweet.Value);
+            }
+            
+        }
+
+        public void ClearInReplyTo(bool saveInReplyTo = false)
+        {
+            if (!saveInReplyTo && string.IsNullOrWhiteSpace(Tweet.Value))
+            {
+                InReplyTo.Value = "";
+            }
+            
+        }
     }
 }

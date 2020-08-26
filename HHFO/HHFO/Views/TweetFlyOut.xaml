@@ -14,7 +14,9 @@
                  BorderThickness="0"
                  TextWrapping="Wrap"
                  AcceptsReturn="True"
-                 Text="{Binding Tweet.Value}">
+                 Text="{Binding Tweet.Value, Mode=TwoWay}"
+                 Tag="{Binding InReplyTo.Value, Mode=OneWay}"
+                 >
         </TextBox>
         <Button Grid.Column="1"
                 Content="tweet"></Button>

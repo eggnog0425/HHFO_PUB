@@ -63,7 +63,7 @@ namespace HHFO.Models
         /// <summary>
         /// mediasからShowTweetに含まれるIdの発言のみを抽出
         /// </summary>
-        public ReadOnlyReactiveCollection<Media> Medias { get; private set; }
+        public ObservableCollection<Media> Medias { get; private set; } = new ObservableCollection<Media>();
 
         public ObservableCollection<Func<Tweet, bool>> Predicates { get; protected set; } = new ObservableCollection<Func<Tweet, bool>>();
 
@@ -75,6 +75,8 @@ namespace HHFO.Models
         public ReactiveCommand OnClickOrSearch { get; }
         public ReactiveCommand OnClickAndSearch { get; }
         public ReactiveCommand IsCheckedAndSearch { get; }
+        public ReactiveCommand<RoutedEventArgs> SendReply { get; }
+        protected ITweetPublisher TweetPublisher { get; set; }
 
         /// <summary>
         /// 自動更新用のタイマー
@@ -90,20 +92,22 @@ namespace HHFO.Models
         private Func<Tweet, bool> FilterVideos = tweet => tweet.Status.ExtendedEntities?.Media?[0].Type == "video";
         private Func<Tweet, bool> FilterRetweeted = tweet => tweet.Status.RetweetedStatus != null;
 
-        public Tab()
+        public Tab(ITweetPublisher tweetPublisher)
         {
             Disposable = new CompositeDisposable();
+            this.TweetPublisher = tweetPublisher;
             Token = Authorization.GetToken();
 
             timer.Interval = TimeSpan.FromSeconds(5.0);
             timer.Tick += (s, e) => FetchTweets();
             timer.Start();
 
-            Medias = medias.Where(m => ShowTweets.Any(t => t.Status.Id == m.Id)).ToObservable().ToReadOnlyReactiveCollection();
+            // 初回起動時に画像・
+            AddMedias(medias);
 
             this.PropertyChangedAsObservable()
                 .Where(e => e.PropertyName == nameof(Tweets))
-                .Subscribe(_ => Reflesh(Tweets))
+                .Subscribe(_ => OnTweetsChanged())
                 .AddTo(Disposable);
             OnCheckFilterLink = new ReactiveCommand()
                 .AddTo(Disposable);
@@ -118,6 +122,8 @@ namespace HHFO.Models
             OnClickAndSearch = new ReactiveCommand()
                 .AddTo(Disposable);
             IsCheckedAndSearch = new ReactiveCommand()
+                .AddTo(Disposable);
+            SendReply = new ReactiveCommand<RoutedEventArgs>()
                 .AddTo(Disposable);
 
             OnCheckFilterLink.Subscribe(_ => OnCheckFilterLinkAction())
@@ -134,6 +140,33 @@ namespace HHFO.Models
                 .AddTo(Disposable);
             IsCheckedAndSearch.Subscribe(_ => IsCheckedAndSearchAction())
                 .AddTo(Disposable);
+            SendReply.Subscribe(e => SendReplyAction(e, p))
+                .AddTo(Disposable);
+        }
+
+        private void SendReplyAction(RoutedEventArgs e)
+        {
+            e.
+        }
+
+        private void OnTweetsChanged()
+        {
+            Reflesh(Tweets);
+            AddMedia();
+        }
+
+        private void AddMedia()
+        {
+            var newMedias = Tweets.Where(t => FilterImages(t) || FilterVideos(t))
+                      .Where(t => !medias.Any(m => m.Id == t.Status.Id))
+                      .Select(t => new Media(id: t.Status.Id
+                                           , type: t.Status.ExtendedEntities?.Media?[0].Type
+                                           , mediaUrl: t.Status.ExtendedEntities?.Media?[0].MediaUrl));
+            foreach (var media in newMedias)
+            {
+                medias.Add(media);
+            }
+            AddMedias(newMedias);
         }
 
         protected abstract void FetchTweets();
@@ -219,6 +252,7 @@ namespace HHFO.Models
                 NormalGridVisibility.Value = Visibility.Visible;
             }
             Reflesh(Filter(Tweets));
+            RefleshMedias(medias);
         }
 
         public void OnClickOrSearchAction()
@@ -239,16 +273,31 @@ namespace HHFO.Models
             }
         }
 
+        private IEnumerable<Media> FilterMedias(IEnumerable<Media> medias) =>
+            medias.Where(m => ShowTweets.Any(t => t.Status.Id == m.Id));
+        
+        private void RefleshMedias(IEnumerable<Media> medias)
+        {
+            Medias.Clear();
+            foreach (var media in FilterMedias(medias))
+            {
+                Medias.Add(media);
+            }
+        }
+        
+        private void AddMedias(IEnumerable<Media> medias)
+        {
+            foreach (var media in FilterMedias(medias))
+            {
+                Medias.Add(media);
+            }
+        }
+
         public bool IsCheckedAndSearchAction()
         {
             return !IsOrSearch.Value;
         }
 
-
-        protected Task<Media> createMedias(IEnumerable<Tweet> tweets)
-        {
-
-        }
         public void Dispose()
         {
             this.Disposable.Dispose();

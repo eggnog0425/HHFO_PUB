@@ -5,7 +5,7 @@ using System.Text;
 
 namespace HHFO.Models
 {
-    public interface IListProvider
+    public interface IListPublisher
     {
         public long Id { get; set; }
         void Publish();

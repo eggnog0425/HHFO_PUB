@@ -17,7 +17,8 @@
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <StackPanel>
-                        <Image Source="{Binding MediaUrl, Converter={StaticResource ConvertThumb}}"
+                        <TextBlock Text="{Binding Id}"></TextBlock>
+                        <Image Source="{Binding MediaUrl, Converter={StaticResource ConvertThumb}, IsAsync=True}"
                                Width="150"
                                Height="150">
                             <Image.Style>

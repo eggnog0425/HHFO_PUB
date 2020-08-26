@@ -30,7 +30,7 @@ namespace HHFO.ViewModels
 
         private static Logger logger = LogManager.GetCurrentClassLogger();
         private CompositeDisposable Disposable { get; set; }
-        private ListSubscriber ListSubscriber { get; set; }
+        private ListProvider ListProvider { get; set; }
         public Tab CurrentTab { get; private set; }
 
         private FrameworkElement ParentElement { get; set; }
@@ -48,11 +48,11 @@ namespace HHFO.ViewModels
         public ReactiveCommand<SelectionChangedEventArgs> OnCurrentTabChanged { get; }
         public ReactiveCommand<System.Windows.Input.MouseButtonEventArgs> OnTabClose { get; }
         
-        public TweetsViewModel(ListSubscriber ListIdSubscriber)
+        public TweetsViewModel(ListProvider ListIdProvider)
         {
             Disposable = new CompositeDisposable();
-            this.ListSubscriber = ListIdSubscriber;
-            ListId = this.ListSubscriber.Id.ToReadOnlyReactiveProperty();
+            this.ListProvider = ListIdProvider;
+            ListId = this.ListProvider.Id.ToReadOnlyReactiveProperty();
             Tabs = new ObservableCollection<Tab>();
 
             OnSizeChanged = new ReactiveCommand<SizeChangedEventArgs>()
