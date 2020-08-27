@@ -12,10 +12,5 @@ namespace HHFO.Views
         {
             InitializeComponent();
         }
-
-        private void CommandBinding_Executed(object sender, System.Windows.Input.ExecutedRoutedEventArgs e)
-        {
-
-        }
     }
 }

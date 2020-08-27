@@ -22,5 +22,10 @@ namespace HHFO.Views
         {
             InitializeComponent();
         }
+
+        private void DataGrid_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
+        {
+
+        }
     }
 }

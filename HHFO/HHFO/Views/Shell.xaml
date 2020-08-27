@@ -9,7 +9,7 @@
         xmlns:reactiveInteractivity="clr-namespace:Reactive.Bindings.Interactivity;assembly=ReactiveProperty.WPF"
         xmlns:local="clr-namespace:HHFO.Views"
         xmlns:shellViewModel="clr-namespace:HHFO.ViewModels"
-        xmlns:modelsUi="clr-namespace:HHFO.Models.UI;assembly=HHFO.Core"
+        xmlns:models="clr-namespace:HHFO.Models;assembly=HHFO.Core"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Regular"
         TextElement.FontSize="13"
@@ -24,10 +24,10 @@
         <interactivity:EventTrigger EventName="Loaded">
             <reactiveInteractivity:EventToReactiveCommand Command="{Binding OnLoaded, Mode=OneWay}" />
         </interactivity:EventTrigger>
+        <interactivity:KeyTrigger Modifiers="{Binding ModifierKeys, Mode=OneWay}" Key="Return">
+            <reactiveInteractivity:EventToReactiveCommand Command="{Binding OpenTweetFlyOut, Mode=OneWay}"/>
+        </interactivity:KeyTrigger>
     </interactivity:Interaction.Triggers>
-    <mahApps:MetroWindow.InputBindings>
-        <KeyBinding Command="{Binding OpenTwTest, Mode=OneWay}" Gesture="Ctrl + Shift + Enter"/>
-    </mahApps:MetroWindow.InputBindings>
     <mahApps:MetroWindow.Flyouts>
         <mahApps:FlyoutsControl>
             <mahApps:Flyout Name="Auth"
@@ -43,10 +43,11 @@
             <mahApps:Flyout Name="TweetFlyOut"
                             Position="Bottom"
                             Header="tweet"
+                            
                             Width="Auto"
                             Height="Auto"
                             IsOpen="{Binding IsOpenTweetFlyOut.Value}"
-                            IsPinned="true"
+                            IsPinned="false"
                             CloseButtonVisibility="Visible"
                             FontSize="18"
                             >

@@ -9,10 +9,9 @@ using System.Text;
 
 namespace HHFO.Models
 {
-    public class Tweet: BindableBase, IDisposable, IEquatable<Tweet>
+    public class Tweet: BindableBase, IEquatable<Tweet>
     {
         public Status Status { get; private set; }
-        private CompositeDisposable Disposable = new CompositeDisposable();
 
         public Tweet(Status status)
         {
@@ -42,11 +41,6 @@ namespace HHFO.Models
         public override int GetHashCode()
         {
             return Status.ToString().GetHashCode();
-        }
-
-        public void Dispose()
-        {
-            this.Dispose();
         }
 
         public bool Equals([AllowNull] Tweet other)

@@ -17,6 +17,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Threading;
 
 namespace HHFO.Models
@@ -58,6 +59,7 @@ namespace HHFO.Models
         /// 画面に実際に表示されるTweets
         /// </summary>
         public ObservableCollection<Tweet> ShowTweets { get; private set; } = new ObservableCollection<Tweet>();
+        public ObservableCollection<Tweet> SelectedTweetItems { get; set; } = new ObservableCollection<Tweet>();
 
         protected ObservableCollection<Media> medias { get; private set; } = new ObservableCollection<Media>();
         /// <summary>
@@ -75,7 +77,8 @@ namespace HHFO.Models
         public ReactiveCommand OnClickOrSearch { get; }
         public ReactiveCommand OnClickAndSearch { get; }
         public ReactiveCommand IsCheckedAndSearch { get; }
-        public ReactiveCommand<RoutedEventArgs> SendReply { get; }
+        public ReactiveCommand SendReply { get; }
+        public ReactiveCommand<SelectionChangedEventArgs> SelectionChange { get; }
         protected ITweetPublisher TweetPublisher { get; set; }
 
         /// <summary>
@@ -102,7 +105,6 @@ namespace HHFO.Models
             timer.Tick += (s, e) => FetchTweets();
             timer.Start();
 
-            // 初回起動時に画像・
             AddMedias(medias);
 
             this.PropertyChangedAsObservable()
@@ -123,7 +125,9 @@ namespace HHFO.Models
                 .AddTo(Disposable);
             IsCheckedAndSearch = new ReactiveCommand()
                 .AddTo(Disposable);
-            SendReply = new ReactiveCommand<RoutedEventArgs>()
+            SendReply = new ReactiveCommand()
+                .AddTo(Disposable);
+            SelectionChange = new ReactiveCommand<SelectionChangedEventArgs>()
                 .AddTo(Disposable);
 
             OnCheckFilterLink.Subscribe(_ => OnCheckFilterLinkAction())
@@ -140,13 +144,24 @@ namespace HHFO.Models
                 .AddTo(Disposable);
             IsCheckedAndSearch.Subscribe(_ => IsCheckedAndSearchAction())
                 .AddTo(Disposable);
-            SendReply.Subscribe(e => SendReplyAction(e, p))
+            SendReply.Subscribe(_ => SendReplyAction())
+                .AddTo(Disposable);
+            SelectionChange.Subscribe(e => SelectionChangeAction(e))
                 .AddTo(Disposable);
         }
 
-        private void SendReplyAction(RoutedEventArgs e)
+        private void SelectionChangeAction(SelectionChangedEventArgs e)
         {
-            e.
+            e.OriginalSource.GetType().ToString();
+        }
+
+        private void SendReplyAction()
+        {
+            TweetPublisher.TweetId = SelectedTweetItems.Count == 1
+                                   ? SelectedTweetItems[0].Status.Id
+                                   : 0;
+            TweetPublisher.UserScreenNames = SelectedTweetItems.Select(t => t.Status.User.ScreenName).ToList();
+            TweetPublisher.Publish();
         }
 
         private void OnTweetsChanged()

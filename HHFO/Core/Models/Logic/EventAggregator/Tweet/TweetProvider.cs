@@ -12,7 +12,7 @@ namespace HHFO.Models
 {
     public class TweetProvider : BindableBase, ITweetProvider
     {
-        public ReactiveProperty<TweetInfo> Tweet { get; private set; }
+        public ReactiveProperty<TweetInfo> Tweet { get; private set; } = new ReactiveProperty<TweetInfo>();
 
         public TweetProvider(IEventAggregator eventAggregator)
         {

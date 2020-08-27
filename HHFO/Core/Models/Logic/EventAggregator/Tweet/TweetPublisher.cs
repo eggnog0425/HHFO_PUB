@@ -11,9 +11,7 @@ namespace HHFO.Models.Logic.EventAggregator.Tweet
     public class TweetPublisher : ITweetPublisher
     {
         public long TweetId { get; set; }
-        public string UserScreenName { get; set; }
-        public string InReplyToScreenName { get; set; }
-        public HashtagEntity[] HashTags { get; set; }
+        public List<string> UserScreenNames { get; set; }
 
         [Dependency]
         public IEventAggregator EventAggregator { get; set; }
@@ -24,9 +22,7 @@ namespace HHFO.Models.Logic.EventAggregator.Tweet
             var tweet = new TweetInfo()
             {
                 TweetId = this.TweetId
-              , UserScreenName = this.UserScreenName
-              , InReplyToScreenName = this.InReplyToScreenName
-              , HashTags = this.HashTags
+              , UserScreenNames = this.UserScreenNames
             };
             this.EventAggregator
                 .GetEvent<TweetEvent>()

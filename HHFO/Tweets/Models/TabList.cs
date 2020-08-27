@@ -1,4 +1,5 @@
 ﻿using CoreTweet;
+using HHFO.Models.Logic.EventAggregator.Tweet;
 using ImTools;
 using Reactive.Bindings;
 using System;
@@ -14,7 +15,7 @@ namespace HHFO.Models
 {
     public class TabList: Tab
     {
-        public TabList(long id): base()
+        public TabList(long id, ITweetPublisher tweetPublisher): base(tweetPublisher)
         {
             Id = id;
             Name = Token.Lists.Show(list_id => id, tweet_mode => "extended").Name;

@@ -15,13 +15,11 @@ using CoreTweet;
 using CoreTweet.Rest;
 using System.Linq;
 using System.Diagnostics;
-using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Windows.Controls;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using MahApps.Metro.Controls;
-using HHFO.Models.UI;
 
 namespace HHFO.ViewModels
 {
@@ -32,6 +30,7 @@ namespace HHFO.ViewModels
         public string Title { get; } = new SettingUtils().GetCommonSetting().Title;
         private Authorization authorization { get; set; }
         private IListPublisher ListPublisher { get; set; }
+        public ModifierKeys ModifierKeys { get; } = ModifierKeys.Control | ModifierKeys.Shift;
 
         public ReactiveCommand<System.Windows.Input.MouseButtonEventArgs> OpenList { get; }
         public ReactiveCommand OnLoaded { get; }
@@ -39,16 +38,16 @@ namespace HHFO.ViewModels
         public ReactiveCommand InitialAuth { get; }
         public ReactiveCommand<RoutedEventArgs> ExpandedLists { get; }
         public ReactiveCommand OpenTweetFlyOut { get; }
+        public ReactiveCommand<KeyEventArgs> SendTweet { get; }
 
         public ReactiveProperty<bool> IsOpenTweetFlyOut { get; } = new ReactiveProperty<bool>(false);
         public ReactiveProperty<bool> IsOpenAuthFlyOut { get; } = new ReactiveProperty<bool>(false);
         public ReactiveProperty<String> Pin { get; set; } = new ReactiveProperty<string>();
         public ReactiveProperty<Visibility> PinError { get; } = new ReactiveProperty<Visibility>(Visibility.Collapsed);
         public ReactiveProperty<Visibility> MenuVisibility { get; } = new ReactiveProperty<Visibility>(Visibility.Hidden);
-        public ReactiveProperty<TweetInfo> SelectedTweet { get; private set; } = new ReactiveProperty<TweetInfo>();
-        public ReactiveProperty<string> InReplyTo { get; private set; } = new ReactiveProperty<string>("");
+        public ReactiveProperty<Visibility> SendErrorVisibility { get; } = new ReactiveProperty<Visibility>(Visibility.Collapsed);
+        public SendingTweet Tweet { get; private set; } = new SendingTweet();
 
-        public ReactiveProperty<string> Tweet { get; set; } = new ReactiveProperty<string>("");
         public ObservableCollection<CoreTweet.List> Lists { get; private set; } = new ObservableCollection<CoreTweet.List>();
         public ReactiveProperty<double> TweetAreaHeight { get; private set; } = new ReactiveProperty<double>(0.0d);
 
@@ -69,6 +68,8 @@ namespace HHFO.ViewModels
                 .AddTo(Disposable);
             OpenTweetFlyOut = new ReactiveCommand()
                 .AddTo(Disposable);
+            SendTweet = new ReactiveCommand<KeyEventArgs>()
+                .AddTo(Disposable);
 
             ListPublisher = listPublisher;
 
@@ -84,8 +85,22 @@ namespace HHFO.ViewModels
                 .AddTo(Disposable);
             OpenTweetFlyOut.Subscribe(_ => OpenTweetFlyOutAction())
                 .AddTo(Disposable);
-            SelectedTweet.Subscribe(e => OpenTweetFlyOutAction(e));
-            Tweet.Subscribe(t => ClearInReplyTo());
+            tweetProvider.Tweet.Subscribe(e => OpenTweetFlyOutAction(e))
+                .AddTo(Disposable);
+            SendTweet.Subscribe(_ => SendTweetAction());
+        }
+
+        private void SendTweetAction()
+        {
+            if (Tweet.Send())
+            {
+                IsOpenTweetFlyOut.Value = false;
+                SendErrorVisibility.Value = Visibility.Collapsed;
+            } 
+            else
+            {
+                SendErrorVisibility.Value = Visibility.Visible;
+            }
         }
 
         private void OpenListAction(MouseButtonEventArgs e)
@@ -146,36 +161,23 @@ namespace HHFO.ViewModels
 
         public void OpenTweetFlyOutAction()       
         {
-            IsOpenTweetFlyOut.Value = !IsOpenTweetFlyOut.Value;
+            var afterIsOpen = !IsOpenTweetFlyOut.Value && !IsOpenSetting;
+            IsOpenTweetFlyOut.Value = afterIsOpen;
+            if (!afterIsOpen)
+            {
+                SendErrorVisibility.Value = Visibility.Collapsed;
+            }
         }
         
         public void OpenTweetFlyOutAction(TweetInfo tweet)
         {
-            if (tweet == null)
+            // 起動時に呼ばれちゃうようなのでnullの場合もガード
+            if (tweet == null || IsOpenSetting)
             {
                 return;
             }
-
+            Tweet.AddReply(tweet);
             IsOpenTweetFlyOut.Value = true;
-            
-            if (tweet.InReplyToScreenName == null)
-            {
-                string.Join(' ', tweet.UserScreenName, Tweet.Value);
-            }
-            else
-            {
-                string.Join(' ', tweet.UserScreenName, tweet.InReplyToScreenName, Tweet.Value);
-            }
-            
-        }
-
-        public void ClearInReplyTo(bool saveInReplyTo = false)
-        {
-            if (!saveInReplyTo && string.IsNullOrWhiteSpace(Tweet.Value))
-            {
-                InReplyTo.Value = "";
-            }
-            
         }
     }
 }

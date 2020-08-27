@@ -1,6 +1,7 @@
 ﻿using ControlzEx.Standard;
 using CoreTweet;
 using HHFO.Models;
+using HHFO.Models.Logic.EventAggregator.Tweet;
 using ImTools;
 using MahApps.Metro.Controls;
 using NLog;
@@ -35,6 +36,8 @@ namespace HHFO.ViewModels
 
         private FrameworkElement ParentElement { get; set; }
         private TabControl TabControl { get; set; }
+        private ITweetPublisher TweetPublisher { get; set; }
+        public ModifierKeys ModifierKeys { get; } = ModifierKeys.Control | ModifierKeys.Shift;
 
         private ReadOnlyReactiveProperty<long> ListId { get; }
         public ObservableCollection<Tab> Tabs { get; }
@@ -48,11 +51,12 @@ namespace HHFO.ViewModels
         public ReactiveCommand<SelectionChangedEventArgs> OnCurrentTabChanged { get; }
         public ReactiveCommand<System.Windows.Input.MouseButtonEventArgs> OnTabClose { get; }
         
-        public TweetsViewModel(ListProvider ListIdProvider)
+        public TweetsViewModel(ListProvider ListIdProvider, ITweetPublisher tweetPublisher)
         {
             Disposable = new CompositeDisposable();
             this.ListProvider = ListIdProvider;
             ListId = this.ListProvider.Id.ToReadOnlyReactiveProperty();
+            TweetPublisher = tweetPublisher;
             Tabs = new ObservableCollection<Tab>();
 
             OnSizeChanged = new ReactiveCommand<SizeChangedEventArgs>()
@@ -142,7 +146,7 @@ namespace HHFO.ViewModels
                 var tab = Tabs.FirstOrDefault(t => t.Id == id);
                 if (tab == null)
                 {
-                    tab = new TabList(id);
+                    tab = new TabList(id, TweetPublisher);
                     Tabs.Add(tab);
                 }
                 SelectTabByVM(id);
