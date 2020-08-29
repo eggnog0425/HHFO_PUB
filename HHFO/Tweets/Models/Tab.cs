@@ -226,18 +226,35 @@ namespace HHFO.Models
 
         private void AddMedia()
         {
-            var newMedias = Tweets.Where(t => FilterImages(t) || FilterVideos(t))
-                      .Select(t => new Media(id: t.Status.Id
-                                           , type: t.Status.ExtendedEntities?.Media?[0].Type
-                                           , mediaUrl: t.Status.ExtendedEntities?.Media?[0].MediaUrlHttps));
-            foreach (var media in newMedias)
+            var mediaTweets = Tweets.Where(t => FilterImages(t) || FilterVideos(t) || t.Status.RetweetedStatus?.ExtendedEntities?.Media?[0].Type == "photo" || t.Status.RetweetedStatus?.ExtendedEntities?.Media?[0].Type == "animated_gif")
+                .Select(t => t.Status);
+
+            var medias = new List<Media>();
+            foreach (var tweet in mediaTweets)
             {
+                if (tweet.RetweetedStatus == null)
+                {
+                    medias.AddRange(MediaTweetsToMedia(tweet));
+                }
+                else
+                {
+                    medias.AddRange(MediaTweetsToMedia(tweet.RetweetedStatus));
+                }
+            }
+            foreach (var media in medias)
+            {
+
                 if (Medias.Any(m => m.Id == media.Id))
                 {
                     continue;
                 }
                 Medias.Add(media);
             }
+        }
+
+        private IEnumerable<Media> MediaTweetsToMedia(Status tweet)
+        {
+            return tweet.ExtendedEntities.Media.Select(m => new Media(id: tweet.Id, type: m.Type, mediaUrl: m.MediaUrlHttps));
         }
 
         protected abstract void FetchTweets();
