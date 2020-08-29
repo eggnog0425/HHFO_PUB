@@ -11,6 +11,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -68,7 +69,7 @@ namespace HHFO.Models
         /// <summary>
         /// mediasからShowTweetに含まれるIdの発言のみを抽出
         /// </summary>
-        public ObservableCollection<Media> Medias { get; private set; } = new ObservableCollection<Media>();
+        public ReactiveCollection<Media> Medias { get; private set; } = new ReactiveCollection<Media>();
 
         public ObservableCollection<Func<Tweet, bool>> Predicates { get; protected set; } = new ObservableCollection<Func<Tweet, bool>>();
 
@@ -189,7 +190,11 @@ namespace HHFO.Models
 
             var fileName = regexPre.Replace(media.MediaUrl, "");
             fileName = "./images/" + regexSuf.Replace(fileName, "_orig.");
-            client.DownloadFile(media.MediaUrl + ":orig", fileName);
+            if (File.Exists(fileName))
+            {
+                return;
+            }
+            client.DownloadFileAsync(new Uri(media.MediaUrl + ":orig"), fileName);
 
             /*
             var img = new Bitmap(fileName);
@@ -222,15 +227,17 @@ namespace HHFO.Models
         private void AddMedia()
         {
             var newMedias = Tweets.Where(t => FilterImages(t) || FilterVideos(t))
-                      .Where(t => !medias.Any(m => m.Id == t.Status.Id))
                       .Select(t => new Media(id: t.Status.Id
                                            , type: t.Status.ExtendedEntities?.Media?[0].Type
                                            , mediaUrl: t.Status.ExtendedEntities?.Media?[0].MediaUrlHttps));
             foreach (var media in newMedias)
             {
-                medias.Add(media);
+                if (Medias.Any(m => m.Id == media.Id))
+                {
+                    continue;
+                }
+                Medias.Add(media);
             }
-            AddMedias(newMedias);
         }
 
         protected abstract void FetchTweets();
