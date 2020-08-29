@@ -18,6 +18,11 @@
              FontFamily="{DynamicResource MaterialDesignFont}"
              Name="rootControl">
 
+    <interactivity:Interaction.Triggers>
+        <interactivity:KeyTrigger Modifiers="Ctrl" Key="R">
+            <reactiveInteractivity:EventToReactiveCommand Command="{Binding ReloadPast, Mode=OneWay}" />
+        </interactivity:KeyTrigger>
+    </interactivity:Interaction.Triggers>
     <Grid>
         <interactivity:Interaction.Triggers>
             <interactivity:EventTrigger EventName="Loaded">
@@ -72,7 +77,7 @@
 
             <TabControl.ContentTemplate>
                 <DataTemplate>
-                    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Name="TabRoot">
                         <interactivity:Interaction.Triggers>
                             <interactivity:EventTrigger EventName="Loaded">
                                 <reactiveInteractivity:EventToReactiveCommand Command="{Binding DataContext.OnContentLoaded, Mode=OneWay, ElementName=rootControl}" />

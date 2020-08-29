@@ -50,7 +50,9 @@ namespace HHFO.ViewModels
         public ReactiveCommand<RoutedEventArgs> OnContentLoaded { get; }
         public ReactiveCommand<SelectionChangedEventArgs> OnCurrentTabChanged { get; }
         public ReactiveCommand<System.Windows.Input.MouseButtonEventArgs> OnTabClose { get; }
-        
+        public ReactiveCommand ReloadPast { get; }
+
+
         public TweetsViewModel(ListProvider ListIdProvider, ITweetPublisher tweetPublisher)
         {
             Disposable = new CompositeDisposable();
@@ -69,6 +71,8 @@ namespace HHFO.ViewModels
                 .AddTo(Disposable);
             OnTabClose = new ReactiveCommand<System.Windows.Input.MouseButtonEventArgs>()
                 .AddTo(Disposable);
+            ReloadPast = new ReactiveCommand()
+                .AddTo(Disposable);
 
             OnSizeChanged.Subscribe(e => OnSizeChangedAction(e));
             ListId.Subscribe(e => OpenListTabAction(e))
@@ -81,6 +85,17 @@ namespace HHFO.ViewModels
                 .AddTo(Disposable);
             OnTabClose.Subscribe(e => OnTabCloseAction(e))
                 .AddTo(Disposable);
+            ReloadPast.Subscribe(_ => ReloadPastAction())
+                .AddTo(Disposable);
+        }
+
+        private void ReloadPastAction()
+        {
+            if (CurrentTab == null)
+            {
+                return;
+            }
+            CurrentTab.ReloadPast();
         }
 
         private void OnContentLoadedAction(RoutedEventArgs e)

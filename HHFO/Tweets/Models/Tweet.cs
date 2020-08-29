@@ -1,5 +1,6 @@
 ﻿using CoreTweet;
 using Prism.Mvvm;
+using Reactive.Bindings;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -12,10 +13,15 @@ namespace HHFO.Models
     public class Tweet: BindableBase, IEquatable<Tweet>
     {
         public Status Status { get; private set; }
-
+        public ReactiveProperty<string> UserName { get; private set; } = new ReactiveProperty<string>();
+        public ReactiveProperty<string> ScreenName { get; private set; } = new ReactiveProperty<string>();
+        public ReactiveProperty<string> FullText { get; private set; } = new ReactiveProperty<string>();
         public Tweet(Status status)
         {
             Status = status;
+            UserName.Value = status.User.Name;
+            ScreenName.Value = status.User.ScreenName;
+            FullText.Value = status.FullText;
         }
 
 

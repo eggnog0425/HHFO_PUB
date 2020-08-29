@@ -27,6 +27,7 @@
         <interactivity:KeyTrigger Modifiers="{Binding ModifierKeys, Mode=OneWay}" Key="Return">
             <reactiveInteractivity:EventToReactiveCommand Command="{Binding OpenTweetFlyOut, Mode=OneWay}"/>
         </interactivity:KeyTrigger>
+        <interactivity:KeyTrigger Modifiers="Ctrl" Key="R"/>
     </interactivity:Interaction.Triggers>
     <mahApps:MetroWindow.Flyouts>
         <mahApps:FlyoutsControl>

@@ -28,5 +28,23 @@ namespace HHFO.Models
             var newTweets = Token.Lists.Statuses(list_id => Id, tweet_mode => "extended").Select(s => new Tweet(s)).AsEnumerable();
             Tweets = newTweets.Union(Tweets).ToList();
         }
+
+        public override void ReloadPast()
+        {
+            var lastId = Tweets.Select(t => t.Status.Id)
+                             .Min();
+            var token = Authorization.GetToken();
+
+                try
+            {
+                var tweets =token.Lists.Statuses(list_id => Id, max_id => lastId, tweet_mode => "extended").AsEnumerable().Select(s => new Tweet(s));
+                Tweets.AddRange(tweets);
+            }
+            catch (TwitterException)
+            {
+                //
+            }
+            
+        }
     }
 }

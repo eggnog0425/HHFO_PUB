@@ -20,7 +20,9 @@
               Name ="DataGrid" 
               SelectionMode="Extended"
               SelectionUnit="FullRow"
-              IsReadOnly="True">
+              IsReadOnly="True"
+              VirtualizingPanel.IsVirtualizing="False"
+              VirtualizingPanel.VirtualizationMode="Standard">
         <interactivity:Interaction.Triggers>
             <interactivity:EventTrigger EventName="SelectionChanged">
                 <reactiveInteractivity:EventToReactiveCommand Command="{Binding SelectionChange, Mode=OneWay}" />
@@ -33,16 +35,16 @@
         <DataGrid.Columns>
             <DataGridTextColumn Header="ユーザID"
                                                 Width="100"
-                                                Binding="{Binding Status.User.Name}">
+                                                Binding="{Binding UserName.Value}">
             </DataGridTextColumn>
             <DataGridTextColumn Header="ユーザ名"
                                                 Width="100"
                                                 ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}"
-                                                Binding="{Binding Status.User.ScreenName}"/>
+                                                Binding="{Binding ScreenName.Value}"/>
 
             <DataGridTextColumn Header="ツイート"
                                                 Width="500"
-                                                Binding="{Binding Status.FullText}">
+                                                Binding="{Binding FullText.Value}">
                 <DataGridTextColumn.ElementStyle>
                     <Style>
                         <Setter Property="TextBlock.TextWrapping" Value="Wrap" />

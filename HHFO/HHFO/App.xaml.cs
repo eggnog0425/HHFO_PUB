@@ -58,6 +58,11 @@ namespace HHFO
                         throw new Exception(message);
                     }
                 }
+                var imageDir = "./images";
+                if (!Directory.Exists(imageDir))
+                {
+                    Directory.CreateDirectory(imageDir);
+                }
                 var defaultAccont = userSetting?.UserAccounts?.FirstOrDefault(ua => ua.DefaultAccount);
                 if(defaultAccont != null)
                 {

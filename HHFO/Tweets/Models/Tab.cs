@@ -10,14 +10,17 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 
 namespace HHFO.Models
@@ -79,6 +82,9 @@ namespace HHFO.Models
         public ReactiveCommand IsCheckedAndSearch { get; }
         public ReactiveCommand SendReply { get; }
         public ReactiveCommand<SelectionChangedEventArgs> SelectionChange { get; }
+
+        public ReactiveCommand<KeyEventArgs> SaveImages { get; }
+        public ReactiveCommand<SelectionChangedEventArgs> SelectionChangeMedia { get; }
         protected ITweetPublisher TweetPublisher { get; set; }
 
         /// <summary>
@@ -101,7 +107,7 @@ namespace HHFO.Models
             this.TweetPublisher = tweetPublisher;
             Token = Authorization.GetToken();
 
-            timer.Interval = TimeSpan.FromSeconds(5.0);
+            timer.Interval = TimeSpan.FromSeconds(10.0);
             timer.Tick += (s, e) => FetchTweets();
             timer.Start();
 
@@ -129,6 +135,10 @@ namespace HHFO.Models
                 .AddTo(Disposable);
             SelectionChange = new ReactiveCommand<SelectionChangedEventArgs>()
                 .AddTo(Disposable);
+            SaveImages = new ReactiveCommand<KeyEventArgs>()
+                .AddTo(Disposable);
+            SelectionChangeMedia = new ReactiveCommand<SelectionChangedEventArgs>()
+                .AddTo(Disposable);
 
             OnCheckFilterLink.Subscribe(_ => OnCheckFilterLinkAction())
                 .AddTo(Disposable);
@@ -148,6 +158,45 @@ namespace HHFO.Models
                 .AddTo(Disposable);
             SelectionChange.Subscribe(e => SelectionChangeAction(e))
                 .AddTo(Disposable);
+            SaveImages.Subscribe(e => SaveImagesAction(e))
+                .AddTo(Disposable);
+            SelectionChangeMedia.Subscribe(e => SelectionChangeMediaAction(e))
+                .AddTo(Disposable);
+        }
+
+        private void SelectionChangeMediaAction(SelectionChangedEventArgs e)
+        {
+            foreach(var media in e.RemovedItems.Cast<Media>())
+            {
+                media.IsSelected.Value = false;
+            }
+            foreach(var media in e.AddedItems.Cast<Media>())
+            {
+                media.IsSelected.Value = true;
+            }
+        }
+
+        private void SaveImagesAction(KeyEventArgs e)
+        {
+            var media = (e.Source as ListBoxItem).Content as Media;
+            if (media == null || !(media.IsSelected.Value)) {
+                return;
+            }
+
+            var client = new System.Net.WebClient();
+            var regexPre = new Regex(@".*\.com/media/");
+            var regexSuf = new Regex(@"\.");
+
+            var fileName = regexPre.Replace(media.MediaUrl, "");
+            fileName = "./images/" + regexSuf.Replace(fileName, "_orig.");
+            client.DownloadFile(media.MediaUrl + ":orig", fileName);
+
+            /*
+            var img = new Bitmap(fileName);
+            var status = Tweets.FirstOrDefault(t => t.Status.Id == media.Id).Status;
+            var author = new  List<>
+            */
+            
         }
 
         private void SelectionChangeAction(SelectionChangedEventArgs e)
@@ -176,7 +225,7 @@ namespace HHFO.Models
                       .Where(t => !medias.Any(m => m.Id == t.Status.Id))
                       .Select(t => new Media(id: t.Status.Id
                                            , type: t.Status.ExtendedEntities?.Media?[0].Type
-                                           , mediaUrl: t.Status.ExtendedEntities?.Media?[0].MediaUrl));
+                                           , mediaUrl: t.Status.ExtendedEntities?.Media?[0].MediaUrlHttps));
             foreach (var media in newMedias)
             {
                 medias.Add(media);
@@ -307,6 +356,10 @@ namespace HHFO.Models
                 Medias.Add(media);
             }
         }
+
+
+        public abstract void ReloadPast();
+
 
         public bool IsCheckedAndSearchAction()
         {
