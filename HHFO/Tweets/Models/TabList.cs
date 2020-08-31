@@ -18,27 +18,42 @@ namespace HHFO.Models
         public TabList(long id, ITweetPublisher tweetPublisher): base(tweetPublisher)
         {
             Id = id;
-            Name = Token.Lists.Show(list_id => id, tweet_mode => "extended").Name;
+            Name = Authorization.GetToken().Lists.Show(list_id => id, tweet_mode => "extended").Name;
             FetchTweets();
         }
 
         protected override void FetchTweets()
         {
             var token = Authorization.GetToken();
-            var newTweets = Token.Lists.Statuses(list_id => Id, tweet_mode => "extended").Select(s => new Tweet(s)).AsEnumerable();
-            Tweets = newTweets.Union(Tweets).ToList();
+            try
+            {
+                var newTweets = Authorization.GetToken().Lists.Statuses(list_id => Id, tweet_mode => "extended").Select(s => new Tweet(s)).AsEnumerable();
+                foreach (var newTweet in newTweets)
+                {
+                    if (!Tweets.Any(tweet => tweet.Id == newTweet.Id))
+                    {
+                        Tweets.Add(newTweet);
+                    }
+                }
+            }catch (TwitterException)
+            {
+                //
+            }
         }
 
         public override void ReloadPast()
         {
-            var lastId = Tweets.Select(t => t.Status.Id)
+            var lastId = Tweets.Select(t => t.Id)
                              .Min();
             var token = Authorization.GetToken();
 
                 try
             {
-                var tweets =token.Lists.Statuses(list_id => Id, max_id => lastId, tweet_mode => "extended").AsEnumerable().Select(s => new Tweet(s));
-                Tweets.AddRange(tweets);
+                var newTweets =token.Lists.Statuses(list_id => Id, max_id => lastId, tweet_mode => "extended").AsEnumerable().Select(s => new Tweet(s));
+                foreach(var tweet in newTweets)
+                {
+                    Tweets.Add(tweet);
+                }
             }
             catch (TwitterException)
             {

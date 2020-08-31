@@ -9,18 +9,14 @@
              xmlns:reactiveInteractivity="clr-namespace:Reactive.Bindings.Interactivity;assembly=ReactiveProperty.WPF"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <DataGrid Height="{Binding DataGridHeight.Value, Mode=OneWay}"
-              Width="{Binding DataGridWidth.Value, Mode=OneWay}"
-              VerticalScrollBarVisibility="Visible"
-              HorizontalScrollBarVisibility="Visible"
+    <ListView Height="Auto"
+              Width="Auto"
               Padding="5,5,5,5"
               ItemsSource="{Binding ShowTweets}"
               VerticalAlignment="Top"
               HorizontalAlignment="Left"
               Name ="DataGrid" 
               SelectionMode="Extended"
-              SelectionUnit="FullRow"
-              IsReadOnly="True"
               VirtualizingPanel.IsVirtualizing="False"
               VirtualizingPanel.VirtualizationMode="Standard">
         <interactivity:Interaction.Triggers>
@@ -28,30 +24,18 @@
                 <reactiveInteractivity:EventToReactiveCommand Command="{Binding SelectionChange, Mode=OneWay}" />
             </interactivity:EventTrigger>
         </interactivity:Interaction.Triggers>
-        
-        <DataGrid.InputBindings>
-            <KeyBinding Gesture="Shift + Ctrl + Enter" Command="{Binding DataContext.SendReply, Mode=OneWay, ElementName=rootControl}"/>
-        </DataGrid.InputBindings>
-        <DataGrid.Columns>
-            <DataGridTextColumn Header="ユーザID"
-                                                Width="100"
-                                                Binding="{Binding UserName.Value}">
-            </DataGridTextColumn>
-            <DataGridTextColumn Header="ユーザ名"
-                                                Width="100"
-                                                ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}"
-                                                Binding="{Binding ScreenName.Value}"/>
 
-            <DataGridTextColumn Header="ツイート"
-                                                Width="500"
-                                                Binding="{Binding FullText.Value}">
-                <DataGridTextColumn.ElementStyle>
-                    <Style>
-                        <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
-                        <Setter Property="TextBlock.TextAlignment" Value="Center"/>
-                    </Style>
-                </DataGridTextColumn.ElementStyle>
-            </DataGridTextColumn>
-        </DataGrid.Columns>
-    </DataGrid>
+        <ListView.InputBindings>
+            <KeyBinding Gesture="Shift + Ctrl + Enter" Command="{Binding DataContext.SendReply, Mode=OneWay, ElementName=rootControl}"/>
+        </ListView.InputBindings>
+        <ListView.View>
+            <GridView>
+                <GridViewColumn DisplayMemberBinding="{Binding ScreenName}">
+                    <GridViewColumn.Header>
+                        <TextBlock>ScreenName</TextBlock>
+                    </GridViewColumn.Header>
+                </GridViewColumn>
+            </GridView>
+        </ListView.View>
+    </ListView>
 </UserControl>

@@ -41,13 +41,9 @@ namespace HHFO.ViewModels
 
         private ReadOnlyReactiveProperty<long> ListId { get; }
         public ObservableCollection<Tab> Tabs { get; }
-        public ReactiveProperty<double> DataGridHeight { get; set; } = new ReactiveProperty<double>(0.0d);
-        public ReactiveProperty<double> DataGridWidth { get; set; } = new ReactiveProperty<double>(0.0d);
         public ReactiveProperty<bool> IsOpenCheckBoxArea { get; set; } = new ReactiveProperty<bool>(true);
 
-        public ReactiveCommand<SizeChangedEventArgs> OnSizeChanged { get; }
         public ReactiveCommand<RoutedEventArgs> OnLoaded { get; }
-        public ReactiveCommand<RoutedEventArgs> OnContentLoaded { get; }
         public ReactiveCommand<SelectionChangedEventArgs> OnCurrentTabChanged { get; }
         public ReactiveCommand<System.Windows.Input.MouseButtonEventArgs> OnTabClose { get; }
         public ReactiveCommand ReloadPast { get; }
@@ -61,11 +57,7 @@ namespace HHFO.ViewModels
             TweetPublisher = tweetPublisher;
             Tabs = new ObservableCollection<Tab>();
 
-            OnSizeChanged = new ReactiveCommand<SizeChangedEventArgs>()
-                .AddTo(Disposable);
             OnLoaded = new ReactiveCommand<RoutedEventArgs>()
-                .AddTo(Disposable);
-            OnContentLoaded = new ReactiveCommand<RoutedEventArgs>()
                 .AddTo(Disposable);
             OnCurrentTabChanged = new ReactiveCommand<SelectionChangedEventArgs>()
                 .AddTo(Disposable);
@@ -74,12 +66,9 @@ namespace HHFO.ViewModels
             ReloadPast = new ReactiveCommand()
                 .AddTo(Disposable);
 
-            OnSizeChanged.Subscribe(e => OnSizeChangedAction(e));
             ListId.Subscribe(e => OpenListTabAction(e))
                 .AddTo(Disposable);
             OnLoaded.Subscribe(e => OnLoadedAction(e))
-                .AddTo(Disposable);
-            OnContentLoaded.Subscribe(e => OnContentLoadedAction(e))
                 .AddTo(Disposable);
             OnCurrentTabChanged.Subscribe(e => OnCurrentTabChangedAction())
                 .AddTo(Disposable);
@@ -98,11 +87,6 @@ namespace HHFO.ViewModels
             CurrentTab.ReloadPast();
         }
 
-        private void OnContentLoadedAction(RoutedEventArgs e)
-        {
-            ChangeDataGridSize((FrameworkElement)e.OriginalSource);
-        }
-
         private void OnTabCloseAction(MouseButtonEventArgs e)
         {
             var hoge = e.Source.GetType().ToString();
@@ -111,28 +95,6 @@ namespace HHFO.ViewModels
         private void OnCurrentTabChangedAction()
         {
             CurrentTab = (Tab)TabControl.SelectedItem;
-        }
-
-        private void ChangeDataGridSize(FrameworkElement parent)
-        {
-            var otherHeight = 0.0d;
-            foreach(var item in parent.GetChildObjects()) {
-                if (item is FrameworkElement)
-                {
-                    FrameworkElement element = item as FrameworkElement;
-                    if (element.Name != "NormalTweetView" && element.Name != "MediaTweetView")
-                    {
-                        otherHeight += element.ActualHeight;
-                    }
-                }
-            }
-            DataGridHeight.Value = parent.ActualHeight - otherHeight;
-            DataGridWidth.Value = parent.ActualWidth;
-        }
-
-        private void OnSizeChangedAction(SizeChangedEventArgs e)
-        {
-            ChangeDataGridSize((FrameworkElement)e.OriginalSource);
         }
 
         private void OnLoadedAction(RoutedEventArgs e)
