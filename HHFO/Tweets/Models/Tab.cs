@@ -14,6 +14,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Text;
@@ -48,8 +49,9 @@ namespace HHFO.Models
         /// <summary>
         /// 画面に実際に表示されるtweets
         /// </summary>
-        public ObservableCollection<Tweet> ShowTweets { get; private set; }
+        public ObservableCollection<Tweet> ShowTweets { get; private set; } = new ObservableCollection<Tweet>();
         public List<Tweet> SelectedTweets { get; set; } = new List<Tweet>();
+        public ObservableCollection<Media> Medias { get; private set; } = new ObservableCollection<Media>();
 
         public ObservableCollection<Func<Tweet, bool>> Predicates { get; protected set; } = new ObservableCollection<Func<Tweet, bool>>();
 
@@ -78,8 +80,8 @@ namespace HHFO.Models
         public ReactiveProperty<Visibility> MediaGridVisibility { get; } = new ReactiveProperty<Visibility>(Visibility.Collapsed);
 
         private Func<Tweet, bool> FilterLink = tweet => tweet.HasLinks;
-        private Func<Tweet, bool> FilterImages = tweet => tweet.MediaType == "photo" || tweet.MediaType == "animated_gif";
-        private Func<Tweet, bool> FilterVideos = tweet => tweet.MediaType == "video";
+        private Func<Tweet, bool> FilterImages = tweet => tweet.Media?[0].Type == "photo" || tweet.Media?[0].Type == "animated_gif";
+        private Func<Tweet, bool> FilterVideos = tweet => tweet.Media?[0].Type == "video";
         private Func<Tweet, bool> FilterRetweeted = tweet => tweet.IsRetweetedTweet || tweet.QuotedTweet != null;
 
         public Tab(ITweetPublisher tweetPublisher)
@@ -90,8 +92,6 @@ namespace HHFO.Models
             timer.Interval = TimeSpan.FromSeconds(10.0);
             timer.Tick += (s, e) => FetchTweets();
             timer.Start();
-
-            ShowTweets = Tweets;
 
             OnCheckFilterLink = new ReactiveCommand()
                 .AddTo(Disposable);
@@ -116,9 +116,6 @@ namespace HHFO.Models
             SelectionChangeMedia = new ReactiveCommand<SelectionChangedEventArgs>()
                 .AddTo(Disposable);
 
-            Predicates.CollectionChangedAsObservable()
-                .Subscribe(_ => OnChangedPredicate())
-                .AddTo(Disposable);
             OnCheckFilterLink.Subscribe(_ => OnCheckFilterLinkAction())
                 .AddTo(Disposable);
             OnCheckFilterImages.Subscribe(_ => OnCheckFilterImagesAction())
@@ -135,23 +132,14 @@ namespace HHFO.Models
                 .AddTo(Disposable);
             SelectionChange.Subscribe(e => SelectionChangeAction(e))
                 .AddTo(Disposable);
-            SaveImages.Subscribe(e => SaveImagesAction(e))
+            ShowTweets.PropertyChangedAsObservable().Subscribe(_ => RefleshMedias())
                 .AddTo(Disposable);
-        }
-
-        private void SelectionChangeMediaAction(SelectionChangedEventArgs e)
-        {
-            foreach(var media in e.RemovedItems.Cast<Media>())
-            {
-                media.IsSelected.Value = false;
-            }
-            foreach(var media in e.AddedItems.Cast<Media>())
-            {
-                media.IsSelected.Value = true;
-            }
+            // SaveImages.Subscribe(e => SaveImagesAction(e))
+            //    .AddTo(Disposable);
         }
 
         // TODO Modelに移管
+        /*
         private void SaveImagesAction(KeyEventArgs e)
         {
             Media media = (e.Source as ListBoxItem).Content as Media;
@@ -172,13 +160,12 @@ namespace HHFO.Models
             client.DownloadFileAsync(new Uri(media.MediaUrl + ":orig"), fileName);
             
             // TODO メタデータ書き込み実装
-            /*
             var img = new Bitmap(fileName);
             var status = Tweets.FirstOrDefault(t => t.Status.Id == media.Id).Status;
             var author = new  List<>
-            */
             
         }
+    */
 
         private void SelectionChangeAction(SelectionChangedEventArgs e)
         {
@@ -251,6 +238,8 @@ namespace HHFO.Models
             {
                 Predicates.Remove(func);
             }
+            OnChangedPredicate();
+
             if (IsFilteredImages.Value || IsFilteredVideos.Value)
             {
                 NormalGridVisibility.Value = Visibility.Collapsed;
@@ -271,7 +260,6 @@ namespace HHFO.Models
             OnChangedPredicate();
         }
 
-
         public void OnClickAndSearchAction()
         {
             IsOrSearch.Value = false;
@@ -281,9 +269,21 @@ namespace HHFO.Models
         private void OnChangedPredicate()
         {
             ShowTweets = new ObservableCollection<Tweet>(Tweets.Where(tweet => Filter(tweet)));
+            RaisePropertyChanged(nameof(ShowTweets));
+            RefleshMedias();
         }
 
         public abstract void ReloadPast();
+
+        protected void RefleshMedias()
+        {
+            Medias.Clear();
+            var mediaTweets = ShowTweets.Where(t => t.Media != null);
+            foreach (var media in mediaTweets.SelectMany(t => t.Media))
+            {
+                Medias.Add(media);
+            }
+        }
 
         public void Dispose()
         {

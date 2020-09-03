@@ -39,8 +39,7 @@ namespace HHFO.Models
         public string[] Links { get; private set; }
         public bool HasMedias { get; private set; }
         public string Via { get; private set;}
-        public string MediaType { get; private set; }
-        public string[] MediaUrls { get; private set; }
+        public Media[] Media { get; private set; }
 
         public Tweet(Status status)
         {
@@ -82,8 +81,7 @@ namespace HHFO.Models
             HasMedias = medias != null;
             if (HasMedias)
             {
-                MediaType = medias[0].Type;
-                MediaUrls = medias.Select(m => m.MediaUrlHttps).ToArray();
+                Media = medias.Select(m => new Media(m)).ToArray();
                 // MediaのURLは該当tweetの詳細画面に飛ぶURLになっているので最初の要素で置換
                 hyperlinks = hyperlinks.Append(new Link(medias[0].DisplayUrl, medias[0].Indices[0], medias[0].Indices[1]));
             }

@@ -13,13 +13,18 @@ using System.Windows.Controls;
 
 namespace HHFO.Models
 {
-    public class TabList: Tab
+    public class TabList : Tab
     {
-        public TabList(long id, ITweetPublisher tweetPublisher): base(tweetPublisher)
+        public TabList(long id, ITweetPublisher tweetPublisher) : base(tweetPublisher)
         {
             Id = id;
             Name = Authorization.GetToken().Lists.Show(list_id => id, tweet_mode => "extended").Name;
             FetchTweets();
+
+            foreach (var tweet in Tweets.Where(tweet => Filter(tweet)))
+            {
+                ShowTweets.Add(tweet);
+            }
         }
 
         protected override void FetchTweets()
@@ -34,8 +39,9 @@ namespace HHFO.Models
                     {
                         Tweets.Add(newTweet);
                     }
-                }
-            }catch (TwitterException)
+                };
+            }
+            catch (TwitterException)
             {
                 //
             }
@@ -47,10 +53,10 @@ namespace HHFO.Models
                              .Min();
             var token = Authorization.GetToken();
 
-                try
+            try
             {
-                var newTweets =token.Lists.Statuses(list_id => Id, max_id => lastId, tweet_mode => "extended").AsEnumerable().Select(s => new Tweet(s));
-                foreach(var tweet in newTweets)
+                var newTweets = token.Lists.Statuses(list_id => Id, max_id => lastId, tweet_mode => "extended").AsEnumerable().Select(s => new Tweet(s));
+                foreach (var tweet in newTweets)
                 {
                     Tweets.Add(tweet);
                 }
@@ -59,7 +65,7 @@ namespace HHFO.Models
             {
                 //
             }
-            
+
         }
     }
 }

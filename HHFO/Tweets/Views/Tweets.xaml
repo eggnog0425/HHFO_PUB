@@ -61,15 +61,14 @@
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
                                 Style="{StaticResource MaterialDesignFlatButton}"
-                                
+                                Command="{Binding DataContext.TabCloseCommand, ElementName=rootControl, Mode=OneWay}"
                                 ToolTip="Icon">
                             <materialDesign:PackIcon Grid.Column="1" 
                                                  HorizontalAlignment="Center"
                                                  VerticalAlignment="Center"
                                                  Kind="Close"
                                                  Foreground="#FFBEBEBE"
-                                                 Background="Transparent"
-                                                 Tag="{Binding Id}"/>
+                                                 Background="Transparent"/>
                         </Button>
                     </Grid>
                 </DataTemplate>

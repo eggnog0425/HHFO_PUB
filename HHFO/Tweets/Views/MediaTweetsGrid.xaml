@@ -10,47 +10,49 @@
              d:DesignHeight="450" d:DesignWidth="800"
              Name="mediaRoot">
     <ScrollViewer>
-        <ListView ItemsSource="{Binding Medias}">
+    <ListView ItemsSource="{Binding Medias}">
 
-            <interactivity:Interaction.Triggers>
-                <interactivity:EventTrigger EventName="SelectionChanged">
-                    <reactiveInteractivity:EventToReactiveCommand Command="{Binding DataContext.CurrentTab.SelectionChangeMedia, ElementName=rootControl, Mode=OneWay}" />
-                </interactivity:EventTrigger>
-            </interactivity:Interaction.Triggers>
-            <ItemsControl.Template>
-                <ControlTemplate TargetType="ItemsControl">
-                    <ControlTemplate.Resources></ControlTemplate.Resources>
-                    <WrapPanel Orientation="Horizontal" IsItemsHost="True"/>
-                </ControlTemplate>
-            </ItemsControl.Template>
+        <interactivity:Interaction.Triggers>
+            <interactivity:EventTrigger EventName="SelectionChanged">
+                <reactiveInteractivity:EventToReactiveCommand Command="{Binding DataContext.CurrentTab.SelectionChangeMedia, ElementName=rootControl, Mode=OneWay}" />
+            </interactivity:EventTrigger>
+        </interactivity:Interaction.Triggers>
+        <ItemsControl.Template>
+            <ControlTemplate TargetType="ItemsControl">
+                <ControlTemplate.Resources></ControlTemplate.Resources>
+                <WrapPanel Orientation="Horizontal" IsItemsHost="True"/>
+            </ControlTemplate>
+        </ItemsControl.Template>
 
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel>
-                        <TextBox Text="{Binding Id, Mode=OneWay}"/>
-                        <Image Source="{Binding MediaUrl, Converter={StaticResource ConvertThumb}, IsAsync=True}"
-                                   Width="150"
-                                   Height="150"
-                                   Stretch="Fill"
-                                   Focusable="True">
-                            <interactivity:Interaction.Triggers>
-                                <interactivity:KeyTrigger Key="F2">
-                                    <reactiveInteractivity:EventToReactiveCommand Command="{Binding DataContext.CurrentTab.SaveImages, ElementName=rootControl, Mode=OneWay}" />
-                                </interactivity:KeyTrigger>
-                            </interactivity:Interaction.Triggers>
-                            <Image.Style>
-                                <Style TargetType="Image">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Type}" Value="video">
-                                            <Setter Property="IsEnabled" Value="False" />
-                                            <Setter Property="Visibility" Value="Collapsed" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Image.Style>
-                        </Image>
-                    </StackPanel>
-                    <!--
+        <ItemsControl.ItemTemplate>
+            <DataTemplate>
+                <StackPanel>
+                    <TextBox Text="{Binding TweetId, Mode=OneWay}">
+                        <!--
+                        <interactivity:Interaction.Triggers>
+                            <interactivity:KeyTrigger Key="F2">
+                                <reactiveInteractivity:EventToReactiveCommand Command="{Binding DataContext.CurrentTab.SaveImages, ElementName=rootControl, Mode=OneWay}" />
+                            </interactivity:KeyTrigger>
+                        </interactivity:Interaction.Triggers>
+                        -->
+                    </TextBox>
+                        <Image Source="{Binding MediaUrl, IsAsync=True, Mode=OneWay}"
+                                           Width="150"
+                                           Height="150"
+                                           Focusable="True">
+                        <Image.Style>
+                            <Style TargetType="Image">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Type}" Value="video">
+                                        <Setter Property="IsEnabled" Value="False" />
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
+                </StackPanel>
+                <!--
                         <MediaElement Source="{Binding MediaUrl, IsAsync=True}">
                             <MediaElement.Style>
                                 <Style TargetType="MediaElement">
@@ -67,8 +69,8 @@
                                 </Style>
                             </MediaElement.Style>
                         </MediaElement>-->
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ListView>
+            </DataTemplate>
+        </ItemsControl.ItemTemplate>
+    </ListView>
     </ScrollViewer>
 </UserControl>
