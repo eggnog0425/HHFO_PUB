@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Reactive.Disposables;
+using System.Windows;
 using System.Windows.Documents;
 
 namespace HHFO.Models
@@ -30,10 +32,6 @@ namespace HHFO.Models
         /// </summary>
         public string PlainFullText { get; private set; }
 
-        /// <summary>
-        /// tweet詳細用にHyperLinkの設定を追加したtweet本文
-        /// </summary>
-        public Paragraph FullText { get; private set; }
         public Tweet QuotedTweet { get; private set; }
         public bool HasLinks { get; private set; }
         public string[] Links { get; private set; }
@@ -55,13 +53,20 @@ namespace HHFO.Models
                 RetweetedCreatedAt = retweetedStatus.CreatedAt;
                 RetweetedUserId = retweetedStatus.User.Id ?? 0;
                 RetweetedUserScreenName = retweetedStatus.User.ScreenName;
-                AddFieldValues(retweetedStatus);
+                Media = retweetedStatus.ExtendedEntities?.Media.Select(m => new Media(retweetedStatus.Id, m)).ToArray();
             }
             else
             {
-                AddFieldValues(status);
+                Media = status.ExtendedEntities?.Media.Select(m => new Media(Id, m)).ToArray();
             }
         }
+
+        /*
+         * TODO この辺はviewで表示したタイミングでやるようにする
+        /// <summary>
+        /// tweet詳細用にHyperLinkの設定を追加したtweet本文
+        /// </summary>
+        public Paragraph FullText { get; private set; }
         public void AddFieldValues(Status status)
         {
             PlainFullText = status.FullText;

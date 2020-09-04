@@ -27,6 +27,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using Unity;
 
 namespace HHFO.Models
 {
@@ -42,22 +43,11 @@ namespace HHFO.Models
         public ReactiveProperty<bool> IsFilteredImages { get; private set; } = new ReactiveProperty<bool>(false);
         public ReactiveProperty<bool> IsFilteredVideos { get; private set; } = new ReactiveProperty<bool>(false);
         public ReactiveProperty<bool> IsFilteredRetweeted { get; private set; } = new ReactiveProperty<bool>(false);
-        public ReactiveProperty<bool> IsOrSearch { get; private set; } = new ReactiveProperty<bool>(true);
+        public ReadOnlyReactiveProperty<bool> IsOrSearch { get; }
 
-        /*
-        /// <summary>
-        /// APIの取得対象となるtweetsの全量
-        /// </summary>
-        protected IList<Tweet> Tweets { get; } = new List<Tweet>();
-        /// <summary>
-        /// 画面に実際に表示されるtweets
-        /// </summary>
-        public ObservableCollection<Tweet> ShowTweets { get; private set; } = new ObservableCollection<Tweet>();
         public List<Tweet> SelectedTweets { get; set; } = new List<Tweet>();
-        */
-        public ObservableCollection<Media> Medias { get; private set; } = new ObservableCollection<Media>();
+        public Tweets Tweets { get; } = new Tweets();
 
-        public ObservableCollection<Func<Tweet, bool>> Predicates { get; protected set; } = new ObservableCollection<Func<Tweet, bool>>();
 
         // チェックボックス・ラジオボタンエリアのコマンド
         public ReactiveCommand OnCheckFilterLink { get; }
@@ -72,6 +62,8 @@ namespace HHFO.Models
 
         public ReactiveCommand<KeyEventArgs> SaveImages { get; }
         public ReactiveCommand<SelectionChangedEventArgs> SelectionChangeMedia { get; }
+
+        [Dependency]
         protected ITweetPublisher TweetPublisher { get; set; }
 
         /// <summary>
@@ -88,15 +80,15 @@ namespace HHFO.Models
         private Func<Tweet, bool> FilterVideos = tweet => tweet.Media?[0].Type == "video";
         private Func<Tweet, bool> FilterRetweeted = tweet => tweet.IsRetweetedTweet || tweet.QuotedTweet != null;
 
-        public TabBase(ITweetPublisher tweetPublisher)
+        protected TabBase()
         {
             Disposable = new CompositeDisposable();
-            this.TweetPublisher = tweetPublisher;
 
             Timer.Interval = TimeSpan.FromSeconds(10.0);
             Timer.Tick += async (s, e) => await FetchTweetsAsync();
             Timer.Start();
 
+            IsOrSearch = Tweets.IsOrSearch.ToReadOnlyReactiveProperty();
             OnCheckFilterLink = new ReactiveCommand()
                 .AddTo(Disposable);
             OnCheckFilterImages = new ReactiveCommand()
@@ -120,13 +112,13 @@ namespace HHFO.Models
             SelectionChangeMedia = new ReactiveCommand<SelectionChangedEventArgs>()
                 .AddTo(Disposable);
 
-            OnCheckFilterLink.Subscribe(_ => OnCheckFilterLinkAction())
+            OnCheckFilterLink.Subscribe(async _ => await OnCheckFilterLinkAction())
                 .AddTo(Disposable);
-            OnCheckFilterImages.Subscribe(_ => OnCheckFilterImagesAction())
+            OnCheckFilterImages.Subscribe(async _ => await OnCheckFilterImagesAction())
                 .AddTo(Disposable);
-            OnCheckFilterVideos.Subscribe(_ => OnCheckFilterVideosAction())
+            OnCheckFilterVideos.Subscribe(async _ => await OnCheckFilterVideosAction())
                 .AddTo(Disposable);
-            OnCheckFilterRetweeted.Subscribe(_ => OnCheckFilterRetweetedAction())
+            OnCheckFilterRetweeted.Subscribe(async _ => await OnCheckFilterRetweetedAction())
                 .AddTo(Disposable);
             OnClickOrSearch.Subscribe(_ => OnClickOrSearchAction())
                 .AddTo(Disposable);
@@ -135,8 +127,6 @@ namespace HHFO.Models
             SendReply.Subscribe(_ => SendReplyAction())
                 .AddTo(Disposable);
             SelectionChange.Subscribe(e => SelectionChangeAction(e))
-                .AddTo(Disposable);
-            ShowTweets.PropertyChangedAsObservable().Subscribe(_ => AddMedias())
                 .AddTo(Disposable);
             // SaveImages.Subscribe(e => SaveImagesAction(e))
             //    .AddTo(Disposable);
@@ -187,62 +177,45 @@ namespace HHFO.Models
 
         protected abstract Task FetchTweetsAsync();
 
-        protected bool Filter(Tweet tweet)
-        {
-            if (Predicates.Count() == 0)
-            {
-                return true;
-            }
 
-            if (IsOrSearch.Value)
-            {
-                return Predicates.Any(predicate => predicate(tweet));
-            }
-            else
-            {
-                return Predicates.All(predicate => predicate(tweet));
-            }
-        }
-
-        public void OnCheckFilterLinkAction()
+        public async Task OnCheckFilterLinkAction()
         {
             var isFiltered = !IsFilteredLink.Value;
             IsFilteredLink.Value = isFiltered;
-            ChangePredicates(isFiltered, FilterLink);
+            await ChangePredicates(isFiltered, FilterLink);
         }
 
-        public void OnCheckFilterImagesAction()
+        public async Task OnCheckFilterImagesAction()
         {
             var isFiltered = !IsFilteredImages.Value;
             IsFilteredImages.Value = isFiltered;
-            ChangePredicates(isFiltered, FilterImages);
+            await ChangePredicates(isFiltered, FilterImages);
         }
 
-        public void OnCheckFilterVideosAction()
+        public async Task OnCheckFilterVideosAction()
         {
             var isFiltered = !IsFilteredVideos.Value;
             IsFilteredVideos.Value = isFiltered;
-            ChangePredicates(isFiltered, FilterVideos);
+            await ChangePredicates(isFiltered, FilterVideos);
         }
 
-        public void OnCheckFilterRetweetedAction()
+        public async Task OnCheckFilterRetweetedAction()
         {
             var isFiltered = !IsFilteredRetweeted.Value;
             IsFilteredRetweeted.Value = isFiltered;
-            ChangePredicates(isFiltered, FilterRetweeted);
+            await ChangePredicates(isFiltered, FilterRetweeted);
         }
 
-        private void ChangePredicates(bool isFiltered, Func<Tweet, bool> func)
+        private async Task ChangePredicates(bool isFiltered, Func<Tweet, bool> func)
         {
             if (isFiltered)
             {
-                Predicates.Add(func);
+                await Tweets.AddPredicates(func);
             }
             else
             {
-                Predicates.Remove(func);
+                await Tweets.RemovePredicates(func);
             }
-            OnChangedPredicate();
 
             if (IsFilteredImages.Value || IsFilteredVideos.Value)
             {
@@ -260,66 +233,16 @@ namespace HHFO.Models
 
         public void OnClickOrSearchAction()
         {
-            IsOrSearch.Value = true;
-            OnChangedPredicate();
+            Tweets.IsOrSearch.Value = true;
         }
 
         public void OnClickAndSearchAction()
         {
-            IsOrSearch.Value = false;
-            OnChangedPredicate();
-        }
-
-        private void OnChangedPredicate()
-        {
-            RefleshShowTweets();
-            AddMedias();
+            Tweets.IsOrSearch.Value = false;
         }
 
         public abstract Task ReloadPastAsync();
 
-        protected void RefleshShowTweets()
-        {
-            // UIスレッドで実行させたいのでローカル関数に切り出してdispatcherから呼び出す
-            var d = Application.Current.Dispatcher;
-            d.Invoke(action);
-            void action()
-            {
-                ShowTweets.Clear();
-                foreach (var tweet in Tweets.Where(tweet => Filter(tweet)).OrderBy())
-                {
-                    ShowTweets.Add(tweet);
-                }
-            }
-        }
-
-        protected void AddMedias()
-        {
-            // UIスレッドで実行させたいのでローカル関数に切り出してdispatcherから呼び出す
-            var d = Application.Current.Dispatcher;
-            d.Invoke(action);
-            void action()
-            {
-                var mediaTweets = ShowTweets.Where(t => t.Media != null);
-                foreach (var media in mediaTweets.SelectMany(t => t.Media))
-                {
-                    // メディアは下手にソートして上に追加しようとすると見ている場所が下に流れてうざいのでソートしない
-                    Medias.Add(media);
-                }
-            }
-        }
-
-        protected async Task AddTweetsAsync(Task<ListedResponse<Status>> req)
-        {
-            var statuses = await req;
-            lock (Tweets)
-            {
-                foreach (var tweet in statuses.Select(s => new Tweet(s)).Where(newT => !Tweets.Any(t => t.Id == newT.Id)))
-                {
-                    Tweets.Add(tweet);
-                }
-            }
-        }
 
         public void Dispose()
         {

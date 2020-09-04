@@ -32,7 +32,7 @@
 
         <TabControl 
             Margin="0" 
-            ItemsSource ="{Binding Tabs}" 
+            ItemsSource ="{Binding Tabs, IsAsync=True}" 
             Background="Transparent" 
             Name="TabControl">
             <interactivity:Interaction.Triggers>
@@ -100,37 +100,37 @@
                         <CheckBox Grid.Row="0"
                                       Grid.Column="0"
                                       Content="リンクつきの呟きのみ表示する" 
-                                      IsChecked="{Binding IsFilteredLink.Value, Mode=OneWay}" 
-                                      Command="{Binding OnCheckFilterLink, Mode=OneWay}">
+                                      IsChecked="{Binding IsFilteredLink.Value, Mode=OneWay, IsAsync=True}" 
+                                      Command="{Binding OnCheckFilterLink, Mode=OneWay, IsAsync=True}">
                             </CheckBox>
                             <CheckBox Grid.Row="0" 
                                       Grid.Column="1"
                                       Content="画像つきの呟きのみ表示する" 
-                                      IsChecked="{Binding IsFilteredImages.Value, Mode=OneWay}" 
-                                      Command="{Binding OnCheckFilterImages, Mode=OneWay}">
+                                      IsChecked="{Binding IsFilteredImages.Value, Mode=OneWay, IsAsync=True}" 
+                                      Command="{Binding OnCheckFilterImages, Mode=OneWay, IsAsync=True}">
                             </CheckBox>
                             <CheckBox Grid.Row="0" 
                                       Grid.Column="2"
                                       Content="動画つきの呟きのみ表示する" 
-                                      IsChecked="{Binding IsFilteredVideos.Value, Mode=OneWay}" 
-                                      Command="{Binding OnCheckFilterVideos, Mode=OneWay}">
+                                      IsChecked="{Binding IsFilteredVideos.Value, Mode=OneWay, IsAsync=True}" 
+                                      Command="{Binding OnCheckFilterVideos, Mode=OneWay, IsAsync=True}">
                             </CheckBox>
                             <CheckBox Grid.Row="0" 
                                       Grid.Column="3"
                                       Content="リツイートされた呟きのみ表示する" 
-                                      IsChecked="{Binding IsFilteredRetweeted.Value, Mode=OneWay}" 
-                                      Command="{Binding OnCheckFilterRetweeted, Mode=OneWay}">
+                                      IsChecked="{Binding IsFilteredRetweeted.Value, Mode=OneWay, IsAsync=True}" 
+                                      Command="{Binding OnCheckFilterRetweeted, Mode=OneWay, IsAsync=True}">
                             </CheckBox>
                             <RadioButton Content="いずれかの条件を満たす呟きを表示する"
                                          Grid.Row="1"
                                          Grid.Column="0"
-                                         IsChecked="{Binding IsOrSearch.Value, Mode=OneWay}"
-                                         Command="{Binding OnClickOrSearch, Mode=OneWay}"/>
+                                         IsChecked="{Binding IsOrSearch.Value, Mode=OneWay, IsAsync=True}"
+                                         Command="{Binding OnClickOrSearch, Mode=OneWay, IsAsync=True}"/>
                             <RadioButton Content="全ての条件を満たす呟きを表示する"
                                          Grid.Row="1"
                                          Grid.Column="1"
-                                         IsChecked ="{Binding Path=IsOrSearch.Value, Converter={StaticResource ReverseBool}, Mode=OneWay}"
-                                         Command="{Binding OnClickAndSearch, Mode=OneWay}"/>
+                                         IsChecked ="{Binding Path=IsOrSearch.Value, Converter={StaticResource ReverseBool}, Mode=OneWay, IsAsync=True}"
+                                         Command="{Binding OnClickAndSearch, Mode=OneWay, IsAsync=True}"/>
                         <views:NormalTweetsGrid Visibility="{Binding NormalGridVisibility.Value,Mode=OneWay}" x:Name="NormalTweetView"
                                                 Grid.Row="2"
                                                 Grid.Column="0"

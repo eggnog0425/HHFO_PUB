@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Disposables;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -32,7 +33,7 @@ namespace HHFO.ViewModels
         private static Logger logger = LogManager.GetCurrentClassLogger();
         private CompositeDisposable Disposable { get; set; }
         private ListProvider ListProvider { get; set; }
-        public Tab CurrentTab { get; private set; }
+        public TabBase CurrentTab { get; private set; }
 
         private FrameworkElement ParentElement { get; set; }
         private TabControl TabControl { get; set; }
@@ -40,7 +41,7 @@ namespace HHFO.ViewModels
         public ModifierKeys ModifierKeys { get; } = ModifierKeys.Control | ModifierKeys.Shift;
 
         private ReadOnlyReactiveProperty<long> ListId { get; }
-        public ObservableCollection<Tab> Tabs { get; }
+        public ObservableCollection<TabBase> Tabs { get; }
         public ReactiveProperty<bool> IsOpenCheckBoxArea { get; set; } = new ReactiveProperty<bool>(true);
 
         public ReactiveCommand<RoutedEventArgs> OnLoaded { get; }
@@ -56,7 +57,7 @@ namespace HHFO.ViewModels
             this.ListProvider = ListIdProvider;
             ListId = this.ListProvider.Id.ToReadOnlyReactiveProperty();
             TweetPublisher = tweetPublisher;
-            Tabs = new ObservableCollection<Tab>();
+            Tabs = new ObservableCollection<TabBase>();
 
             OnLoaded = new ReactiveCommand<RoutedEventArgs>()
                 .AddTo(Disposable);
@@ -69,13 +70,11 @@ namespace HHFO.ViewModels
             TabCloseCommand = new ReactiveCommand<RoutedEventArgs>()
                 .AddTo(Disposable);
 
-            ListId.Subscribe(e => OpenListTabAction(e))
+            ListId.Subscribe(async e => await OpenListTabAction(e))
                 .AddTo(Disposable);
             OnLoaded.Subscribe(e => OnLoadedAction(e))
                 .AddTo(Disposable);
             OnCurrentTabChanged.Subscribe(e => OnCurrentTabChangedAction())
-                .AddTo(Disposable);
-            OnTabClose.Subscribe(e => OnTabCloseAction(e))
                 .AddTo(Disposable);
             ReloadPast.Subscribe(_ => ReloadPastAction())
                 .AddTo(Disposable);
@@ -104,7 +103,7 @@ namespace HHFO.ViewModels
 
         private void OnCurrentTabChangedAction()
         {
-            CurrentTab = (Tab)TabControl.SelectedItem;
+            CurrentTab = (TabBase)TabControl.SelectedItem;
         }
 
         private void OnLoadedAction(RoutedEventArgs e)
@@ -121,7 +120,7 @@ namespace HHFO.ViewModels
             }
         }
 
-        private void OpenListTabAction (long id)
+        private async Task OpenListTabAction (long id)
         {
             if (id == 0)
             {
@@ -133,21 +132,22 @@ namespace HHFO.ViewModels
                 var tab = Tabs.FirstOrDefault(t => t.Id == id);
                 if (tab == null)
                 {
-                    tab = new TabList(id, TweetPublisher);
+                    tab = await TabList.Create(id);
                     Tabs.Add(tab);
                 }
                 SelectTabByVM(id);
             }
             catch (TwitterException)
             {
-                MessageBox.Show("リストの取得に失敗しました。");
+                // TODO メッセージを発行する形に変更
+                //MessageBox.Show("リストの取得に失敗しました。");
             }
         }
 
         private void SelectTabByVM(long id)
         {
             var i = 0;
-            foreach (Tab item in TabControl.Items)
+            foreach (TabBase item in TabControl.Items)
             {
                 if (item.Id == id)
                 {

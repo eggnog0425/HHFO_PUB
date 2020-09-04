@@ -20,14 +20,13 @@ namespace HHFO.Models
         public string MediaUrl { get; }
         public long TweetId { get; }
         public string Type { get; }
-        private Task task { get; set; }
 
         private CompositeDisposable Disposable = new CompositeDisposable();
 
-        public Media(MediaEntity entity)
+        public Media(long id, MediaEntity entity)
         {
             MediaUrl = entity.MediaUrlHttps;
-            TweetId = entity.Id;
+            TweetId = id;
             Type = entity.Type;
         }
 

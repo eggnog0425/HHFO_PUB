@@ -14,13 +14,19 @@ using System.Windows.Controls;
 
 namespace HHFO.Models
 {
-    public class TabList : Tab
+    public class TabList : TabBase
     {
-        public TabList(long id, ITweetPublisher tweetPublisher) : base(tweetPublisher)
+        public static async Task<TabList> Create(long id)
+        {
+            var ret = new TabList(id);
+            await ret.FetchTweetsAsync();
+            var listInfo = await Authorization.GetToken().Lists.ShowAsync(list_id => id, tweet_mode => "extended");
+            ret.Name = listInfo.Name;
+            return ret;
+        }
+        private TabList(long id) : base()
         {
             Id = id;
-            Name = Authorization.GetToken().Lists.Show(list_id => id, tweet_mode => "extended").Name;
-            _ = FetchTweetsAsync();
         }
 
         protected override async Task FetchTweetsAsync()
@@ -29,9 +35,7 @@ namespace HHFO.Models
             try
             {
                 var newTweets = Authorization.GetToken().Lists.StatusesAsync(list_id => Id, tweet_mode => "extended");
-                await AddTweetsAsync(newTweets);
-                RefleshShowTweets();
-                AddMedias();
+                await Tweets.AddTweetsAsync(newTweets);
             }
             catch (TwitterException)
             {
@@ -41,14 +45,14 @@ namespace HHFO.Models
 
         public override async Task ReloadPastAsync()
         {
-            var lastId = Tweets.Min(t => t.Id);
+            var lastId = Tweets.MinId();
                              
             var token = Authorization.GetToken();
 
             try
             {
                 var newTweets = token.Lists.StatusesAsync(list_id => Id, max_id => lastId, tweet_mode => "extended");
-                await AddTweetsAsync(newTweets);
+                await Tweets.AddTweetsAsync(newTweets);
             }
             catch (TwitterException)
             {
