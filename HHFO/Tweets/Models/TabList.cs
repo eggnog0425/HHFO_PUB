@@ -8,6 +8,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -19,27 +20,18 @@ namespace HHFO.Models
         {
             Id = id;
             Name = Authorization.GetToken().Lists.Show(list_id => id, tweet_mode => "extended").Name;
-            FetchTweets();
-
-            foreach (var tweet in Tweets.Where(tweet => Filter(tweet)))
-            {
-                ShowTweets.Add(tweet);
-            }
+            _ = FetchTweetsAsync();
         }
 
-        protected override void FetchTweets()
+        protected override async Task FetchTweetsAsync()
         {
             var token = Authorization.GetToken();
             try
             {
-                var newTweets = Authorization.GetToken().Lists.Statuses(list_id => Id, tweet_mode => "extended").Select(s => new Tweet(s)).AsEnumerable();
-                foreach (var newTweet in newTweets)
-                {
-                    if (!Tweets.Any(tweet => tweet.Id == newTweet.Id))
-                    {
-                        Tweets.Add(newTweet);
-                    }
-                };
+                var newTweets = Authorization.GetToken().Lists.StatusesAsync(list_id => Id, tweet_mode => "extended");
+                await AddTweetsAsync(newTweets);
+                RefleshShowTweets();
+                AddMedias();
             }
             catch (TwitterException)
             {
@@ -47,19 +39,16 @@ namespace HHFO.Models
             }
         }
 
-        public override void ReloadPast()
+        public override async Task ReloadPastAsync()
         {
-            var lastId = Tweets.Select(t => t.Id)
-                             .Min();
+            var lastId = Tweets.Min(t => t.Id);
+                             
             var token = Authorization.GetToken();
 
             try
             {
-                var newTweets = token.Lists.Statuses(list_id => Id, max_id => lastId, tweet_mode => "extended").AsEnumerable().Select(s => new Tweet(s));
-                foreach (var tweet in newTweets)
-                {
-                    Tweets.Add(tweet);
-                }
+                var newTweets = token.Lists.StatusesAsync(list_id => Id, max_id => lastId, tweet_mode => "extended");
+                await AddTweetsAsync(newTweets);
             }
             catch (TwitterException)
             {

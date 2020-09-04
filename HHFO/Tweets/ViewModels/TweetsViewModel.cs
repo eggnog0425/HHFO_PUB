@@ -94,7 +94,7 @@ namespace HHFO.ViewModels
             {
                 return;
             }
-            CurrentTab.ReloadPast();
+            CurrentTab.ReloadPastAsync();
         }
 
         private void OnTabCloseAction(MouseButtonEventArgs e)
