@@ -37,6 +37,7 @@ namespace HHFO.Models
 
         public long Id { get; protected set; }
         public string Name { get; protected set; }
+        public int SurrogateKey { get; protected set; }
 
         // チェックボックス・ラジオボタンの状態
         public ReactiveProperty<bool> IsFilteredLink { get; private set; } = new ReactiveProperty<bool>(false);
@@ -79,14 +80,15 @@ namespace HHFO.Models
         private Func<Tweet, bool> FilterImages = tweet => tweet.Media?[0].Type == "photo" || tweet.Media?[0].Type == "animated_gif";
         private Func<Tweet, bool> FilterVideos = tweet => tweet.Media?[0].Type == "video";
         private Func<Tweet, bool> FilterRetweeted = tweet => tweet.IsRetweetedTweet || tweet.QuotedTweet != null;
-
-        protected TabBase()
+        private EventHandler OnTick;
+        protected TabBase(long id, int surrogateKey)
         {
             Disposable = new CompositeDisposable();
 
-            Timer.Interval = TimeSpan.FromSeconds(10.0);
-            Timer.Tick += async (s, e) => await FetchTweetsAsync();
-            Timer.Start();
+            Id = id;
+            SurrogateKey = surrogateKey;
+
+            OnTick = async (s, e) => await FetchTweetsAsync();
 
             IsOrSearch = Tweets.IsOrSearch.ToReadOnlyReactiveProperty();
             OnCheckFilterLink = new ReactiveCommand()
@@ -244,8 +246,15 @@ namespace HHFO.Models
         public abstract Task ReloadPastAsync();
 
 
+
         public void Dispose()
         {
+            if (Timer != null)
+            {
+                Timer.Stop();
+                Timer.Tick -= OnTick;
+                Timer = null;
+            }
             this.Disposable.Dispose();
         }
     }

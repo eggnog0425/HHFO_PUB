@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Text;
 using System.Windows.Data;
 
-namespace HHFO.Models
+namespace HHFO.Models.UI
 {
     [ValueConversion(typeof(string), typeof(string))]
     public class ThumbnailConverter : IValueConverter

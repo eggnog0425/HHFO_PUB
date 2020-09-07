@@ -16,18 +16,15 @@ namespace HHFO.Models
 {
     public class TabList : TabBase
     {
-        public static async Task<TabList> Create(long id)
+        public static async Task<TabList> Create(long id, int surrogateKey)
         {
-            var ret = new TabList(id);
+            var ret = new TabList(id, surrogateKey);
             await ret.FetchTweetsAsync();
             var listInfo = await Authorization.GetToken().Lists.ShowAsync(list_id => id, tweet_mode => "extended");
             ret.Name = listInfo.Name;
             return ret;
         }
-        private TabList(long id) : base()
-        {
-            Id = id;
-        }
+        private TabList(long id, int surrogateKey) : base(id, surrogateKey){}
 
         protected override async Task FetchTweetsAsync()
         {

@@ -30,9 +30,53 @@
         </ListView.InputBindings>
         <ListView.View>
             <GridView>
-                <GridViewColumn DisplayMemberBinding="{Binding ScreenName}">
+                <GridViewColumn>
                     <GridViewColumn.Header>
-                        <TextBlock>ScreenName</TextBlock>
+                        <TextBlock>
+                            <TextBlock.Text>スクリーンネーム</TextBlock.Text>
+                            <TextBlock.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="テスト。以下入れたい項目"/>
+                                    <MenuItem Header="この列を非表示にする"/>
+                                    <MenuItem Header="非表示にした列を表示する"/>
+                                    <MenuItem Header="この列で昇順にソートする"/>
+                                    <MenuItem Header="この列で降順にソートする"/>
+                                </ContextMenu>
+                            </TextBlock.ContextMenu>
+                        </TextBlock>
+                    </GridViewColumn.Header>
+                    <GridViewColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock>
+                                <TextBlock.Text>
+                                    <MultiBinding Converter="{StaticResource MakeDispScreenName}">
+                                        <Binding Path="ScreenName" Mode="OneWay"/>
+                                        <Binding Path="RetweetedUserScreenName" Mode="OneWay"/>
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+                        </DataTemplate>
+                    </GridViewColumn.CellTemplate>
+                </GridViewColumn>
+                <GridViewColumn>
+                    <GridViewColumn.Header>
+                        <TextBlock>ユーザ名</TextBlock>
+                    </GridViewColumn.Header>
+                    <GridViewColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding UserName}">
+                            </TextBlock>
+                        </DataTemplate>
+                    </GridViewColumn.CellTemplate>
+                </GridViewColumn>
+                <GridViewColumn DisplayMemberBinding="{Binding UserId}">
+                    <GridViewColumn.Header>
+                        <TextBlock>ユーザID</TextBlock>
+                    </GridViewColumn.Header>
+                </GridViewColumn>
+                <GridViewColumn DisplayMemberBinding="{Binding Tweet}">
+                    <GridViewColumn.Header>
+                        <TextBlock>ユーザID</TextBlock>
                     </GridViewColumn.Header>
                 </GridViewColumn>
             </GridView>

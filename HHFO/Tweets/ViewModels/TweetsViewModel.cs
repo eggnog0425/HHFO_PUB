@@ -13,6 +13,7 @@ using Reactive.Bindings.Extensions;
 using Reactive.Bindings.ObjectExtensions;
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -49,11 +50,13 @@ namespace HHFO.ViewModels
         public ReactiveCommand<System.Windows.Input.MouseButtonEventArgs> OnTabClose { get; }
         public ReactiveCommand ReloadPast { get; }
         public ReactiveCommand<RoutedEventArgs> TabCloseCommand { get; }
+        private static ConcurrentDictionary<int, TabBase> SurrogateKeyDictionary { get; } = new ConcurrentDictionary<int, TabBase>();
 
 
         public TweetsViewModel(ListProvider ListIdProvider, ITweetPublisher tweetPublisher)
         {
             Disposable = new CompositeDisposable();
+
             this.ListProvider = ListIdProvider;
             ListId = this.ListProvider.Id.ToReadOnlyReactiveProperty();
             TweetPublisher = tweetPublisher;
@@ -120,42 +123,49 @@ namespace HHFO.ViewModels
             }
         }
 
-        private async Task OpenListTabAction (long id)
+        private async Task OpenListTabAction(long id)
         {
             if (id == 0)
             {
                 return;
             }
-
-            try
+            
+            await Task.Run(async () =>
             {
-                var tab = Tabs.FirstOrDefault(t => t.Id == id);
-                if (tab == null)
+                try
                 {
-                    tab = await TabList.Create(id);
-                    Tabs.Add(tab);
+                    var surrogateKey = SurrogateKeyDictionary.Keys.Max();
+                    var tab = await TabList.Create(id, surrogateKey);
+                    lock (Tabs)
+                    {
+                        Tabs.Add(tab);
+                    }
+                    SelectTabByVM(surrogateKey);
                 }
-                SelectTabByVM(id);
-            }
-            catch (TwitterException)
-            {
-                // TODO メッセージを発行する形に変更
-                //MessageBox.Show("リストの取得に失敗しました。");
-            }
+                catch (TwitterException)
+                {
+                        // TODO メッセージを発行する形に変更
+                        //MessageBox.Show("リストの取得に失敗しました。");
+                    }
+            }).ConfigureAwait(false);
         }
 
-        private void SelectTabByVM(long id)
+        private void SelectTabByVM(int surrogateKey)
         {
-            var i = 0;
-            foreach (TabBase item in TabControl.Items)
+            var d = Application.Current.Dispatcher;
+            d.Invoke(() =>
             {
-                if (item.Id == id)
+                var i = 0;
+                foreach (TabBase item in TabControl.Items)
                 {
-                    TabControl.SelectedIndex = i;
-                    return;
+                    if (item.SurrogateKey == surrogateKey)
+                    {
+                        TabControl.SelectedIndex = i;
+                        return;
+                    }
+                    i++;
                 }
-                i++;
-            }
+            });
         }
 
         public void Dispose()

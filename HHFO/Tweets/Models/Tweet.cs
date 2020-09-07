@@ -17,14 +17,16 @@ namespace HHFO.Models
         public long Id { get; private set; }
         public DateTimeOffset CreatedAt { get; private set; }
         public long UserId { get; private set; }
-        public string ScreenName { get; private set; }
+        public string ScreenName { get; private set; } = "";
+        public string UserName { get; private set; }
         public bool IsRetweetedTweet { get; private set; }
 
         // Retweetの場合のみ入る項目群
         public long RetweetedId { get; private set; }
         public DateTimeOffset RetweetedCreatedAt {get; private set;}
         public long RetweetedUserId { get; private set; }
-        public string RetweetedUserScreenName { get; private set; }
+        public string RetweetedUserScreenName { get; private set; } = "";
+        public string RetweetedUserName { get; private set; } = "";
 
         // Retweetの場合はRetweet先のstatusの値が入る項目群
         /// <summary>
@@ -45,6 +47,7 @@ namespace HHFO.Models
             CreatedAt = status.CreatedAt;
             UserId = status.User.Id ?? 0;
             ScreenName = status.User.ScreenName;
+            UserName = status.User.Name;
 
             IsRetweetedTweet = status.RetweetedStatus != null;
             if (IsRetweetedTweet)
@@ -53,6 +56,7 @@ namespace HHFO.Models
                 RetweetedCreatedAt = retweetedStatus.CreatedAt;
                 RetweetedUserId = retweetedStatus.User.Id ?? 0;
                 RetweetedUserScreenName = retweetedStatus.User.ScreenName;
+                RetweetedUserName = retweetedStatus.User.Name;
                 Media = retweetedStatus.ExtendedEntities?.Media.Select(m => new Media(retweetedStatus.Id, m)).ToArray();
             }
             else

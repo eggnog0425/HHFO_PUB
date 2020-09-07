@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace HHFO.Models
+namespace HHFO.Models.UI
 {
     public class Link
     {

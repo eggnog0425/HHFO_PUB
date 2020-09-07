@@ -11,14 +11,16 @@
              Name="mediaRoot">
     <ListView ItemsSource="{Binding Tweets.Medias, IsAsync=True}"
               VirtualizingPanel.IsVirtualizing="True"
-              ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+              ScrollViewer.CanContentScroll="False"
+              >
         <interactivity:Interaction.Triggers>
             <interactivity:EventTrigger EventName="SelectionChanged">
                 <reactiveInteractivity:EventToReactiveCommand Command="{Binding DataContext.CurrentTab.SelectionChangeMedia, ElementName=rootControl, Mode=OneWay}" />
             </interactivity:EventTrigger>
         </interactivity:Interaction.Triggers>
 
-        <ListView.ItemsPanel>
+        <ListView.ItemsPanel >
             <ItemsPanelTemplate>
                 <WrapPanel Orientation="Horizontal" />
             </ItemsPanelTemplate>
