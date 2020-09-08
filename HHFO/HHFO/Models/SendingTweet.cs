@@ -18,8 +18,8 @@ namespace HHFO.Models
     {
         private CompositeDisposable Disposable = new CompositeDisposable();
 
-        public ReactiveProperty<long> InReplyTo { get; private set; } = new ReactiveProperty<long>(0);
-        public ReactiveProperty<string> Text { get; set; } = new ReactiveProperty<string>("");
+        public ReactivePropertySlim<long> InReplyTo { get; private set; } = new ReactivePropertySlim<long>(0);
+        public ReactivePropertySlim<string> Text { get; set; } = new ReactivePropertySlim<string>("");
 
         /// <summary>
         /// 発言内容を初期から変えていない場合true。1文字以上入力するとfalse。発言全削除または発言成功でtrue。

@@ -5,6 +5,7 @@ using System.Security.Policy;
 using System.Text;
 using Unity;
 using HHFO.Models;
+using Reactive.Bindings;
 
 namespace HHFO.Models
 {
@@ -14,10 +15,11 @@ namespace HHFO.Models
         [Dependency]
         public IEventAggregator EventAggregator { get; set; }
 
-        public long Id { get; set; }
+        public ReactivePropertySlim<long> Id { get; set; } = new ReactivePropertySlim<long>();
         public void Publish()
         {
-            var list = new TwittertListId() { Id = this.Id};
+            var list = new TwittertListId();
+            list.Id.Value = this.Id.Value;
             this.EventAggregator
                 .GetEvent<ListEvent>()
                 .Publish(list);

@@ -19,7 +19,7 @@ namespace HHFO.Models
         private List<Tweet> _tweets { get; set; } = new List<Tweet>();
         private ObservableCollection<Tweet> _showTweets { get; set; } = new ObservableCollection<Tweet>();
         public ReadOnlyReactiveCollection<Tweet> ShowTweets { get; private set; }
-        public ReactiveProperty<bool> IsOrSearch { get; set; } = new ReactiveProperty<bool>(true);
+        public ReactivePropertySlim<bool> IsOrSearch { get; set; } = new ReactivePropertySlim<bool>(true);
         private ObservableCollection<Func<Tweet, bool>> Predicates { get; set; } = new ObservableCollection<Func<Tweet, bool>>();
         private ObservableCollection<Media> _medias { get; set; } = new ObservableCollection<Media>();
         public ReadOnlyReactiveCollection<Media> Medias { get; private set; }
@@ -84,7 +84,7 @@ namespace HHFO.Models
             }
         }
 
-        public async Task AddTweetsAsync(Task<ListedResponse<Status>> req)
+        public async Task<RateLimit> AddTweetsAsync(Task<ListedResponse<Status>> req)
         {
             var statuses = await req;
             var tweets = statuses.Select(s => new Tweet(s));
@@ -95,6 +95,7 @@ namespace HHFO.Models
             }
                 RefleshShowTweets();
                 AddMedias();
+            return statuses.RateLimit;
         }
 
         protected bool Filter(Tweet tweet)

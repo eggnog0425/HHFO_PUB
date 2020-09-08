@@ -1,4 +1,5 @@
 ﻿using CoreTweet;
+using NLog;
 using Reactive.Bindings;
 using System;
 using System.Collections.Generic;
@@ -10,39 +11,27 @@ using System.Threading.Tasks;
 namespace HHFO.Models.Logic.API
 {
     public abstract class CalcReloadTimeBase : ICalcReloadTime
+
     {
+        protected Logger logger = LogManager.GetCurrentClassLogger();
+
+        protected readonly TimeSpan MinReloadTime = TimeSpan.FromSeconds(1.0d);
+
         public int CntTabs;
 
-        public abstract TimeSpan CalcReloadTime();
+        public abstract TimeSpan CalcReloadTime(RateLimit rateLimit);
 
         protected int ApiLimit;
-
-        /// <summary>
-        /// 次にAPIがリセットされる時間(UTCのエポック秒)
-        /// </summary>
-        protected DateTimeOffset ApiLimitReset;
-
-        /// <summary>
-        /// リセットまでに叩ける回数
-        /// </summary>
-        protected int ApiLimitRemaining;
-
-
-        protected ReactiveProperty<TimeSpan> _nextReloadTime = new ReactiveProperty<TimeSpan>();
-        public ReadOnlyReactiveProperty<TimeSpan> NextReloadTime;
 
         public CalcReloadTimeBase(int cntTabs, RateLimit rateLimit)
         {
             CntTabs = cntTabs;
-            ApiLimit = rateLimit.Limit;
-            ApiLimitRemaining = rateLimit.Remaining;
-            ApiLimitReset = rateLimit.Reset;
         }
 
-        public void AddTab()
+        public TimeSpan AddTab(RateLimit rateLimit)
         {
             _ = Interlocked.Increment(ref CntTabs);
-            CalcReloadTime();
+            return CalcReloadTime(rateLimit);
         }
 
         public void AddTabs(int numAdd)
@@ -67,5 +56,10 @@ namespace HHFO.Models.Logic.API
             }
             _ = Interlocked.Add(ref CntTabs, -numRemove);
         }
+        public void WhenManualUpdate(RateLimit rateLimit)
+        {
+
+        }
+
     }
 }

@@ -61,8 +61,13 @@
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
                                 Style="{StaticResource MaterialDesignFlatButton}"
-                                Command="{Binding DataContext.TabCloseCommand, ElementName=rootControl, Mode=OneWay}"
+                                Tag="{Binding SurrogateKey}"
                                 ToolTip="Icon">
+                            <interactivity:Interaction.Triggers>
+                                <interactivity:EventTrigger EventName="Click">
+                                    <reactiveInteractivity:EventToReactiveCommand Command="{Binding DataContext.TabCloseCommand, ElementName=rootControl ,Mode=OneWay}" />
+                                </interactivity:EventTrigger>
+                            </interactivity:Interaction.Triggers>
                             <materialDesign:PackIcon Grid.Column="1" 
                                                  HorizontalAlignment="Center"
                                                  VerticalAlignment="Center"
@@ -121,16 +126,20 @@
                                       IsChecked="{Binding IsFilteredRetweeted.Value, Mode=OneWay, IsAsync=True}" 
                                       Command="{Binding OnCheckFilterRetweeted, Mode=OneWay, IsAsync=True}">
                             </CheckBox>
-                            <RadioButton Content="いずれかの条件を満たす呟きを表示する"
+                            <CheckBox Content="全ての条件を満たす呟きのみ表示する"
                                          Grid.Row="1"
                                          Grid.Column="0"
-                                         IsChecked="{Binding IsOrSearch.Value, Mode=OneWay, IsAsync=True}"
-                                         Command="{Binding OnClickOrSearch, Mode=OneWay, IsAsync=True}"/>
-                            <RadioButton Content="全ての条件を満たす呟きを表示する"
-                                         Grid.Row="1"
-                                         Grid.Column="1"
                                          IsChecked ="{Binding Path=IsOrSearch.Value, Converter={StaticResource ReverseBool}, Mode=OneWay, IsAsync=True}"
                                          Command="{Binding OnClickAndSearch, Mode=OneWay, IsAsync=True}"/>
+                        <TextBlock Text="{Binding DispNextReloadTime.Value, Mode=OneWay, StringFormat=次回更新時刻: {0}}"
+                                   Grid.Row="1"
+                                   Grid.Column="1"/>
+                        <TextBlock Text="{Binding DispNextResetTime.Value, Mode=OneWay, StringFormat=APIリセット時刻: {0}}"
+                                   Grid.Row="1"
+                                   Grid.Column="2"/>
+                        <TextBlock Text="{Binding DispLateRemaining.Value, Mode=OneWay, StringFormat=残API: {0}}"
+                                   Grid.Row="1"
+                                   Grid.Column="3"/>
                         <views:NormalTweetsGrid Visibility="{Binding NormalGridVisibility.Value,Mode=OneWay}" x:Name="NormalTweetView"
                                                 Grid.Row="2"
                                                 Grid.Column="0"

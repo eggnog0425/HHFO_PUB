@@ -15,7 +15,7 @@ namespace HHFO.Models
     {
         // 常に元tweetの値が入る項目群
         public long Id { get; private set; }
-        public DateTimeOffset CreatedAt { get; private set; }
+        public DateTimeOffset? CreatedAt { get; private set; }
         public long UserId { get; private set; }
         public string ScreenName { get; private set; } = "";
         public string UserName { get; private set; }
@@ -23,7 +23,7 @@ namespace HHFO.Models
 
         // Retweetの場合のみ入る項目群
         public long RetweetedId { get; private set; }
-        public DateTimeOffset RetweetedCreatedAt {get; private set;}
+        public DateTimeOffset? RetweetedCreatedAt { get; private set; }
         public long RetweetedUserId { get; private set; }
         public string RetweetedUserScreenName { get; private set; } = "";
         public string RetweetedUserName { get; private set; } = "";
@@ -32,14 +32,14 @@ namespace HHFO.Models
         /// <summary>
         /// ListView用のtweet本文
         /// </summary>
-        public string PlainFullText { get; private set; }
+        public string FullText { get; private set; }
 
-        public Tweet QuotedTweet { get; private set; }
         public bool HasLinks { get; private set; }
         public string[] Links { get; private set; }
         public bool HasMedias { get; private set; }
-        public string Via { get; private set;}
+        public string Source { get; private set;}
         public Media[] Media { get; private set; }
+        public Tweet QuotedTweet { get; private set; }
 
         public Tweet(Status status)
         {
@@ -57,11 +57,26 @@ namespace HHFO.Models
                 RetweetedUserId = retweetedStatus.User.Id ?? 0;
                 RetweetedUserScreenName = retweetedStatus.User.ScreenName;
                 RetweetedUserName = retweetedStatus.User.Name;
+                
                 Media = retweetedStatus.ExtendedEntities?.Media.Select(m => new Media(retweetedStatus.Id, m)).ToArray();
+                FullText = retweetedStatus.FullText;
+                Links = retweetedStatus.Entities?.Urls?.Select(s => s.ExpandedUrl).ToArray();
+                HasLinks = 0 < (Links?.Count() ?? 0);
+                Source = retweetedStatus.Source;
+                QuotedTweet = retweetedStatus.QuotedStatus == null
+                    ? null
+                    : new Tweet(retweetedStatus.QuotedStatus);
             }
             else
             {
                 Media = status.ExtendedEntities?.Media.Select(m => new Media(Id, m)).ToArray();
+                FullText = status.FullText;
+                Links = status.Entities?.Urls?.Select(s => s.ExpandedUrl).ToArray();
+                HasLinks = 0 < (Links?.Count() ?? 0);
+                Source = status.Source;
+                QuotedTweet = status.QuotedStatus == null
+                    ? null
+                    : new Tweet(status.QuotedStatus);
             }
         }
 

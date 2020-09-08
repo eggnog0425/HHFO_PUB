@@ -32,7 +32,8 @@ namespace HHFO.Models
             try
             {
                 var newTweets = Authorization.GetToken().Lists.StatusesAsync(list_id => Id, tweet_mode => "extended");
-                await Tweets.AddTweetsAsync(newTweets);
+                Limit = await Tweets.AddTweetsAsync(newTweets);
+                OnReloaded();
             }
             catch (TwitterException)
             {
@@ -50,6 +51,7 @@ namespace HHFO.Models
             {
                 var newTweets = token.Lists.StatusesAsync(list_id => Id, max_id => lastId, tweet_mode => "extended");
                 await Tweets.AddTweetsAsync(newTweets);
+                OnReloaded();
             }
             catch (TwitterException)
             {

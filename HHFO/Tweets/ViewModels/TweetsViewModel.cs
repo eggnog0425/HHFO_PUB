@@ -1,6 +1,7 @@
 ﻿using ControlzEx.Standard;
 using CoreTweet;
 using HHFO.Models;
+using HHFO.Models.Logic.API;
 using HHFO.Models.Logic.EventAggregator.Tweet;
 using ImTools;
 using MahApps.Metro.Controls;
@@ -29,28 +30,25 @@ namespace HHFO.ViewModels
 {
     public class TweetsViewModel : BindableBase, IDisposable
     {
-        public ReactiveProperty<bool> IsExpandedHeader { get; private set; } = new ReactiveProperty<bool>(true);
-
         private static Logger logger = LogManager.GetCurrentClassLogger();
         private CompositeDisposable Disposable { get; set; }
         private ListProvider ListProvider { get; set; }
         public TabBase CurrentTab { get; private set; }
 
-        private FrameworkElement ParentElement { get; set; }
         private TabControl TabControl { get; set; }
         private ITweetPublisher TweetPublisher { get; set; }
         public ModifierKeys ModifierKeys { get; } = ModifierKeys.Control | ModifierKeys.Shift;
 
-        private ReadOnlyReactiveProperty<long> ListId { get; }
+        private ReadOnlyReactivePropertySlim<long> ListId { get; }
         public ObservableCollection<TabBase> Tabs { get; }
-        public ReactiveProperty<bool> IsOpenCheckBoxArea { get; set; } = new ReactiveProperty<bool>(true);
+        public ReactivePropertySlim<bool> IsOpenCheckBoxArea { get; set; } = new ReactivePropertySlim<bool>(true);
 
         public ReactiveCommand<RoutedEventArgs> OnLoaded { get; }
         public ReactiveCommand<SelectionChangedEventArgs> OnCurrentTabChanged { get; }
-        public ReactiveCommand<System.Windows.Input.MouseButtonEventArgs> OnTabClose { get; }
         public ReactiveCommand ReloadPast { get; }
         public ReactiveCommand<RoutedEventArgs> TabCloseCommand { get; }
         private static ConcurrentDictionary<int, TabBase> SurrogateKeyDictionary { get; } = new ConcurrentDictionary<int, TabBase>();
+        private static CalcReloadTimeBase ListReloadTimeCalclator = null;
 
 
         public TweetsViewModel(ListProvider ListIdProvider, ITweetPublisher tweetPublisher)
@@ -58,15 +56,15 @@ namespace HHFO.ViewModels
             Disposable = new CompositeDisposable();
 
             this.ListProvider = ListIdProvider;
-            ListId = this.ListProvider.Id.ToReadOnlyReactiveProperty();
+            ListId = this.ListProvider.Id.ToReadOnlyReactivePropertySlim();
             TweetPublisher = tweetPublisher;
             Tabs = new ObservableCollection<TabBase>();
+
+            // TODO 前回起動時のタブを呼び出す処理を追加
 
             OnLoaded = new ReactiveCommand<RoutedEventArgs>()
                 .AddTo(Disposable);
             OnCurrentTabChanged = new ReactiveCommand<SelectionChangedEventArgs>()
-                .AddTo(Disposable);
-            OnTabClose = new ReactiveCommand<System.Windows.Input.MouseButtonEventArgs>()
                 .AddTo(Disposable);
             ReloadPast = new ReactiveCommand()
                 .AddTo(Disposable);
@@ -81,13 +79,8 @@ namespace HHFO.ViewModels
                 .AddTo(Disposable);
             ReloadPast.Subscribe(_ => ReloadPastAction())
                 .AddTo(Disposable);
-            TabCloseCommand.Subscribe(e => TabClose(e))
+            TabCloseCommand.Subscribe(e => OnTabCloseAction(e))
                 .AddTo(Disposable);
-        }
-
-        private void TabClose(RoutedEventArgs e)
-        {
-
         }
 
         private void ReloadPastAction()
@@ -99,9 +92,12 @@ namespace HHFO.ViewModels
             CurrentTab.ReloadPastAsync();
         }
 
-        private void OnTabCloseAction(MouseButtonEventArgs e)
+        private void OnTabCloseAction(RoutedEventArgs e)
         {
-            var hoge = e.Source.GetType().ToString();
+            if (e.Source is Button b)
+            {
+                //(long)b.Tag
+            }
         }
 
         private void OnCurrentTabChangedAction()
@@ -111,13 +107,13 @@ namespace HHFO.ViewModels
 
         private void OnLoadedAction(RoutedEventArgs e)
         {
-            ParentElement = (FrameworkElement)e.OriginalSource;
+            var parentElement = (FrameworkElement)e.OriginalSource;
 
-            foreach (var item in ParentElement.GetChildObjects())
+            foreach (var item in parentElement.GetChildObjects())
             {
-                if (item is TabControl)
+                if (item is TabControl tc)
                 {
-                    TabControl = item as TabControl;
+                    TabControl = tc;
                     return;
                 }
             }
@@ -129,25 +125,61 @@ namespace HHFO.ViewModels
             {
                 return;
             }
-            
-            await Task.Run(async () =>
+            var surrogateKey = GetTabIndex();
+            TabBase tab = null;
+            try
             {
-                try
-                {
-                    var surrogateKey = SurrogateKeyDictionary.Keys.Max();
-                    var tab = await TabList.Create(id, surrogateKey);
-                    lock (Tabs)
-                    {
-                        Tabs.Add(tab);
-                    }
-                    SelectTabByVM(surrogateKey);
-                }
-                catch (TwitterException)
-                {
-                        // TODO メッセージを発行する形に変更
-                        //MessageBox.Show("リストの取得に失敗しました。");
-                    }
-            }).ConfigureAwait(false);
+                tab = await TabList.Create(id, surrogateKey);
+            }
+            catch
+            {
+                ListProvider.Id.Value = 0;
+                return;
+            }
+            AddTab(tab);
+            if (ListReloadTimeCalclator == null)
+            {
+                var targetCnt = Tabs.Count() == 0
+                    ? 1
+                    : Tabs.Count(t => t.GetType() == typeof(TabList));
+                ListReloadTimeCalclator = CalcReloadTimeList.GetInstance(targetCnt, tab.Limit);
+                tab.RefleshTimer(ListReloadTimeCalclator.CalcReloadTime(tab.Limit));
+            }
+            else
+            {
+                tab.RefleshTimer(ListReloadTimeCalclator.AddTab(tab.Limit));
+            }
+            ListProvider.Id.Value = 0;
+        }
+
+        private void RefleshReloadTime(TimeSpan ts, Type T)
+        {
+            foreach(var tab in Tabs.Where(tab => tab.GetType() == T))
+            {
+                tab.RefleshTimer(ts);
+            }
+        }
+
+        private void AddTab(TabBase tab)
+        {
+            lock (Tabs)
+            {
+                Tabs.Add(tab);
+                SelectTabByVM(tab.SurrogateKey);
+            }
+            tab.Reloaded += HandleReloaded;
+        }
+
+        private int GetTabIndex()
+        {
+            var surrogateKey = SurrogateKeyDictionary.Count() == 0
+                ? 0
+                : SurrogateKeyDictionary.Keys.Max() + 1;
+            while (!SurrogateKeyDictionary.TryAdd(surrogateKey, null))
+            {
+                surrogateKey++;
+            }
+            return surrogateKey;
         }
 
         private void SelectTabByVM(int surrogateKey)
@@ -166,6 +198,16 @@ namespace HHFO.ViewModels
                     i++;
                 }
             });
+        }
+
+        private void HandleReloaded(object sender, EventArgs e)
+        {
+            if (sender is TabList tab)
+            {
+                var limit = tab.Limit;
+                var nextReloadTime = tab.RefleshTimer(ListReloadTimeCalclator.CalcReloadTime(limit));
+                tab.RefleshDispApiInfo(nextReloadTime);
+            }
         }
 
         public void Dispose()

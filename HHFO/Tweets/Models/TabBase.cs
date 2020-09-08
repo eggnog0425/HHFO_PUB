@@ -40,11 +40,11 @@ namespace HHFO.Models
         public int SurrogateKey { get; protected set; }
 
         // チェックボックス・ラジオボタンの状態
-        public ReactiveProperty<bool> IsFilteredLink { get; private set; } = new ReactiveProperty<bool>(false);
-        public ReactiveProperty<bool> IsFilteredImages { get; private set; } = new ReactiveProperty<bool>(false);
-        public ReactiveProperty<bool> IsFilteredVideos { get; private set; } = new ReactiveProperty<bool>(false);
-        public ReactiveProperty<bool> IsFilteredRetweeted { get; private set; } = new ReactiveProperty<bool>(false);
-        public ReadOnlyReactiveProperty<bool> IsOrSearch { get; }
+        public ReactivePropertySlim<bool> IsFilteredLink { get; private set; } = new ReactivePropertySlim<bool>(false);
+        public ReactivePropertySlim<bool> IsFilteredImages { get; private set; } = new ReactivePropertySlim<bool>(false);
+        public ReactivePropertySlim<bool> IsFilteredVideos { get; private set; } = new ReactivePropertySlim<bool>(false);
+        public ReactivePropertySlim<bool> IsFilteredRetweeted { get; private set; } = new ReactivePropertySlim<bool>(false);
+        public ReadOnlyReactivePropertySlim<bool> IsOrSearch { get; }
 
         public List<Tweet> SelectedTweets { get; set; } = new List<Tweet>();
         public Tweets Tweets { get; } = new Tweets();
@@ -55,9 +55,7 @@ namespace HHFO.Models
         public ReactiveCommand OnCheckFilterImages { get; }
         public ReactiveCommand OnCheckFilterVideos { get; }
         public ReactiveCommand OnCheckFilterRetweeted { get; }
-        public ReactiveCommand OnClickOrSearch { get; }
         public ReactiveCommand OnClickAndSearch { get; }
-        public ReactiveCommand IsCheckedAndSearch { get; }
         public ReactiveCommand SendReply { get; }
         public ReactiveCommand<SelectionChangedEventArgs> SelectionChange { get; }
 
@@ -72,15 +70,23 @@ namespace HHFO.Models
         /// </summary>
         private DispatcherTimer Timer { get; set; } = new DispatcherTimer(DispatcherPriority.Normal);
 
+        public RateLimit Limit { get; protected set; }
+        public ReactivePropertySlim<string> DispNextReloadTime { get; private set; } = new ReactivePropertySlim<string>();
+        public ReactivePropertySlim<string> DispNextResetTime { get; private set; } = new ReactivePropertySlim<string>();
+        public ReactivePropertySlim<string> DispLateRemaining { get; private set; } = new ReactivePropertySlim<string>();
+
         // 表示形式の切替
-        public ReactiveProperty<Visibility> NormalGridVisibility { get; } = new ReactiveProperty<Visibility>(Visibility.Visible);
-        public ReactiveProperty<Visibility> MediaGridVisibility { get; } = new ReactiveProperty<Visibility>(Visibility.Collapsed);
+        public ReactivePropertySlim<Visibility> NormalGridVisibility { get; } = new ReactivePropertySlim<Visibility>(Visibility.Visible);
+        public ReactivePropertySlim<Visibility> MediaGridVisibility { get; } = new ReactivePropertySlim<Visibility>(Visibility.Collapsed);
 
         private Func<Tweet, bool> FilterLink = tweet => tweet.HasLinks;
         private Func<Tweet, bool> FilterImages = tweet => tweet.Media?[0].Type == "photo" || tweet.Media?[0].Type == "animated_gif";
         private Func<Tweet, bool> FilterVideos = tweet => tweet.Media?[0].Type == "video";
         private Func<Tweet, bool> FilterRetweeted = tweet => tweet.IsRetweetedTweet || tweet.QuotedTweet != null;
         private EventHandler OnTick;
+
+        public event EventHandler<EventArgs> Reloaded;
+
         protected TabBase(long id, int surrogateKey)
         {
             Disposable = new CompositeDisposable();
@@ -90,7 +96,7 @@ namespace HHFO.Models
 
             OnTick = async (s, e) => await FetchTweetsAsync();
 
-            IsOrSearch = Tweets.IsOrSearch.ToReadOnlyReactiveProperty();
+            IsOrSearch = Tweets.IsOrSearch.ToReadOnlyReactivePropertySlim();
             OnCheckFilterLink = new ReactiveCommand()
                 .AddTo(Disposable);
             OnCheckFilterImages = new ReactiveCommand()
@@ -99,11 +105,7 @@ namespace HHFO.Models
                 .AddTo(Disposable);
             OnCheckFilterRetweeted = new ReactiveCommand()
                 .AddTo(Disposable);
-            OnClickOrSearch = new ReactiveCommand()
-                .AddTo(Disposable);
             OnClickAndSearch = new ReactiveCommand()
-                .AddTo(Disposable);
-            IsCheckedAndSearch = new ReactiveCommand()
                 .AddTo(Disposable);
             SendReply = new ReactiveCommand()
                 .AddTo(Disposable);
@@ -122,8 +124,6 @@ namespace HHFO.Models
                 .AddTo(Disposable);
             OnCheckFilterRetweeted.Subscribe(async _ => await OnCheckFilterRetweetedAction())
                 .AddTo(Disposable);
-            OnClickOrSearch.Subscribe(_ => OnClickOrSearchAction())
-                .AddTo(Disposable);
             OnClickAndSearch.Subscribe(_ => OnClickAndSearchAction())
                 .AddTo(Disposable);
             SendReply.Subscribe(_ => SendReplyAction())
@@ -132,6 +132,7 @@ namespace HHFO.Models
                 .AddTo(Disposable);
             // SaveImages.Subscribe(e => SaveImagesAction(e))
             //    .AddTo(Disposable);
+
         }
 
         // TODO Modelに移管
@@ -208,6 +209,11 @@ namespace HHFO.Models
             await ChangePredicates(isFiltered, FilterRetweeted);
         }
 
+
+        public virtual void OnReloaded(EventArgs e = null)
+        {
+            Reloaded?.Invoke(this, e ?? EventArgs.Empty);
+        }
         private async Task ChangePredicates(bool isFiltered, Func<Tweet, bool> func)
         {
             if (isFiltered)
@@ -233,19 +239,35 @@ namespace HHFO.Models
             }
         }
 
-        public void OnClickOrSearchAction()
-        {
-            Tweets.IsOrSearch.Value = true;
-        }
-
         public void OnClickAndSearchAction()
         {
-            Tweets.IsOrSearch.Value = false;
+            lock (Tweets.IsOrSearch)
+            {
+                Tweets.IsOrSearch.Value = !Tweets.IsOrSearch.Value;
+            }
         }
 
         public abstract Task ReloadPastAsync();
 
+        public DateTimeOffset RefleshTimer(TimeSpan ts)
+        {
+            if (Timer != null)
+            {
+                Timer.Stop();
+                Timer.Tick -= OnTick;
+                Timer.Interval = ts;
+                Timer.Tick += OnTick;
+                Timer.Start();
+            }
+                return DateTimeOffset.Now.ToLocalTime() + ts;
+        }
 
+        public void RefleshDispApiInfo(DateTimeOffset nextReloadTime)
+        {
+            DispNextReloadTime.Value = nextReloadTime.ToString("G");
+            DispLateRemaining.Value = Limit.Remaining.ToString();
+            DispNextResetTime.Value = Limit.Reset.ToLocalTime().ToString("G");
+        }
 
         public void Dispose()
         {

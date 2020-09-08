@@ -9,8 +9,8 @@ namespace HHFO.Models
 {
     public class ListProvider : BindableBase
     {
-        private ReactiveProperty<long> id;
-        public ReactiveProperty<long> Id
+        private ReactivePropertySlim<long> id;
+        public ReactivePropertySlim<long> Id
         {
             get { return id; }
             private set
@@ -22,11 +22,12 @@ namespace HHFO.Models
 
         public ListProvider(IEventAggregator eventAggregator)
         {
-            id = new ReactiveProperty<long>();
+            id = new ReactivePropertySlim<long>();
             eventAggregator
                 .GetEvent<ListEvent>()
                 .Subscribe(x => {
-                    Id.Value = x.Id;
+                    Id.Value = x.Id.Value;
+                    Id.ForceNotify();
                     });
         }
     }

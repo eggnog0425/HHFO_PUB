@@ -40,16 +40,15 @@ namespace HHFO.ViewModels
         public ReactiveCommand OpenTweetFlyOut { get; }
         public ReactiveCommand<KeyEventArgs> SendTweet { get; }
 
-        public ReactiveProperty<bool> IsOpenTweetFlyOut { get; } = new ReactiveProperty<bool>(false);
-        public ReactiveProperty<bool> IsOpenAuthFlyOut { get; } = new ReactiveProperty<bool>(false);
-        public ReactiveProperty<String> Pin { get; set; } = new ReactiveProperty<string>();
-        public ReactiveProperty<Visibility> PinError { get; } = new ReactiveProperty<Visibility>(Visibility.Collapsed);
-        public ReactiveProperty<Visibility> MenuVisibility { get; } = new ReactiveProperty<Visibility>(Visibility.Hidden);
-        public ReactiveProperty<Visibility> SendErrorVisibility { get; } = new ReactiveProperty<Visibility>(Visibility.Collapsed);
+        public ReactivePropertySlim<bool> IsOpenTweetFlyOut { get; } = new ReactivePropertySlim<bool>(false);
+        public ReactivePropertySlim<bool> IsOpenAuthFlyOut { get; } = new ReactivePropertySlim<bool>(false);
+        public ReactivePropertySlim<String> Pin { get; set; } = new ReactivePropertySlim<string>();
+        public ReactivePropertySlim<Visibility> PinError { get; } = new ReactivePropertySlim<Visibility>(Visibility.Collapsed);
+        public ReactivePropertySlim<Visibility> MenuVisibility { get; } = new ReactivePropertySlim<Visibility>(Visibility.Hidden);
+        public ReactivePropertySlim<Visibility> SendErrorVisibility { get; } = new ReactivePropertySlim<Visibility>(Visibility.Collapsed);
         public SendingTweet Tweet { get; private set; } = new SendingTweet();
 
         public ObservableCollection<CoreTweet.List> Lists { get; private set; } = new ObservableCollection<CoreTweet.List>();
-        public ReactiveProperty<double> TweetAreaHeight { get; private set; } = new ReactiveProperty<double>(0.0d);
 
         private bool IsOpenSetting { get; set; } = false;
 
@@ -105,7 +104,7 @@ namespace HHFO.ViewModels
 
         private void OpenListAction(MouseButtonEventArgs e)
         {
-            ListPublisher.Id = long.Parse(((TextBlock)e.Source).Tag?.ToString() ?? "0");
+            ListPublisher.Id.Value = long.Parse(((TextBlock)e.Source).Tag?.ToString() ?? "0");
             ListPublisher.Publish();
         }
 

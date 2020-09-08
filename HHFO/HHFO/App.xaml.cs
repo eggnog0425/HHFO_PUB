@@ -17,6 +17,7 @@ using System.Xml;
 using Unity;
 using System.Linq;
 using HHFO.Models.Logic.EventAggregator.Tweet;
+using System.Globalization;
 
 namespace HHFO
 {
@@ -48,6 +49,9 @@ namespace HHFO
         {
             try
             {
+                Thread.CurrentThread.CurrentCulture = new CultureInfo("ja-JP");
+                Thread.CurrentThread.CurrentUICulture = new CultureInfo("ja-JP");
+
                 Reactive.Bindings.UIDispatcherScheduler.Initialize();
                 var settingUtils = new SettingUtils();
                 var userSetting = settingUtils.getUserSetting();

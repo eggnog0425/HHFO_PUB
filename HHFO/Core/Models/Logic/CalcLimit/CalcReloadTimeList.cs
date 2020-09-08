@@ -11,50 +11,61 @@ namespace HHFO.Models.Logic.API
     public sealed class CalcReloadTimeList : CalcReloadTimeBase
     {
         private CalcReloadTimeList(int cntTabs, RateLimit rateLimit) : base(cntTabs, rateLimit) {}
-        private CalcReloadTimeList Instance = null;
-
+        private static CalcReloadTimeList Instance = null;
+            
         /// <summary>
         /// 手動更新とかで余分に更新する可能性があるので少しバッファをとる
         /// </summary>
-        private const int Buffer = 10;
+        private const int Buffer = 2;
 
-        public CalcReloadTimeList GetInstance(int cntTabs, RateLimit rateLimit)
+        public static CalcReloadTimeList GetInstance(int cntTabs, RateLimit rateLimit)
         {
-            lock(Instance)
+
+            if (Instance != null)
             {
-                if (Instance != null)
-                {
-                    Instance.ApiLimitReset = rateLimit.Reset;
-                    Instance.ApiLimitRemaining = rateLimit.Remaining;
-                    Instance.ApiLimitReset = rateLimit.Reset;
+                    Instance.ApiLimit = rateLimit.Limit;
                     return Instance;
-                }
-                Instance = new CalcReloadTimeList(cntTabs, rateLimit);
-                Instance.NextReloadTime = Instance._nextReloadTime.ToReadOnlyReactiveProperty();
             }
+            Instance = new CalcReloadTimeList(cntTabs, rateLimit);
+
             return Instance;
         }
 
-        public override TimeSpan CalcReloadTime()
+    public override TimeSpan CalcReloadTime(RateLimit rateLimit)
         {
             var currentTime = DateTimeOffset.Now.ToUniversalTime();
-            var remainingTime= ApiLimitReset - currentTime;
+            var remainingTime= rateLimit.Reset - currentTime;
 
             // 切り捨てたいからint/intでシンプルに
-            var totalRemaining = ApiLimitRemaining / CntTabs;
+            var totalRemaining = rateLimit.Remaining / CntTabs;
             if (totalRemaining == 0)
             {
-                _nextReloadTime.Value = remainingTime.Add(TimeSpan.FromSeconds(1.5d));
+                if (TimeSpan.Zero < (rateLimit.Reset - DateTimeOffset.Now))
+                {
+                    return CompareMinReloadTime(remainingTime.Add(TimeSpan.FromSeconds(1.5d)));
+                }
+                else
+                {
+                    var limitDictionary = Authorization.GetToken().Application.RateLimitStatus("lists").GetValueOrDefault("lists");
+                    RateLimit limit = null;
+                    if (limitDictionary.TryGetValue("/lists/statuses", out limit))
+                    {
+                        return CompareMinReloadTime(CalcReloadTime(limit));
+                    }
+                }
             }
             else if (totalRemaining <= Buffer)
             {
-                _nextReloadTime.Value = TimeSpan.FromTicks(remainingTime.Ticks / totalRemaining);
+                return CompareMinReloadTime(TimeSpan.FromTicks(remainingTime.Ticks / totalRemaining));
             }
-            else
-            {
-                _nextReloadTime.Value = TimeSpan.FromTicks(remainingTime.Ticks / (totalRemaining - Buffer));
-            }
-            return _nextReloadTime.Value;
+            return CompareMinReloadTime(TimeSpan.FromTicks(remainingTime.Ticks / (totalRemaining - Buffer)));
+        }
+
+        private TimeSpan CompareMinReloadTime(TimeSpan reloadTime)
+        {
+            return MinReloadTime < reloadTime
+                ? reloadTime
+                : MinReloadTime;
         }
     }
 }

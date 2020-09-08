@@ -25,6 +25,19 @@
             </interactivity:EventTrigger>
         </interactivity:Interaction.Triggers>
 
+        <ListView.ItemContainerStyle>
+            <Style TargetType="ListViewItem"
+                   BasedOn="{StaticResource MaterialDesignGridViewItem}">
+
+                <Setter Property="ContextMenu">
+                    <Setter.Value>
+                        <ContextMenu>
+                            <MenuItem Header="リツイート"></MenuItem>
+                        </ContextMenu>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ListView.ItemContainerStyle>
         <ListView.InputBindings>
             <KeyBinding Gesture="Shift + Ctrl + Enter" Command="{Binding DataContext.SendReply, Mode=OneWay, ElementName=rootControl}"/>
         </ListView.InputBindings>
@@ -50,8 +63,8 @@
                             <TextBlock>
                                 <TextBlock.Text>
                                     <MultiBinding Converter="{StaticResource MakeDispScreenName}">
-                                        <Binding Path="ScreenName" Mode="OneWay"/>
-                                        <Binding Path="RetweetedUserScreenName" Mode="OneWay"/>
+                                        <Binding Path="ScreenName" Mode="OneTime"/>
+                                        <Binding Path="RetweetedUserScreenName" Mode="OneTime"/>
                                     </MultiBinding>
                                 </TextBlock.Text>
                             </TextBlock>
@@ -64,20 +77,56 @@
                     </GridViewColumn.Header>
                     <GridViewColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding UserName}">
+                            <TextBlock Text="{Binding UserName, Mode=OneTime}">
                             </TextBlock>
                         </DataTemplate>
                     </GridViewColumn.CellTemplate>
                 </GridViewColumn>
-                <GridViewColumn DisplayMemberBinding="{Binding UserId}">
+                <GridViewColumn>
                     <GridViewColumn.Header>
                         <TextBlock>ユーザID</TextBlock>
                     </GridViewColumn.Header>
+                    <GridViewColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding UserId, Mode=OneTime}"/>
+                        </DataTemplate>
+                    </GridViewColumn.CellTemplate>
                 </GridViewColumn>
-                <GridViewColumn DisplayMemberBinding="{Binding Tweet}">
+                <GridViewColumn>
                     <GridViewColumn.Header>
-                        <TextBlock>ユーザID</TextBlock>
+                        <TextBlock>本文</TextBlock>
                     </GridViewColumn.Header>
+                    <GridViewColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding FullText}" TextWrapping="Wrap"/>
+                        </DataTemplate>
+                    </GridViewColumn.CellTemplate>
+                </GridViewColumn>
+                <GridViewColumn>
+                    <GridViewColumn.Header>発言日時</GridViewColumn.Header>
+                    <GridViewColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock>
+                                <TextBlock.Text>
+                                    <MultiBinding Converter="{StaticResource DateFormatter}">
+                                        <Binding Path="CreatedAt" Mode="OneTime"/>
+                                        <Binding Path="RetweetedCreatedAt" Mode="OneTime"/>
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+                        </DataTemplate>
+                    </GridViewColumn.CellTemplate>
+                </GridViewColumn>
+                <GridViewColumn>
+                    <GridViewColumnHeader>
+                        <TextBlock Text="webで表示"/>
+                    </GridViewColumnHeader>
+                    <GridViewColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock>
+                            </TextBlock>
+                        </DataTemplate>
+                    </GridViewColumn.CellTemplate>
                 </GridViewColumn>
             </GridView>
         </ListView.View>

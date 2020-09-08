@@ -28,6 +28,7 @@
                     <models:ThumbnailConverter x:Key="ConvertThumb"/>
                     <models:ScreenNameConverter x:Key="MakeDispScreenName"/>
                     <models:UserNameConverter x:Key="MakeUserName"/>
+                    <models:DateFormatConverter x:Key="DateFormatter"/>
                 </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
