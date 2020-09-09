@@ -1,6 +1,6 @@
 ﻿using CoreTweet;
 using CoreTweet.Core;
-using HHFO.Models.Logic.EventAggregator.Tweet;
+using HHFO.Models.Logic.EventAggregator.Tweets;
 using ImTools;
 using NLog.Filters;
 using Prism.Mvvm;
@@ -28,6 +28,7 @@ using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Unity;
+using HHFO.Models.Data;
 
 namespace HHFO.Models
 {
@@ -46,7 +47,6 @@ namespace HHFO.Models
         public ReactivePropertySlim<bool> IsFilteredRetweeted { get; private set; } = new ReactivePropertySlim<bool>(false);
         public ReadOnlyReactivePropertySlim<bool> IsOrSearch { get; }
 
-        public List<Tweet> SelectedTweets { get; set; } = new List<Tweet>();
         public Tweets Tweets { get; } = new Tweets();
 
 
@@ -61,9 +61,6 @@ namespace HHFO.Models
 
         public ReactiveCommand<KeyEventArgs> SaveImages { get; }
         public ReactiveCommand<SelectionChangedEventArgs> SelectionChangeMedia { get; }
-
-        [Dependency]
-        protected ITweetPublisher TweetPublisher { get; set; }
 
         /// <summary>
         /// 自動更新用のタイマー
@@ -85,7 +82,9 @@ namespace HHFO.Models
         private Func<Tweet, bool> FilterRetweeted = tweet => tweet.IsRetweetedTweet || tweet.QuotedTweet != null;
         private EventHandler OnTick;
 
-        public event EventHandler<EventArgs> Reloaded;
+        public delegate Task ReloadEvent<EventArgs>(object sender, EventArgs e);
+
+        public event ReloadEvent<EventArgs> Reloaded;
 
         protected TabBase(long id, int surrogateKey)
         {
@@ -166,16 +165,19 @@ namespace HHFO.Models
 
         private void SelectionChangeAction(SelectionChangedEventArgs e)
         {
-            e.OriginalSource.GetType().ToString();
+            foreach (Tweet item in e.AddedItems)
+            {
+                TweetPublisher.Tweets.Add(item);
+            }
+            foreach(Tweet item in e.RemovedItems)
+            {
+                TweetPublisher.Tweets.Remove(item);
+            }
+            
         }
 
         private void SendReplyAction()
         {
-            TweetPublisher.TweetId = SelectedTweets.Count == 1
-                                   ? SelectedTweets[0].Id
-                                   : 0;
-            TweetPublisher.UserScreenNames = SelectedTweets.Select(t => t.ScreenName).ToList();
-            TweetPublisher.Publish();
         }
 
         protected abstract Task FetchTweetsAsync();
@@ -229,13 +231,13 @@ namespace HHFO.Models
             {
                 NormalGridVisibility.Value = Visibility.Collapsed;
                 MediaGridVisibility.Value = Visibility.Visible;
-                SelectedTweets.Clear();
+                TweetPublisher.Tweets.Clear();
             }
             else
             {
                 MediaGridVisibility.Value = Visibility.Collapsed;
                 NormalGridVisibility.Value = Visibility.Visible;
-                SelectedTweets.Clear();
+                TweetPublisher.Tweets.Clear();
             }
         }
 

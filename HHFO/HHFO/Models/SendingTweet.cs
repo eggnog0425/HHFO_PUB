@@ -1,5 +1,6 @@
 ﻿using CoreTweet;
-using HHFO.Models.Logic.EventAggregator.Tweet;
+using HHFO.Models.Data;
+using HHFO.Models.Logic.EventAggregator.Tweets;
 using Prism.Mvvm;
 using Reactive.Bindings;
 using Reactive.Bindings.Extensions;
@@ -49,9 +50,9 @@ namespace HHFO.Models
             }
         }
 
-        public void AddReply(TweetInfo tweet)
+        public void AddReply(IList<Tweet> tweets)
         {
-            var replyUsers = tweet.UserScreenNames.Select(name => "@" + name);
+            var replyUsers = tweets.Select(t => "@" + t.UserName);
             Text.Value = string.Join(' ', replyUsers, Text.Value);
         }
 

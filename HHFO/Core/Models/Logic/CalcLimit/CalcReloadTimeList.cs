@@ -47,8 +47,7 @@ namespace HHFO.Models.Logic.API
                 else
                 {
                     var limitDictionary = Authorization.GetToken().Application.RateLimitStatus("lists").GetValueOrDefault("lists");
-                    RateLimit limit = null;
-                    if (limitDictionary.TryGetValue("/lists/statuses", out limit))
+                    if (limitDictionary.TryGetValue("/lists/statuses", out var limit))
                     {
                         return CompareMinReloadTime(CalcReloadTime(limit));
                     }

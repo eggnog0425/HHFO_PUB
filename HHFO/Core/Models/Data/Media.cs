@@ -13,7 +13,7 @@ using System.Windows;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 
-namespace HHFO.Models
+namespace HHFO.Models.Data
 {
     public class Media : BindableBase, IDisposable
     {

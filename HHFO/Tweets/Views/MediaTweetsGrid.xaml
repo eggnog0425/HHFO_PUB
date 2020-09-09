@@ -7,8 +7,41 @@
              xmlns:reactiveInteractivity="clr-namespace:Reactive.Bindings.Interactivity;assembly=ReactiveProperty.WPF"
              xmlns:local="clr-namespace:HHFO.Views"
              mc:Ignorable="d" 
+             xmlns:UI="clr-namespace:HHFO.Models.UI;assembly=HHFO.Core"
              d:DesignHeight="450" d:DesignWidth="800"
              Name="mediaRoot">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <DataTemplate x:Key="ImageTemplate">
+                <StackPanel>
+                    <TextBox Text="{Binding TweetId, Mode=OneWay, IsAsync=True}">
+                        <!--
+                        <interactivity:Interaction.Triggers>
+                            <interactivity:KeyTrigger Key="F2">
+                                <reactiveInteractivity:EventToReactiveCommand Command="{Binding DataContext.CurrentTab.SaveImages, ElementName=rootControl, Mode=OneWay}" />
+                            </interactivity:KeyTrigger>
+                        </interactivity:Interaction.Triggers>
+                        -->
+                    </TextBox>
+                    <Image Source="{Binding MediaUrl, Converter={StaticResource ConvertThumb}, IsAsync=True, Mode=OneWay}"
+                                           Width="150"
+                                           Height="150"
+                                           Focusable="True">
+                    </Image>
+                </StackPanel>
+            </DataTemplate>
+
+            <DataTemplate x:Key="MovieTemplate">
+                <StackPanel>
+                    <TextBox Text="{Binding TweetId, Mode=OneWay, IsAsync=True}"/>
+                    <MediaElement Source="{Binding MediaUrl, IsAsync=True}"
+                                           Width="150"
+                                           Height="150">
+                    </MediaElement>
+                </StackPanel>
+            </DataTemplate>
+        </ResourceDictionary>
+    </UserControl.Resources>
     <ListView ItemsSource="{Binding Tweets.Medias, IsAsync=True}"
               VirtualizingPanel.IsVirtualizing="True"
               ScrollViewer.HorizontalScrollBarVisibility="Disabled"
@@ -25,53 +58,8 @@
                 <WrapPanel Orientation="Horizontal" />
             </ItemsPanelTemplate>
         </ListView.ItemsPanel>
-        
-        <ListView.ItemTemplate>
-            <DataTemplate>
-                <StackPanel>
-                    <TextBox Text="{Binding TweetId, Mode=OneWay}">
-                        <!--
-                        <interactivity:Interaction.Triggers>
-                            <interactivity:KeyTrigger Key="F2">
-                                <reactiveInteractivity:EventToReactiveCommand Command="{Binding DataContext.CurrentTab.SaveImages, ElementName=rootControl, Mode=OneWay}" />
-                            </interactivity:KeyTrigger>
-                        </interactivity:Interaction.Triggers>
-                        -->
-                    </TextBox>
-                    <Image Source="{Binding MediaUrl, Converter={StaticResource ConvertThumb}, IsAsync=True, Mode=OneWay}"
-                                           Width="150"
-                                           Height="150"
-                                           Focusable="True">
-                        <Image.Style>
-                            <Style TargetType="Image">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Type}" Value="video">
-                                        <Setter Property="IsEnabled" Value="False" />
-                                        <Setter Property="Visibility" Value="Collapsed" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Image.Style>
-                    </Image>
-                </StackPanel>
-                <!--
-                        <MediaElement Source="{Binding MediaUrl, IsAsync=True}">
-                            <MediaElement.Style>
-                                <Style TargetType="MediaElement">
-                                    <Style.Triggers>
-                                        <MultiTrigger>
-                                            <MultiTrigger.Conditions>
-                                                <Condition Binding="{Binding Type}" Value="photo"/>
-                                                <Condition Binding="{Binding Type}" Value="animated_gif"/>
-                                            </MultiTrigger.Conditions>
-                                            <Setter Property="IsEnabled" Value="False" />
-                                            <Setter Property="Visibility" Value="Collapsed" />
-                                        </MultiTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </MediaElement.Style>
-                        </MediaElement>-->
-            </DataTemplate>
-        </ListView.ItemTemplate>
+        <ListView.ItemTemplateSelector>
+            <UI:MediaTemplateSelector ImageTemplate="{StaticResource ImageTemplate}" MovieTemplate="{StaticResource MovieTemplate}"/>
+        </ListView.ItemTemplateSelector>
     </ListView>
 </UserControl>

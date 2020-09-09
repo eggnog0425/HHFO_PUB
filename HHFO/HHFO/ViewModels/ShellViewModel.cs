@@ -1,6 +1,6 @@
 ﻿using DryIoc.Messages;
 using HHFO.Models;
-using HHFO.Models.Logic.EventAggregator.Tweet;
+using HHFO.Models.Logic.EventAggregator.Tweets;
 using Prism.Events;
 using Prism.Mvvm;
 using Prism.Regions;
@@ -20,6 +20,7 @@ using System.Windows.Controls;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using MahApps.Metro.Controls;
+using HHFO.Models.Data;
 
 namespace HHFO.ViewModels
 {
@@ -47,12 +48,13 @@ namespace HHFO.ViewModels
         public ReactivePropertySlim<Visibility> MenuVisibility { get; } = new ReactivePropertySlim<Visibility>(Visibility.Hidden);
         public ReactivePropertySlim<Visibility> SendErrorVisibility { get; } = new ReactivePropertySlim<Visibility>(Visibility.Collapsed);
         public SendingTweet Tweet { get; private set; } = new SendingTweet();
+        public ReadOnlyReactiveCollection<Tweet> SelectedTweets;
 
         public ObservableCollection<CoreTweet.List> Lists { get; private set; } = new ObservableCollection<CoreTweet.List>();
 
         private bool IsOpenSetting { get; set; } = false;
 
-        public ShellViewModel(IRegionManager regionManager, IListPublisher listPublisher, ITweetProvider tweetProvider)
+        public ShellViewModel(IRegionManager regionManager, IListPublisher listPublisher)
         {
             Disposable = new CompositeDisposable();
             ExpandedLists = new ReactiveCommand<RoutedEventArgs>()
@@ -69,7 +71,6 @@ namespace HHFO.ViewModels
                 .AddTo(Disposable);
             SendTweet = new ReactiveCommand<KeyEventArgs>()
                 .AddTo(Disposable);
-
             ListPublisher = listPublisher;
 
             ExpandedLists.Subscribe(_ => FetchTwitterLists())
@@ -84,9 +85,9 @@ namespace HHFO.ViewModels
                 .AddTo(Disposable);
             OpenTweetFlyOut.Subscribe(_ => OpenTweetFlyOutAction())
                 .AddTo(Disposable);
-            tweetProvider.Tweet.Subscribe(e => OpenTweetFlyOutAction(e))
-                .AddTo(Disposable);
             SendTweet.Subscribe(_ => SendTweetAction());
+
+            SelectedTweets.CollectionChangedAsObservable().Subscribe(_ => MessageBox.Show(string.Concat(SelectedTweets.Select(t => t.FullText))));
         }
 
         private void SendTweetAction()
@@ -168,14 +169,14 @@ namespace HHFO.ViewModels
             }
         }
         
-        public void OpenTweetFlyOutAction(TweetInfo tweet)
+        public void OpenTweetFlyOutAction(IList<Models.Data.Tweet> tweets)
         {
             // 起動時に呼ばれちゃうようなのでnullの場合もガード
-            if (tweet == null || IsOpenSetting)
+            if (tweets == null || IsOpenSetting)
             {
                 return;
             }
-            Tweet.AddReply(tweet);
+            Tweet.AddReply(tweets);
             IsOpenTweetFlyOut.Value = true;
         }
     }

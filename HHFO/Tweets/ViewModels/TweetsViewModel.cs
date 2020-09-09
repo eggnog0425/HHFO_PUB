@@ -2,7 +2,7 @@
 using CoreTweet;
 using HHFO.Models;
 using HHFO.Models.Logic.API;
-using HHFO.Models.Logic.EventAggregator.Tweet;
+using HHFO.Models.Logic.EventAggregator.Tweets;
 using ImTools;
 using MahApps.Metro.Controls;
 using NLog;
@@ -36,7 +36,6 @@ namespace HHFO.ViewModels
         public TabBase CurrentTab { get; private set; }
 
         private TabControl TabControl { get; set; }
-        private ITweetPublisher TweetPublisher { get; set; }
         public ModifierKeys ModifierKeys { get; } = ModifierKeys.Control | ModifierKeys.Shift;
 
         private ReadOnlyReactivePropertySlim<long> ListId { get; }
@@ -49,15 +48,15 @@ namespace HHFO.ViewModels
         public ReactiveCommand<RoutedEventArgs> TabCloseCommand { get; }
         private static ConcurrentDictionary<int, TabBase> SurrogateKeyDictionary { get; } = new ConcurrentDictionary<int, TabBase>();
         private static CalcReloadTimeBase ListReloadTimeCalclator = null;
+        private ITabFactory TabFactory { get; set; }
 
-
-        public TweetsViewModel(ListProvider ListIdProvider, ITweetPublisher tweetPublisher)
+        public TweetsViewModel(ListProvider ListIdProvider, ITabFactory tabFactory)
         {
             Disposable = new CompositeDisposable();
 
+            TabFactory = tabFactory;
             this.ListProvider = ListIdProvider;
             ListId = this.ListProvider.Id.ToReadOnlyReactivePropertySlim();
-            TweetPublisher = tweetPublisher;
             Tabs = new ObservableCollection<TabBase>();
 
             // TODO 前回起動時のタブを呼び出す処理を追加
@@ -79,7 +78,7 @@ namespace HHFO.ViewModels
                 .AddTo(Disposable);
             ReloadPast.Subscribe(_ => ReloadPastAction())
                 .AddTo(Disposable);
-            TabCloseCommand.Subscribe(e => OnTabCloseAction(e))
+            TabCloseCommand.Subscribe(e => OnTabClose(e))
                 .AddTo(Disposable);
         }
 
@@ -92,11 +91,16 @@ namespace HHFO.ViewModels
             CurrentTab.ReloadPastAsync();
         }
 
-        private void OnTabCloseAction(RoutedEventArgs e)
+        private void OnTabClose(RoutedEventArgs e)
         {
             if (e.Source is Button b)
             {
-                //(long)b.Tag
+                var target = Tabs.FirstOrDefault(t => t.SurrogateKey == (int)b.Tag);
+                if (target != null)
+                {
+                    Tabs.Remove(target);
+                    target.Dispose();
+                }
             }
         }
 
@@ -129,7 +133,7 @@ namespace HHFO.ViewModels
             TabBase tab = null;
             try
             {
-                tab = await TabList.Create(id, surrogateKey);
+                tab = await TabFactory.CreateListTab(id, surrogateKey);
             }
             catch
             {
@@ -200,13 +204,16 @@ namespace HHFO.ViewModels
             });
         }
 
-        private void HandleReloaded(object sender, EventArgs e)
+        private async Task HandleReloaded(object sender, EventArgs e)
         {
             if (sender is TabList tab)
             {
-                var limit = tab.Limit;
-                var nextReloadTime = tab.RefleshTimer(ListReloadTimeCalclator.CalcReloadTime(limit));
-                tab.RefleshDispApiInfo(nextReloadTime);
+                await Task.Run(() =>
+                {
+                    var limit = tab.Limit;
+                    var nextReloadTime = tab.RefleshTimer(ListReloadTimeCalclator.CalcReloadTime(limit));
+                    tab.RefleshDispApiInfo(nextReloadTime);
+                });
             }
         }
 

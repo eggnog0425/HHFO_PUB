@@ -11,11 +11,15 @@ namespace HHFO.Models
 {
     public class ListPublisher: IListPublisher
     {
-
-        [Dependency]
-        public IEventAggregator EventAggregator { get; set; }
+        private IEventAggregator EventAggregator { get; set; }
 
         public ReactivePropertySlim<long> Id { get; set; } = new ReactivePropertySlim<long>();
+
+        public ListPublisher(IEventAggregator eventAggregator)
+        {
+            EventAggregator = eventAggregator;
+        }
+
         public void Publish()
         {
             var list = new TwittertListId();

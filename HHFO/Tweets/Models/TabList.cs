@@ -1,5 +1,5 @@
 ﻿using CoreTweet;
-using HHFO.Models.Logic.EventAggregator.Tweet;
+using HHFO.Models.Logic.EventAggregator.Tweets;
 using ImTools;
 using Reactive.Bindings;
 using System;

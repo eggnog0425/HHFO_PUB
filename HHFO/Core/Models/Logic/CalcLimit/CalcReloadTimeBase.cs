@@ -15,7 +15,7 @@ namespace HHFO.Models.Logic.API
     {
         protected Logger logger = LogManager.GetCurrentClassLogger();
 
-        protected readonly TimeSpan MinReloadTime = TimeSpan.FromSeconds(1.0d);
+        protected readonly TimeSpan MinReloadTime = TimeSpan.FromSeconds(5.0d);
 
         public int CntTabs;
 

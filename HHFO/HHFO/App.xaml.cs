@@ -16,7 +16,7 @@ using System.Windows;
 using System.Xml;
 using Unity;
 using System.Linq;
-using HHFO.Models.Logic.EventAggregator.Tweet;
+using HHFO.Models.Logic.EventAggregator.Tweets;
 using System.Globalization;
 
 namespace HHFO
@@ -36,8 +36,7 @@ namespace HHFO
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
             containerRegistry.Register<IListPublisher, ListPublisher>();
-            containerRegistry.Register<ITweetPublisher, TweetPublisher>();
-            containerRegistry.Register<ITweetProvider, TweetProvider>();
+            containerRegistry.Register<ITabFactory, TabFactory>();
         }
 
         protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)

@@ -19,7 +19,6 @@ namespace HHFO.Models
             }
         }
 
-
         public ListProvider(IEventAggregator eventAggregator)
         {
             id = new ReactivePropertySlim<long>();

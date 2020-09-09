@@ -9,6 +9,6 @@ namespace HHFO.Models
     public interface IListPublisher
     {
         public ReactivePropertySlim<long> Id { get; set; }
-        void Publish();
+        public void Publish();
     }
 }
