@@ -11,22 +11,22 @@ using Unity;
 
 namespace HHFO.Models.Logic.EventAggregator.Tweets
 {
-    public class TweetPublisher : ITweetPublisher
+    public class TweetsPublisher : ITweetsPublisher
     {
         private IEventAggregator EventAggregator { get; set; }
-        public ConcurrentBag<Tweet> Tweets { get; set; }
+        public IList<Tweet> Tweets { get; set; }
 
-        public TweetPublisher(IEventAggregator eventAggregator)
+        public TweetsPublisher(IEventAggregator eventAggregator)
         {
             EventAggregator = eventAggregator;
-            Tweets = new ConcurrentBag<Tweet>();
+            Tweets = new List<Tweet>();
         }
 
         public void Publish()
         {
-            var list = Tweets.ToArray().ToImmutableList();
+            var list = Tweets.ToImmutableList();
             this.EventAggregator
-                .GetEvent<ListEvent>()
+                .GetEvent<TweetsEvent>()
                 .Publish(list);
         }
     }

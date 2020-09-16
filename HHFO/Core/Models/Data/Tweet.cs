@@ -35,7 +35,7 @@ namespace HHFO.Models.Data
         public string FullText { get; private set; }
 
         public bool HasLinks { get; private set; }
-        public string[] Links { get; private set; }
+        public UrlEntity[] Links { get; private set; }
         public bool HasMedias { get; private set; }
         public string Source { get; private set;}
         public Media[] Media { get; private set; }
@@ -61,7 +61,7 @@ namespace HHFO.Models.Data
                 
                 Media = retweetedStatus.ExtendedEntities?.Media.Select(m => new Media(retweetedStatus.Id, m)).ToArray();
                 FullText = retweetedStatus.FullText;
-                Links = retweetedStatus.Entities?.Urls?.Select(s => s.ExpandedUrl).ToArray();
+                Links = retweetedStatus.Entities?.Urls?.ToArray();
                 HasLinks = 0 < (Links?.Count() ?? 0);
                 Source = retweetedStatus.Source;
                 QuotedTweet = retweetedStatus.QuotedStatus == null
@@ -72,7 +72,7 @@ namespace HHFO.Models.Data
             {
                 Media = status.ExtendedEntities?.Media.Select(m => new Media(Id, m)).ToArray();
                 FullText = status.FullText;
-                Links = status.Entities?.Urls?.Select(s => s.ExpandedUrl).ToArray();
+                Links = status.Entities?.Urls?.ToArray();
                 HasLinks = 0 < (Links?.Count() ?? 0);
                 Source = status.Source;
                 QuotedTweet = status.QuotedStatus == null

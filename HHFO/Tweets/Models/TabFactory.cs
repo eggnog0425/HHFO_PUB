@@ -8,10 +8,16 @@ namespace HHFO.Models
 {
     public class TabFactory : ITabFactory
     {
+        ITweetsPublisher TweetsPublisher;
+        
+        public TabFactory(ITweetsPublisher tweetsPublisher)
+        {
+            TweetsPublisher = tweetsPublisher;
+        }
 
         public async Task<TabList> CreateListTab(long id, int surrogateKey)
         {
-            return await TabList.Create(id, surrogateKey);
+            return await TabList.Create(id, surrogateKey, TweetsPublisher);
         }
     }
 }

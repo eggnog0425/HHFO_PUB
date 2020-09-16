@@ -37,6 +37,8 @@ namespace HHFO
         {
             containerRegistry.Register<IListPublisher, ListPublisher>();
             containerRegistry.Register<ITabFactory, TabFactory>();
+            containerRegistry.Register<ITweetsPublisher, TweetsPublisher>();
+            containerRegistry.Register<ITweetsProvider, TweetsProvider>();
         }
 
         protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)

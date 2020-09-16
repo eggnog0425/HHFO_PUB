@@ -86,12 +86,15 @@ namespace HHFO.Models
 
         public event ReloadEvent<EventArgs> Reloaded;
 
-        protected TabBase(long id, int surrogateKey)
+        public ITweetsPublisher TweetsPublisher;
+
+        protected TabBase(long id, int surrogateKey, ITweetsPublisher tweetsPublisher)
         {
             Disposable = new CompositeDisposable();
 
             Id = id;
             SurrogateKey = surrogateKey;
+            TweetsPublisher = tweetsPublisher;
 
             OnTick = async (s, e) => await FetchTweetsAsync();
 
@@ -165,15 +168,15 @@ namespace HHFO.Models
 
         private void SelectionChangeAction(SelectionChangedEventArgs e)
         {
-            foreach (Tweet item in e.AddedItems)
+            foreach (Tweet tweet in e.AddedItems)
             {
-                TweetPublisher.Tweets.Add(item);
+                TweetsPublisher.Tweets.Add(tweet);
             }
-            foreach(Tweet item in e.RemovedItems)
+            foreach(Tweet tweet in e.RemovedItems)
             {
-                TweetPublisher.Tweets.Remove(item);
+                TweetsPublisher.Tweets.Remove(tweet);
             }
-            
+            TweetsPublisher.Publish();
         }
 
         private void SendReplyAction()
@@ -231,13 +234,13 @@ namespace HHFO.Models
             {
                 NormalGridVisibility.Value = Visibility.Collapsed;
                 MediaGridVisibility.Value = Visibility.Visible;
-                TweetPublisher.Tweets.Clear();
+                TweetsPublisher.Tweets.Clear();
             }
             else
             {
                 MediaGridVisibility.Value = Visibility.Collapsed;
                 NormalGridVisibility.Value = Visibility.Visible;
-                TweetPublisher.Tweets.Clear();
+                TweetsPublisher.Tweets.Clear();
             }
         }
 

@@ -29,6 +29,7 @@
                     <models:ScreenNameConverter x:Key="MakeDispScreenName"/>
                     <models:UserNameConverter x:Key="MakeUserName"/>
                     <models:DateFormatConverter x:Key="DateFormatter"/>
+                    <models:TweetViewConverter x:Key="TweetTextConverter"/>
                 </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

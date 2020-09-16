@@ -54,6 +54,18 @@
                             >
                 <local:TweetFlyOut/>
             </mahApps:Flyout>
+            <mahApps:Flyout Name="TweetViewFlyOut"
+                            Position="Bottom"
+                            IsOpen="True"
+                            IsPinned="True"
+                            CloseButtonVisibility="Visible"
+                            FontSize="18"
+                            >
+                <Grid>
+                    <TextBlock Text="{Binding SelectedTweet.Value, Converter={StaticResource TweetTextConverter}}"
+                               TextWrapping="Wrap"/>
+                </Grid>
+            </mahApps:Flyout>
         </mahApps:FlyoutsControl>
     </mahApps:MetroWindow.Flyouts>
     

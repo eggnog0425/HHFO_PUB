@@ -30,7 +30,6 @@ namespace HHFO.ViewModels
 
         public string Title { get; } = new SettingUtils().GetCommonSetting().Title;
         private Authorization authorization { get; set; }
-        private IListPublisher ListPublisher { get; set; }
         public ModifierKeys ModifierKeys { get; } = ModifierKeys.Control | ModifierKeys.Shift;
 
         public ReactiveCommand<System.Windows.Input.MouseButtonEventArgs> OpenList { get; }
@@ -48,15 +47,29 @@ namespace HHFO.ViewModels
         public ReactivePropertySlim<Visibility> MenuVisibility { get; } = new ReactivePropertySlim<Visibility>(Visibility.Hidden);
         public ReactivePropertySlim<Visibility> SendErrorVisibility { get; } = new ReactivePropertySlim<Visibility>(Visibility.Collapsed);
         public SendingTweet Tweet { get; private set; } = new SendingTweet();
-        public ReadOnlyReactiveCollection<Tweet> SelectedTweets;
+
+        public IListPublisher ListPublisher;
+        public ReadOnlyReactiveCollection<Tweet> SelectedTweets { get; set; }
+        public ReactiveProperty<Tweet> SelectedTweet { get; set; } = new ReactiveProperty<Tweet>(mode: ReactivePropertyMode.DistinctUntilChanged);
 
         public ObservableCollection<CoreTweet.List> Lists { get; private set; } = new ObservableCollection<CoreTweet.List>();
 
         private bool IsOpenSetting { get; set; } = false;
 
-        public ShellViewModel(IRegionManager regionManager, IListPublisher listPublisher)
+
+
+        public ShellViewModel(IRegionManager regionManager, IListPublisher listPublisher, ITweetsProvider tweetsProvider)
         {
             Disposable = new CompositeDisposable();
+            tweetsProvider.Tweets.CollectionChanged += (_, e) =>
+            {
+                SelectedTweets = tweetsProvider.Tweets.ToReadOnlyReactiveCollection();
+                SelectedTweet.Value = SelectedTweets.Count == 1
+                                    ? SelectedTweets[0]
+                                    : SelectedTweet.Value;
+            };
+            ListPublisher = listPublisher;
+
             ExpandedLists = new ReactiveCommand<RoutedEventArgs>()
                 .AddTo(Disposable);
             OnLoaded = new ReactiveCommand()
@@ -71,7 +84,6 @@ namespace HHFO.ViewModels
                 .AddTo(Disposable);
             SendTweet = new ReactiveCommand<KeyEventArgs>()
                 .AddTo(Disposable);
-            ListPublisher = listPublisher;
 
             ExpandedLists.Subscribe(_ => FetchTwitterLists())
                 .AddTo(Disposable);
@@ -86,8 +98,6 @@ namespace HHFO.ViewModels
             OpenTweetFlyOut.Subscribe(_ => OpenTweetFlyOutAction())
                 .AddTo(Disposable);
             SendTweet.Subscribe(_ => SendTweetAction());
-
-            SelectedTweets.CollectionChangedAsObservable().Subscribe(_ => MessageBox.Show(string.Concat(SelectedTweets.Select(t => t.FullText))));
         }
 
         private void SendTweetAction()

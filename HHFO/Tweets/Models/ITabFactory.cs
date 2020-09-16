@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HHFO.Models.Logic.EventAggregator.Tweets;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
