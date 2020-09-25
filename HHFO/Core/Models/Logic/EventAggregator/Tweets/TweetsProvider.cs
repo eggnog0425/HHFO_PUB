@@ -15,25 +15,22 @@ namespace HHFO.Models.Logic.EventAggregator.Tweets
 {
     public class TweetsProvider : BindableBase, ITweetsProvider
     {
-        public ObservableCollection<Tweet> Tweets { get; private set; } = new ObservableCollection<Tweet>();
-        
+        public ImmutableList<Tweet> Tweets { get; private set; }
+
+        public bool IsReply { get; private set; } = false;
+
         public TweetsProvider(IEventAggregator eventAggregator)
         {
             eventAggregator.GetEvent<TweetsEvent>()
-                           .Subscribe(tList =>
+                           .Subscribe(tuple =>
                            {
-                               if (tList.Count == 0)
+                               Tweets = tuple.Item1;
+                               RaisePropertyChanged(nameof(Tweets));
+
+                               IsReply = tuple.Item2;
+                               if (IsReply)
                                {
-                                   for (var i = Tweets.Count - 1; -1 < i; i--)
-                                   {
-                                       Tweets.RemoveAt(i);
-                                   }
-                                   return;
-                               }
-                               Tweets.Clear();
-                               foreach(var t in tList)
-                               {
-                                   Tweets.Add(t);
+                                   RaisePropertyChanged(nameof(IsReply));
                                }
                            }
             , ThreadOption.UIThread);

@@ -19,7 +19,8 @@
         FontFamily="{StaticResource MaterialDesignFont}"
         Title="{Binding Title}"
         Height="800"
-        Width="1200">
+        Width="1200"
+        Name="RootWindow">
     <interactivity:Interaction.Triggers>
         <interactivity:EventTrigger EventName="Loaded">
             <reactiveInteractivity:EventToReactiveCommand Command="{Binding OnLoaded, Mode=OneWay}" />
@@ -41,19 +42,6 @@
                             >
                 <local:AuthFlyOut/>
             </mahApps:Flyout>
-            <mahApps:Flyout Name="TweetFlyOut"
-                            Position="Bottom"
-                            Header="tweet"
-                            
-                            Width="Auto"
-                            Height="Auto"
-                            IsOpen="{Binding IsOpenTweetFlyOut.Value}"
-                            IsPinned="false"
-                            CloseButtonVisibility="Visible"
-                            FontSize="18"
-                            >
-                <local:TweetFlyOut/>
-            </mahApps:Flyout>
             <mahApps:Flyout Name="TweetViewFlyOut"
                             Position="Bottom"
                             IsOpen="True"
@@ -61,10 +49,20 @@
                             CloseButtonVisibility="Visible"
                             FontSize="18"
                             >
-                <Grid>
-                    <TextBlock Text="{Binding SelectedTweet.Value, Converter={StaticResource TweetTextConverter}}"
-                               TextWrapping="Wrap"/>
-                </Grid>
+            </mahApps:Flyout>
+
+            <mahApps:Flyout Name="TweetFlyOut"
+                            Position="Bottom"
+                            Header="tweet"
+                            
+                            Width="Auto"
+                            Height="Auto"
+                            IsOpen="{Binding IsOpenTweetFlyOut.Value}"
+                            IsPinned="True"
+                            CloseButtonVisibility="Visible"
+                            FontSize="18"
+                            >
+                <local:TweetFlyOut/>
             </mahApps:Flyout>
         </mahApps:FlyoutsControl>
     </mahApps:MetroWindow.Flyouts>

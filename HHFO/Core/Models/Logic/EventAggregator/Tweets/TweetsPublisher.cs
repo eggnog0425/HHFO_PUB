@@ -22,12 +22,12 @@ namespace HHFO.Models.Logic.EventAggregator.Tweets
             Tweets = new List<Tweet>();
         }
 
-        public void Publish()
+        public void Publish(bool isReply)
         {
-            var list = Tweets.ToImmutableList();
+            var tuple = (Tweets.ToImmutableList(), isReply);
             this.EventAggregator
                 .GetEvent<TweetsEvent>()
-                .Publish(list);
+                .Publish(tuple);
         }
     }
 }

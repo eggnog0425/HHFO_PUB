@@ -9,6 +9,6 @@ namespace HHFO.Models.Logic.EventAggregator.Tweets
     {
         public IList<Tweet> Tweets { get; set; }
 
-        public void Publish();
+        public void Publish(bool isReply);
     }
 }

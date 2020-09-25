@@ -176,11 +176,12 @@ namespace HHFO.Models
             {
                 TweetsPublisher.Tweets.Remove(tweet);
             }
-            TweetsPublisher.Publish();
+            TweetsPublisher.Publish(false);
         }
 
         private void SendReplyAction()
         {
+            TweetsPublisher.Publish(true);
         }
 
         protected abstract Task FetchTweetsAsync();

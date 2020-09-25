@@ -3,22 +3,78 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:prism="http://prismlibrary.com/" 
              prism:ViewModelLocator.AutoWireViewModel="False"
-             DataContext="Tweet">
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:interactivity="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:reactiveInteractivity="clr-namespace:Reactive.Bindings.Interactivity;assembly=ReactiveProperty.WPF">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="8*"/>
-            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="9*"/>
+            <ColumnDefinition Width="1*"/>
         </Grid.ColumnDefinitions>
-        <TextBox Grid.Column="0"
-                     Background="{StaticResource MahApps.Brushes.ThemeBackground}"
-                     BorderThickness="1">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="4*"/>
+            <RowDefinition Height="5*"/>
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource MaterialDesignSubtitle1TextBlock}" FontSize="16">返信先</TextBlock>
+        <TextBox Grid.Row="1"
+                   Grid.Column="0" 
+                   TextWrapping="Wrap"
+                   VerticalScrollBarVisibility="Auto"   
+                   FontSize="16"
+                   Text="{Binding Tweet.InReplyToMessage.Value}"
+                   MaxHeight="150"
+                   Name="replyMessage">
+            <TextBox.Style>
+                <Style TargetType="TextBox">
+                    <Setter Value="{StaticResource MaterialDesignFloatingHintTextBox}"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Tweet.InReplyTo.Value, Converter={StaticResource ReactiveNullToZero}, FallbackValue=0}" Value="0">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBox.Style>
+        </TextBox>
+        <TextBox Grid.Row="2"
+            Grid.Column="0"
+            Text="{Binding Tweet.Text.Value}"  
+            Style="{StaticResource MaterialDesignTextBox}"
+            AcceptsReturn="True"
+            TextWrapping="Wrap"
+            Height="Auto"
+            MinHeight="120"
+            MaxHeight="200"
+            materialDesign:HintAssist.Hint="入力欄">
+
+            <interactivity:Interaction.Triggers>
+                <interactivity:KeyTrigger Modifiers="Ctrl" Key="Return">
+                    <reactiveInteractivity:EventToReactiveCommand Command="{Binding SendTweet, Mode=OneWay}"/>
+                </interactivity:KeyTrigger>
+            </interactivity:Interaction.Triggers>
             <TextBox.InputBindings>
                 <KeyBinding Gesture="Ctrl + Enter" Command="{Binding SendTweet}"/>
             </TextBox.InputBindings>
-            <TextBox.Text>
-                <Binding Path="Text"></Binding></TextBox.Text>
         </TextBox>
         <Button Grid.Column="1"
-                Content="呟く" Command="{Binding SendTweet}"></Button>
+                Grid.Row="1"
+                Content="返信先を削除する\r\n(Ctrl + Shift + Space)"
+            Visibility="{Binding Visibility, ElementName=replyMessage}">
+            <Button.Style>
+                <Style TargetType="Button">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Tweet.InReplyTo.Value, Converter={StaticResource ReactiveNullToZero}, FallbackValue=0}" Value="0">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+            </Button.Style>
+        </Button>
+        <Button Grid.Column="1"
+                Grid.Row="2"
+                Margin="8"
+                Content="投稿" 
+                
+                Command="{Binding SendTweet}"></Button>
     </Grid>
 </UserControl>

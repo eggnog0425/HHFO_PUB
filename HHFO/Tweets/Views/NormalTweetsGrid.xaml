@@ -38,9 +38,6 @@
                 </Setter>
             </Style>
         </ListView.ItemContainerStyle>
-        <ListView.InputBindings>
-            <KeyBinding Gesture="Shift + Ctrl + Enter" Command="{Binding DataContext.SendReply, Mode=OneWay, ElementName=rootControl}"/>
-        </ListView.InputBindings>
         <ListView.View>
             <GridView>
                 <GridViewColumn>

@@ -36,11 +36,11 @@ namespace HHFO.ViewModels
         public TabBase CurrentTab { get; private set; }
 
         private TabControl TabControl { get; set; }
-        public ModifierKeys ModifierKeys { get; } = ModifierKeys.Control | ModifierKeys.Shift;
 
         private ReadOnlyReactivePropertySlim<long> ListId { get; }
         public ObservableCollection<TabBase> Tabs { get; }
         public ReactivePropertySlim<bool> IsOpenCheckBoxArea { get; set; } = new ReactivePropertySlim<bool>(true);
+        public ModifierKeys ModifierKeys { get; } = ModifierKeys.Control | ModifierKeys.Shift;
 
         public ReactiveCommand<RoutedEventArgs> OnLoaded { get; }
         public ReactiveCommand<SelectionChangedEventArgs> OnCurrentTabChanged { get; }

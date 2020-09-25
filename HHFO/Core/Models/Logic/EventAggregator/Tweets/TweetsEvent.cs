@@ -7,7 +7,7 @@ using System.Text;
 
 namespace HHFO.Models.Logic.EventAggregator.Tweets
 {
-    public class TweetsEvent : PubSubEvent<ImmutableList<Tweet>>
+    public class TweetsEvent : PubSubEvent<(ImmutableList<Tweet>, bool)>
     {
     }
 }

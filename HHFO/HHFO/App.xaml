@@ -30,6 +30,7 @@
                     <models:UserNameConverter x:Key="MakeUserName"/>
                     <models:DateFormatConverter x:Key="DateFormatter"/>
                     <models:TweetViewConverter x:Key="TweetTextConverter"/>
+                    <models:ReactiveLongConverter x:Key="ReactiveNullToZero"/>
                 </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

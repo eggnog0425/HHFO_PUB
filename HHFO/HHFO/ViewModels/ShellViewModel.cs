@@ -21,6 +21,7 @@ using System.Collections.ObjectModel;
 using System.Windows.Input;
 using MahApps.Metro.Controls;
 using HHFO.Models.Data;
+using HHFO.Models.Interface;
 
 namespace HHFO.ViewModels
 {
@@ -50,26 +51,22 @@ namespace HHFO.ViewModels
 
         public IListPublisher ListPublisher;
         public ReadOnlyReactiveCollection<Tweet> SelectedTweets { get; set; }
-        public ReactiveProperty<Tweet> SelectedTweet { get; set; } = new ReactiveProperty<Tweet>(mode: ReactivePropertyMode.DistinctUntilChanged);
+        public ReadOnlyReactivePropertySlim<Tweet> SelectedTweet { get;}
 
         public ObservableCollection<CoreTweet.List> Lists { get; private set; } = new ObservableCollection<CoreTweet.List>();
 
         private bool IsOpenSetting { get; set; } = false;
-
+        private Messanger4Tweets Messanger { get; set; }
 
 
         public ShellViewModel(IRegionManager regionManager, IListPublisher listPublisher, ITweetsProvider tweetsProvider)
         {
             Disposable = new CompositeDisposable();
-            tweetsProvider.Tweets.CollectionChanged += (_, e) =>
-            {
-                SelectedTweets = tweetsProvider.Tweets.ToReadOnlyReactiveCollection();
-                SelectedTweet.Value = SelectedTweets.Count == 1
-                                    ? SelectedTweets[0]
-                                    : SelectedTweet.Value;
-            };
             ListPublisher = listPublisher;
 
+            Messanger = new Messanger4Tweets(tweetsProvider);
+
+            SelectedTweet = Messanger.SelectedTweet.ToReadOnlyReactivePropertySlim();
             ExpandedLists = new ReactiveCommand<RoutedEventArgs>()
                 .AddTo(Disposable);
             OnLoaded = new ReactiveCommand()
@@ -97,7 +94,8 @@ namespace HHFO.ViewModels
                 .AddTo(Disposable);
             OpenTweetFlyOut.Subscribe(_ => OpenTweetFlyOutAction())
                 .AddTo(Disposable);
-            SendTweet.Subscribe(_ => SendTweetAction());
+            SendTweet.Subscribe(_ => SendTweetAction())
+                .AddTo(Disposable);
         }
 
         private void SendTweetAction()
@@ -169,24 +167,24 @@ namespace HHFO.ViewModels
             }
         }
 
-        public void OpenTweetFlyOutAction()       
+        public void OpenTweetFlyOutAction()
         {
-            var afterIsOpen = !IsOpenTweetFlyOut.Value && !IsOpenSetting;
-            IsOpenTweetFlyOut.Value = afterIsOpen;
-            if (!afterIsOpen)
-            {
-                SendErrorVisibility.Value = Visibility.Collapsed;
-            }
-        }
-        
-        public void OpenTweetFlyOutAction(IList<Models.Data.Tweet> tweets)
-        {
-            // 起動時に呼ばれちゃうようなのでnullの場合もガード
-            if (tweets == null || IsOpenSetting)
+            if (IsOpenSetting)
             {
                 return;
             }
-            Tweet.AddReply(tweets);
+            var tweets = Messanger.SelectedTweets;
+            if ((tweets?.Count() ?? 0) == 0)
+            {
+                var afterIsOpen = !IsOpenTweetFlyOut.Value && !IsOpenSetting;
+                IsOpenTweetFlyOut.Value = afterIsOpen;
+                if (!afterIsOpen)
+                {
+                    SendErrorVisibility.Value = Visibility.Collapsed;
+                }
+                return;
+            }
+            App.Current.Dispatcher.Invoke(() => Tweet.AddReply(tweets));
             IsOpenTweetFlyOut.Value = true;
         }
     }

@@ -9,6 +9,7 @@
 	  <None Remove="App.xaml" />
 	  <None Remove="NLog.config" />
 	  <None Remove="Views\Shell.xaml" />
+	  <None Remove="Views\TweetViewFlyOut.xaml" />
 	</ItemGroup>
 	<ItemGroup>
 	  <EmbeddedResource Include="NLog.config" />
@@ -27,6 +28,9 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <ApplicationDefinition Include="App.xaml" />
+	  <Page Include="Views\TweetViewFlyOut.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </Page>
 	  <Page Include="Views\Shell.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </Page>
@@ -41,6 +45,11 @@
 		<ProjectReference Include="..\Core\HHFO.Core.csproj" />
 		<ProjectReference Include="..\Menu\HHFO.Menu.csproj" />
 		<ProjectReference Include="..\Tweets\HHFO.Tweets.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Compile Update="Views\TweetViewFlyOut.xaml.cs">
+	    <SubType>Code</SubType>
+	  </Compile>
 	</ItemGroup>
 
 	<PropertyGroup>

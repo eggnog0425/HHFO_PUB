@@ -53,7 +53,7 @@
             </interactivity:EventTrigger>
         </interactivity:Interaction.Triggers>
 
-        <ListView.ItemsPanel >
+        <ListView.ItemsPanel>
             <ItemsPanelTemplate>
                 <WrapPanel Orientation="Horizontal" />
             </ItemsPanelTemplate>
