@@ -10,22 +10,24 @@
         xmlns:local="clr-namespace:HHFO.Views"
         xmlns:shellViewModel="clr-namespace:HHFO.ViewModels"
         xmlns:models="clr-namespace:HHFO.Models;assembly=HHFO.Core"
-        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Regular"
         TextElement.FontSize="13"
         TextOptions.TextFormattingMode="Ideal"
         TextOptions.TextRenderingMode="Auto"
-        Background="{StaticResource MaterialDesignPaper}"
-        FontFamily="{StaticResource MaterialDesignFont}"
         Title="{Binding Title}"
+        TitleCharacterCasing="Normal"
         Height="800"
         Width="1200"
-        Name="RootWindow">
+        Name="RootWindow"
+        SaveWindowPosition="True"
+        GlowBrush="{StaticResource AccentColorBrush}"
+        BorderThickness="1"
+                     >
     <interactivity:Interaction.Triggers>
         <interactivity:EventTrigger EventName="Loaded">
             <reactiveInteractivity:EventToReactiveCommand Command="{Binding OnLoaded, Mode=OneWay}" />
         </interactivity:EventTrigger>
-        <interactivity:KeyTrigger Modifiers="{Binding ModifierKeys, Mode=OneWay}" Key="Return">
+        <interactivity:KeyTrigger Modifiers="{Binding ModifierKeys, Mode=OneTime}" Key="Return">
             <reactiveInteractivity:EventToReactiveCommand Command="{Binding OpenTweetFlyOut, Mode=OneWay}"/>
         </interactivity:KeyTrigger>
         <interactivity:KeyTrigger Modifiers="Ctrl" Key="R"/>
@@ -44,7 +46,7 @@
             </mahApps:Flyout>
             <mahApps:Flyout Name="TweetViewFlyOut"
                             Position="Bottom"
-                            IsOpen="True"
+                            IsOpen="False"
                             IsPinned="True"
                             CloseButtonVisibility="Visible"
                             FontSize="18"

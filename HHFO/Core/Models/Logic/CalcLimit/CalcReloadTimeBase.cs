@@ -15,7 +15,7 @@ namespace HHFO.Models.Logic.API
     {
         protected Logger logger = LogManager.GetCurrentClassLogger();
 
-        protected readonly TimeSpan MinReloadTime = TimeSpan.FromSeconds(5.0d);
+        protected readonly TimeSpan MinReloadTime = TimeSpan.FromSeconds(3.0d);
 
         public int CntTabs;
 
@@ -56,10 +56,12 @@ namespace HHFO.Models.Logic.API
             }
             _ = Interlocked.Add(ref CntTabs, -numRemove);
         }
-        public void WhenManualUpdate(RateLimit rateLimit)
+
+        protected TimeSpan CompareMinReloadTime(TimeSpan reloadTime)
         {
-
+            return MinReloadTime < reloadTime
+                ? reloadTime
+                : MinReloadTime;
         }
-
     }
 }

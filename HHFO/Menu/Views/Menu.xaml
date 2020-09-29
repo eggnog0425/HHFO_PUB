@@ -12,14 +12,16 @@
         xmlns:mahApps="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         x:Name="parent"
-        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Regular"
         TextElement.FontSize="13"
         TextOptions.TextFormattingMode="Ideal"
         TextOptions.TextRenderingMode="Auto"
-        Background="{DynamicResource MaterialDesignPaper}"
-        FontFamily="{DynamicResource MaterialDesignFont}"
 >
+    <UserControl.Resources>
+        <Style x:Key="MenuButton" TargetType="Button">
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+        </Style>
+    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -33,15 +35,28 @@
             Grid.Column="0" 
             >
 
-            <StackPanel Cursor="Hand">
-                <TextBlock Name="Home" Text="Home" FontSize="16" Padding="8,8,24,6"/>
+            <materialDesign:ColorZone>
+                <StackPanel>
+                    <Button Name="Home" 
+                        FontSize="16"
+                        HorizontalAlignment="Stretch"
+                        Content="Home"
+                        HorizontalContentAlignment="Left"/>
 
-                <Expander Name ="List"
-                          FontSize="16"
-                          Margin="0"
-                          Padding="0"
-                          Header="List"
-                          materialDesign:ExpanderAssist.DownHeaderPadding="8,6,24,6">
+
+                    <Expander Name ="List"
+                          Background="{StaticResource AccentColorBrush}"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Center"
+                          HorizontalContentAlignment="Stretch">
+                        <Expander.Header>
+                            <TextBlock
+                                Padding="0"
+                                Margin="-8,0,0,0"
+                                Text="List"
+                                Style="{StaticResource MaterialDesignButtonTextBlock}"
+                                FontSize="16"/>
+                        </Expander.Header>
                     <interactivity:Interaction.Triggers>
                         <interactivity:EventTrigger EventName="Expanded">
                             <reactiveInteractivity:EventToReactiveCommand Command="{Binding ExpandedLists, Mode=OneWay}"/>
@@ -52,20 +67,25 @@
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel>
-                                        <TextBlock Name="Name" Text="{Binding Name}" Padding="8,8,24,6" Tag="{Binding Id}">
+                                        <Button Name="Name"
+                                                Content="{Binding Name}"
+                                                HorizontalContentAlignment="Left"
+                                                Tag="{Binding Id}"
+                                                >
                                             <interactivity:Interaction.Triggers>
-                                                <interactivity:EventTrigger EventName="MouseDown">
+                                                <interactivity:EventTrigger EventName="Click">
                                                     <reactiveInteractivity:EventToReactiveCommand Command="{Binding DataContext.OpenList, Mode=OneWay, ElementName=parent}" />
                                                 </interactivity:EventTrigger>
                                             </interactivity:Interaction.Triggers>
-                                        </TextBlock>
+                                        </Button>
                                     </StackPanel>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                     </StackPanel>
-                </Expander>
-            </StackPanel>
+                    </Expander>
+                </StackPanel>
+            </materialDesign:ColorZone>
 
         </ScrollViewer>
     </Grid>

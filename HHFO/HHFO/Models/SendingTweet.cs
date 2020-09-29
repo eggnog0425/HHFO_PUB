@@ -48,8 +48,14 @@ namespace HHFO.Models
             if (!IsInit && string.IsNullOrEmpty(Text.Value))
             {
                 InReplyTo.Value = 0;
+                InReplyToMessage.Value = "";
                 IsInit = true;
             }
+        }
+        public void ClearInReplyToForce()
+        {
+                InReplyTo.Value = 0;
+                InReplyToMessage.Value = "";
         }
 
         public void AddReply(IList<Tweet> tweets)

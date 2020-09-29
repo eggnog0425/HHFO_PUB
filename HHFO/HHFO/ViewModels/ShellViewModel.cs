@@ -33,13 +33,14 @@ namespace HHFO.ViewModels
         private Authorization authorization { get; set; }
         public ModifierKeys ModifierKeys { get; } = ModifierKeys.Control | ModifierKeys.Shift;
 
-        public ReactiveCommand<System.Windows.Input.MouseButtonEventArgs> OpenList { get; }
+        public ReactiveCommand<RoutedEventArgs> OpenList { get; }
         public ReactiveCommand OnLoaded { get; }
         public ReactiveCommand OpenBrowser { get; }
         public ReactiveCommand InitialAuth { get; }
         public ReactiveCommand<RoutedEventArgs> ExpandedLists { get; }
         public ReactiveCommand OpenTweetFlyOut { get; }
         public ReactiveCommand<KeyEventArgs> SendTweet { get; }
+        public ReactiveCommand ClearInReplyCommand { get; }
 
         public ReactivePropertySlim<bool> IsOpenTweetFlyOut { get; } = new ReactivePropertySlim<bool>(false);
         public ReactivePropertySlim<bool> IsOpenAuthFlyOut { get; } = new ReactivePropertySlim<bool>(false);
@@ -75,11 +76,13 @@ namespace HHFO.ViewModels
                 .AddTo(Disposable);
             InitialAuth = new ReactiveCommand()
                 .AddTo(Disposable);
-            OpenList = new ReactiveCommand<System.Windows.Input.MouseButtonEventArgs>()
+            OpenList = new ReactiveCommand<RoutedEventArgs>()
                 .AddTo(Disposable);
             OpenTweetFlyOut = new ReactiveCommand()
                 .AddTo(Disposable);
             SendTweet = new ReactiveCommand<KeyEventArgs>()
+                .AddTo(Disposable);
+            ClearInReplyCommand = new ReactiveCommand()
                 .AddTo(Disposable);
 
             ExpandedLists.Subscribe(_ => FetchTwitterLists())
@@ -96,6 +99,8 @@ namespace HHFO.ViewModels
                 .AddTo(Disposable);
             SendTweet.Subscribe(_ => SendTweetAction())
                 .AddTo(Disposable);
+            ClearInReplyCommand.Subscribe(_ => Tweet.ClearInReplyToForce())
+                .AddTo(Disposable);
         }
 
         private void SendTweetAction()
@@ -111,9 +116,9 @@ namespace HHFO.ViewModels
             }
         }
 
-        private void OpenListAction(MouseButtonEventArgs e)
+        private void OpenListAction(RoutedEventArgs e)
         {
-            ListPublisher.Id.Value = long.Parse(((TextBlock)e.Source).Tag?.ToString() ?? "0");
+            ListPublisher.Id.Value = long.Parse(((Button)e.Source).Tag?.ToString() ?? "0");
             ListPublisher.Publish();
         }
 

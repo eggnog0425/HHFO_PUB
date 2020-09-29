@@ -7,32 +7,54 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <!-- MahApps -->
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Dark.Green.xaml" />
 
                 <!-- Material Design -->
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Dark.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.Green.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.indigo.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml" />
 
                 <!-- Material Design: MahApps Compatibility -->
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Fonts.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.MahApps;component/Themes/MaterialDesignTheme.MahApps.Flyout.xaml" />
 
-                <!-- commons -->
-                <ResourceDictionary>
-                    <models:BoolConverter x:Key="ReverseBool"/>
-                    <models:ThumbnailConverter x:Key="ConvertThumb"/>
-                    <models:ScreenNameConverter x:Key="MakeDispScreenName"/>
-                    <models:UserNameConverter x:Key="MakeUserName"/>
-                    <models:DateFormatConverter x:Key="DateFormatter"/>
-                    <models:TweetViewConverter x:Key="TweetTextConverter"/>
-                    <models:ReactiveLongConverter x:Key="ReactiveNullToZero"/>
-                </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
+
+            <!-- MahApps Brushes -->
+            <SolidColorBrush x:Key="HighlightBrush" Color="{StaticResource Primary700}"/>
+            <SolidColorBrush x:Key="AccentBaseColorBrush" Color="{StaticResource Primary600}" />
+            <SolidColorBrush x:Key="AccentColorBrush" Color="{StaticResource Primary500}"/>
+            <SolidColorBrush x:Key="AccentColorBrush2" Color="{StaticResource Primary400}"/>
+            <SolidColorBrush x:Key="AccentColorBrush3" Color="{StaticResource Primary300}"/>
+            <SolidColorBrush x:Key="AccentColorBrush4" Color="{StaticResource Primary200}"/>
+            <SolidColorBrush x:Key="WindowTitleColorBrush" Color="{StaticResource Primary700}"/>
+            <SolidColorBrush x:Key="AccentSelectedColorBrush" Color="{StaticResource Primary500Foreground}"/>
+            <LinearGradientBrush x:Key="ProgressBrush" EndPoint="0.001,0.5" StartPoint="1.002,0.5">
+                <GradientStop Color="{StaticResource Primary700}" Offset="0"/>
+                <GradientStop Color="{StaticResource Primary300}" Offset="1"/>
+            </LinearGradientBrush>
+            <SolidColorBrush x:Key="CheckmarkFill" Color="{StaticResource Primary500}"/>
+            <SolidColorBrush x:Key="RightArrowFill" Color="{StaticResource Primary500}"/>
+            <SolidColorBrush x:Key="IdealForegroundColorBrush" Color="{StaticResource Primary500Foreground}"/>
+            <SolidColorBrush x:Key="IdealForegroundDisabledBrush" Color="{StaticResource Primary500}" Opacity="0.4"/>
+            <SolidColorBrush x:Key="MahApps.Metro.Brushes.ToggleSwitchButton.OnSwitchBrush.Win10" Color="{StaticResource Primary500}" />
+            <SolidColorBrush x:Key="MahApps.Metro.Brushes.ToggleSwitchButton.OnSwitchMouseOverBrush.Win10" Color="{StaticResource Primary400}" />
+            <SolidColorBrush x:Key="MahApps.Metro.Brushes.ToggleSwitchButton.ThumbIndicatorCheckedBrush.Win10" Color="{StaticResource Primary500Foreground}" />
+
+            <!-- commons -->
+            <models:BoolConverter x:Key="ReverseBool"/>
+            <models:ThumbnailConverter x:Key="ConvertThumb"/>
+            <models:ScreenNameConverter x:Key="MakeDispScreenName"/>
+            <models:UserNameConverter x:Key="MakeUserName"/>
+            <models:DateFormatConverter x:Key="DateFormatter"/>
+            <models:TweetViewConverter x:Key="TweetTextConverter"/>
+            
+            <!-- 共通設定 -->
+            <Style x:Key="CommonTextBlock" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="16"/>
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </prism:PrismApplication>

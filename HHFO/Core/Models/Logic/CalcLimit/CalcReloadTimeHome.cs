@@ -8,17 +8,17 @@ using System.Threading.Tasks;
 
 namespace HHFO.Models.Logic.API
 {
-    public sealed class CalcReloadTimeList : CalcReloadTimeBase
+    public sealed class CalcReloadTimeHome : CalcReloadTimeBase
     {
-        private CalcReloadTimeList(int cntTabs, RateLimit rateLimit) : base(cntTabs, rateLimit) {}
-        private static CalcReloadTimeList Instance = null;
+        private CalcReloadTimeHome(int cntTabs, RateLimit rateLimit) : base(cntTabs, rateLimit) {}
+        private static CalcReloadTimeHome Instance = null;
             
         /// <summary>
         /// 手動更新とかで余分に更新する可能性があるので少しバッファをとる
         /// </summary>
         private const int Buffer = 1;
 
-        public static CalcReloadTimeList GetInstance(int cntTabs, RateLimit rateLimit)
+        public static CalcReloadTimeHome GetInstance(int cntTabs, RateLimit rateLimit)
         {
 
             if (Instance != null)
@@ -26,7 +26,7 @@ namespace HHFO.Models.Logic.API
                     Instance.ApiLimit = rateLimit.Limit;
                     return Instance;
             }
-            Instance = new CalcReloadTimeList(cntTabs, rateLimit);
+            Instance = new CalcReloadTimeHome(cntTabs, rateLimit);
 
             return Instance;
         }
@@ -46,8 +46,8 @@ namespace HHFO.Models.Logic.API
                 }
                 else
                 {
-                    var limitDictionary = Authorization.GetToken().Application.RateLimitStatus("lists").GetValueOrDefault("lists");
-                    if (limitDictionary.TryGetValue("/lists/statuses", out var limit))
+                    var limitDictionary = Authorization.GetToken().Application.RateLimitStatus("statuses").GetValueOrDefault("statuses");
+                    if (limitDictionary.TryGetValue("/statuses/home_timeline", out var limit))
                     {
                         return CompareMinReloadTime(CalcReloadTime(limit));
                     }
