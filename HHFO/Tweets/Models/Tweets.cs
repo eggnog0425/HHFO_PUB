@@ -92,11 +92,31 @@ namespace HHFO.Models
             lock (_tweets)
             {
                 var filteredTweets = tweets.Where(newT => !_tweets.Any(t => t.Id == newT.Id));
-                _tweets.AddRange(filteredTweets);
+                if (OrderKey == null)
+                {
+                    _tweets.AddRange(filteredTweets);
+                } else
+                {
+                    AddTweetSorted(filteredTweets);
+                }
             }
                 RefleshShowTweets();
                 AddMedias();
             return statuses.RateLimit;
+        }
+
+        private void AddTweetSorted(IEnumerable<Tweet> filteredTweets)
+        {
+            throw new NotImplementedException();
+        }
+
+        Func<Tweet, Tweet, bool> GetAddrulePredicate()
+        {
+            switch(OrderKey) {
+
+                default:
+                    return 
+            }
         }
 
         protected bool Filter(Tweet tweet)
@@ -136,6 +156,8 @@ namespace HHFO.Models
         {
             switch (OrderKey)
             {
+                case nameof(Tweet.ScreenName):
+                    return Descend ? t.OrderByDescending(t => t.ScreenName) : t.OrderBy(t => t.ScreenName);
                 case nameof(Tweet.Id):
                 default:
                     return Descend ? t.OrderByDescending(t => t.Id) : t.OrderBy(t => t.Id);
