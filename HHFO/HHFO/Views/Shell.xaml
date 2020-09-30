@@ -11,7 +11,7 @@
         xmlns:shellViewModel="clr-namespace:HHFO.ViewModels"
         xmlns:models="clr-namespace:HHFO.Models;assembly=HHFO.Core"
         TextElement.FontWeight="Regular"
-        TextElement.FontSize="13"
+        TextElement.FontSize="16"
         TextOptions.TextFormattingMode="Ideal"
         TextOptions.TextRenderingMode="Auto"
         Title="{Binding Title}"
@@ -20,8 +20,11 @@
         Width="1200"
         Name="RootWindow"
         SaveWindowPosition="True"
+                     
         GlowBrush="{StaticResource AccentColorBrush}"
         BorderThickness="1"
+        Background="{DynamicResource MaterialDesignPaper}"
+        FontFamily="{DynamicResource MaterialDesignFont}"
                      >
     <interactivity:Interaction.Triggers>
         <interactivity:EventTrigger EventName="Loaded">

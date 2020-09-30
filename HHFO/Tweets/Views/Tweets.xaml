@@ -10,7 +10,7 @@
              xmlns:interactivity="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:reactiveInteractivity="clr-namespace:Reactive.Bindings.Interactivity;assembly=ReactiveProperty.WPF"
              TextElement.FontWeight="Regular"
-             TextElement.FontSize="13"
+             TextElement.FontSize="14"
              TextOptions.TextFormattingMode="Ideal"
              TextOptions.TextRenderingMode="Auto"
              Name="rootControl">
@@ -23,56 +23,74 @@
     <Grid>
         <interactivity:Interaction.Triggers>
             <interactivity:EventTrigger EventName="Loaded">
-                <reactiveInteractivity:EventToReactiveCommand Command="{Binding OnLoaded, Mode=OneWay}" />
+                <reactiveInteractivity:EventToReactiveCommand Command="{Binding OnLoaded, Mode=OneTime}" />
             </interactivity:EventTrigger>
         </interactivity:Interaction.Triggers>
 
         <TabControl 
             Margin="0" 
             ItemsSource ="{Binding Tabs, IsAsync=True}" 
-            Background="Transparent" 
             Name="TabControl">
             <interactivity:Interaction.Triggers>
                 <interactivity:EventTrigger EventName="SelectionChanged">
-                    <reactiveInteractivity:EventToReactiveCommand Command="{Binding OnCurrentTabChanged, Mode=OneWay}" />
+                    <reactiveInteractivity:EventToReactiveCommand Command="{Binding OnCurrentTabChanged, Mode=OneTime}" />
                 </interactivity:EventTrigger>
             </interactivity:Interaction.Triggers>
 
             <TabControl.ItemTemplate>
                 <DataTemplate>
-                    <Grid Margin="0" Height="25">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0"
-                                   Text="{Binding Name}"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center"
-                                   FontSize="16"
-                                   TextAlignment="Center"/>
-                        <Button Grid.Column="1"
-                                Width="Auto" 
-                                Margin="0" 
-                                Padding="0" 
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Style="{StaticResource MaterialDesignFlatButton}"
-                                Tag="{Binding SurrogateKey}"
-                                ToolTip="Icon">
+                    <Grid Height="48">
+                    <ToggleButton Grid.Column="0"
+                                      Margin="8,8,4,8"
+                                      HorizontalAlignment="Stretch"
+                                      VerticalAlignment="Center"
+                                      FontSize="16"
+                                      Style="{StaticResource MahApps.Styles.ToggleButton.ToolBar}"
+                                      IsChecked ="{Binding IsSelected.Value, Mode=OneWay}"
+                                      Tag="{Binding SurrogateKey}"
+                                      >
                             <interactivity:Interaction.Triggers>
                                 <interactivity:EventTrigger EventName="Click">
-                                    <reactiveInteractivity:EventToReactiveCommand Command="{Binding DataContext.TabCloseCommand, ElementName=rootControl ,Mode=OneWay}" />
+                                    <reactiveInteractivity:EventToReactiveCommand Command="{Binding DataContext.CurrentTabChangedCommandByButtonCommand, ElementName=rootControl ,Mode=OneTime}" />
                                 </interactivity:EventTrigger>
                             </interactivity:Interaction.Triggers>
-                            <materialDesign:PackIcon Grid.Column="1" 
-                                                 HorizontalAlignment="Center"
-                                                 VerticalAlignment="Center"
+                            <ToggleButton.Content>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{Binding Name}" 
+                                           Grid.Column="0"
+                                            Margin="0"
+                                             HorizontalAlignment="Stretch"
+                                           VerticalAlignment="Center"/>
+
+                                <Button Grid.Column="1"
+                                            Width="Auto" 
+                                            Margin="4" 
+                                            Padding="0" 
+                                            HorizontalAlignment="Stretch"
+                                            VerticalAlignment="Center"
+                                            Style="{StaticResource MaterialDesignFlatButton}"
+                                            Tag="{Binding SurrogateKey}"
+                                            ToolTip="Icon">
+                                    <interactivity:Interaction.Triggers>
+                                        <interactivity:EventTrigger EventName="Click">
+                                            <reactiveInteractivity:EventToReactiveCommand Command="{Binding DataContext.TabCloseCommand, ElementName=rootControl ,Mode=OneTime}" />
+                                        </interactivity:EventTrigger>
+                                    </interactivity:Interaction.Triggers>
+                                    <materialDesign:PackIcon Grid.Column="1" 
+                                                 HorizontalAlignment="Stretch"
+                                                 VerticalAlignment="Stretch"
                                                  Kind="Close"
-                                                 Foreground="#FFBEBEBE"
-                                                 Background="Transparent"/>
-                        </Button>
-                    </Grid>
+                                                 Foreground="{StaticResource IdealForegroundColorBrush}"/>
+                                </Button>
+                            </Grid>
+                        </ToggleButton.Content>
+                    </ToggleButton>
+                        </Grid>
+
                 </DataTemplate>
             </TabControl.ItemTemplate>
 

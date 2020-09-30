@@ -5,7 +5,8 @@
              prism:ViewModelLocator.AutoWireViewModel="False"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:interactivity="http://schemas.microsoft.com/xaml/behaviors"
-             xmlns:reactiveInteractivity="clr-namespace:Reactive.Bindings.Interactivity;assembly=ReactiveProperty.WPF">
+             xmlns:reactiveInteractivity="clr-namespace:Reactive.Bindings.Interactivity;assembly=ReactiveProperty.WPF"
+             FontSize="16">
     <Grid>
         <interactivity:Interaction.Triggers>
             <interactivity:KeyTrigger Modifiers="{Binding ModifierKeys, Mode=OneWay}" Key="Space">

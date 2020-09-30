@@ -39,6 +39,7 @@ namespace HHFO.Models
         public long Id { get; protected set; }
         public string Name { get; protected set; }
         public int SurrogateKey { get; protected set; }
+        public ReactivePropertySlim<bool> IsSelected { get; set; } = new ReactivePropertySlim<bool>(false);
 
         // チェックボックス・ラジオボタンの状態
         public ReactivePropertySlim<bool> IsFilteredLink { get; private set; } = new ReactivePropertySlim<bool>(false);

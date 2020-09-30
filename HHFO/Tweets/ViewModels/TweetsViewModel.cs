@@ -22,6 +22,7 @@ using System.Reactive.Disposables;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using Unity;
 using Status = CoreTweet.Status;
@@ -44,6 +45,7 @@ namespace HHFO.ViewModels
 
         public ReactiveCommand<RoutedEventArgs> OnLoaded { get; }
         public ReactiveCommand<SelectionChangedEventArgs> OnCurrentTabChanged { get; }
+        public ReactiveCommand<RoutedEventArgs> CurrentTabChangedCommandByButtonCommand { get; set; }
         public ReactiveCommand ReloadPast { get; }
         public ReactiveCommand<RoutedEventArgs> TabCloseCommand { get; }
         private static ConcurrentDictionary<int, TabBase> SurrogateKeyDictionary { get; } = new ConcurrentDictionary<int, TabBase>();
@@ -69,6 +71,8 @@ namespace HHFO.ViewModels
                 .AddTo(Disposable);
             TabCloseCommand = new ReactiveCommand<RoutedEventArgs>()
                 .AddTo(Disposable);
+            CurrentTabChangedCommandByButtonCommand = new ReactiveCommand<RoutedEventArgs>()
+                .AddTo(Disposable);
 
             ListId.Subscribe(async e => await OpenListTabAction(e))
                 .AddTo(Disposable);
@@ -80,6 +84,20 @@ namespace HHFO.ViewModels
                 .AddTo(Disposable);
             TabCloseCommand.Subscribe(e => OnTabClose(e))
                 .AddTo(Disposable);
+            CurrentTabChangedCommandByButtonCommand.Subscribe(e => CurrentTabChangedCommandByButton(e))
+                .AddTo(Disposable);
+
+        }
+
+        private void CurrentTabChangedCommandByButton(RoutedEventArgs e)
+        {
+            if (e.Source is ToggleButton button)
+            {
+                if (button.DataContext is TabBase tab)
+                {
+                    SelectTabByVM(tab.SurrogateKey);
+                }
+            }
         }
 
         private void ReloadPastAction()
@@ -107,6 +125,11 @@ namespace HHFO.ViewModels
         private void OnCurrentTabChangedAction()
         {
             CurrentTab = (TabBase)TabControl.SelectedItem;
+            foreach (var tab in TabControl.Items)
+            {
+                var t = tab as TabBase;
+                t.IsSelected.Value = t.SurrogateKey == CurrentTab.SurrogateKey;
+            }
         }
 
         private void OnLoadedAction(RoutedEventArgs e)
@@ -197,7 +220,10 @@ namespace HHFO.ViewModels
                     if (item.SurrogateKey == surrogateKey)
                     {
                         TabControl.SelectedIndex = i;
-                        return;
+                        item.IsSelected.Value = true;
+                    } else
+                    {
+                        item.IsSelected.Value = false;
                     }
                     i++;
                 }

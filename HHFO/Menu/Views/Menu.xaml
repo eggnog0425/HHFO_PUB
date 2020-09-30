@@ -12,14 +12,26 @@
         xmlns:mahApps="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         x:Name="parent"
-        TextElement.FontWeight="Regular"
-        TextElement.FontSize="13"
+        TextElement.FontSize="16"
         TextOptions.TextFormattingMode="Ideal"
         TextOptions.TextRenderingMode="Auto"
+        Background="{StaticResource AccentColorBrush}"
+        Width="200"
+        MaxWidth="240"
 >
     <UserControl.Resources>
-        <Style x:Key="MenuButton" TargetType="Button">
-            <Setter Property="HorizontalAlignment" Value="Left"/>
+        <Style x:Key="MenuButtonSetting"
+               TargetType="Button"
+               BasedOn="{StaticResource MahApps.Styles.Button.Flat}">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Foreground" Value="{StaticResource MahApps.Brushes.Badged.Foreground}"/>
+            <Setter Property="Background" Value="{StaticResource AccentColorBrush}"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Padding" Value="8,0,0,8"/>
+            <Setter Property="VerticalAlignment" Value="Stretch"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontWeight" Value="Bold"/>
         </Style>
     </UserControl.Resources>
     <Grid>
@@ -35,27 +47,27 @@
             Grid.Column="0" 
             >
 
-            <materialDesign:ColorZone>
-                <StackPanel>
+            <materialDesign:ColorZone Margin="0" MaxWidth="232">
+                <StackPanel Margin="0">
                     <Button Name="Home" 
-                        FontSize="16"
-                        HorizontalAlignment="Stretch"
-                        Content="Home"
-                        HorizontalContentAlignment="Left"/>
+                            Content="Home"
+                            Style="{StaticResource MenuButtonSetting}"/>
 
 
                     <Expander Name ="List"
-                          Background="{StaticResource AccentColorBrush}"
-                          HorizontalAlignment="Center"
+                          HorizontalAlignment="Stretch"
                           VerticalAlignment="Center"
-                          HorizontalContentAlignment="Stretch">
+                          HorizontalContentAlignment="Stretch"
+                          Background="{StaticResource AccentColorBrush}">
                         <Expander.Header>
                             <TextBlock
                                 Padding="0"
-                                Margin="-8,0,0,0"
+                                Margin="-16,0,0,0"
                                 Text="List"
                                 Style="{StaticResource MaterialDesignButtonTextBlock}"
-                                FontSize="16"/>
+                                Foreground="{StaticResource MahApps.Brushes.Badged.Foreground}"
+                                FontSize="16"
+                                FontWeight="Bold"/>
                         </Expander.Header>
                     <interactivity:Interaction.Triggers>
                         <interactivity:EventTrigger EventName="Expanded">
@@ -68,10 +80,14 @@
                                 <DataTemplate>
                                     <StackPanel>
                                         <Button Name="Name"
-                                                Content="{Binding Name}"
-                                                HorizontalContentAlignment="Left"
+                                                Style="{StaticResource MenuButtonSetting}"
                                                 Tag="{Binding Id}"
                                                 >
+                                                <Button.Content>
+                                                    <TextBlock TextWrapping="Wrap"
+                                                               Text="{Binding Name}"/>
+
+                                                </Button.Content>
                                             <interactivity:Interaction.Triggers>
                                                 <interactivity:EventTrigger EventName="Click">
                                                     <reactiveInteractivity:EventToReactiveCommand Command="{Binding DataContext.OpenList, Mode=OneWay, ElementName=parent}" />
