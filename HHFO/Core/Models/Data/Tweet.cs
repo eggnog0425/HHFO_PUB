@@ -15,25 +15,21 @@ namespace HHFO.Models.Data
     {
         // 常に元tweetの値が入る項目群
         public long Id { get; private set; }
-        public DateTimeOffset? CreatedAt { get; private set; }
+        public DateTimeOffset CreatedAt { get; private set; }
         public long UserId { get; private set; }
         public string ScreenName { get; private set; } = "";
         public string UserName { get; private set; }
         public bool IsRetweetedTweet { get; private set; }
 
         // Retweetの場合のみ入る項目群
-        public long RetweetedId { get; private set; }
-        public DateTimeOffset? RetweetedCreatedAt { get; private set; }
-        public long RetweetedUserId { get; private set; }
+        public long RetweetedId { get; private set; } = 0L;
+        public DateTimeOffset? RetweetedCreatedAt { get; private set; } = null;
+        public long RetweetedUserId { get; private set; } = 0L;
         public string RetweetedUserScreenName { get; private set; } = "";
         public string RetweetedUserName { get; private set; } = "";
 
         // Retweetの場合はRetweet先のstatusの値が入る項目群
-        /// <summary>
-        /// ListView用のtweet本文
-        /// </summary>
         public string FullText { get; private set; }
-
         public bool HasLinks { get; private set; }
         public UrlEntity[] Links { get; private set; }
         public bool HasMedias { get; private set; }

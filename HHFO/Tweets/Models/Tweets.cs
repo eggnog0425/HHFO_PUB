@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using HHFO.Models.Data;
+using System.Globalization;
 
 namespace HHFO.Models
 {
@@ -26,7 +27,7 @@ namespace HHFO.Models
         public ReadOnlyReactiveCollection<Media> Medias { get; private set; }
 
         private bool Descend = false;
-        private string OrderKey = null;
+        private string SortKey = null;
 
         public Tweets()
         {
@@ -63,7 +64,7 @@ namespace HHFO.Models
             lock (_showTweets)
             {
                 _showTweets.Clear();
-                foreach (var tweet in Order(filteredTweets))
+                foreach (var tweet in Sort(filteredTweets))
                 {
                     _showTweets.Add(tweet);
                 }
@@ -92,12 +93,12 @@ namespace HHFO.Models
             lock (_tweets)
             {
                 var filteredTweets = tweets.Where(newT => !_tweets.Any(t => t.Id == newT.Id));
-                if (OrderKey == null)
+                if (SortKey == null)
                 {
                     _tweets.AddRange(filteredTweets);
                 } else
                 {
-                    AddTweetSorted(filteredTweets);
+                    AddTweetWhenSorted(filteredTweets);
                 }
             }
                 RefleshShowTweets();
@@ -105,17 +106,40 @@ namespace HHFO.Models
             return statuses.RateLimit;
         }
 
-        private void AddTweetSorted(IEnumerable<Tweet> filteredTweets)
+        private void AddTweetWhenSorted(IEnumerable<Tweet> addTweets)
         {
-            throw new NotImplementedException();
+            // 追加の際は末尾から回す必要があるので追加要素をあらかじめソート
+            var sortedAddTweets = Sort(addTweets).ToList();
+
+            // 追加される側をぐるぐる回しつつ追加するやつと比較して該当箇所にぶっこみたい
+            for(var i = _tweets.Count - 1; -1 < i; i--)
+            {
+
+                var compare = KeySelector(_tweets[i]).CompareTo(KeySelector(sortedAddTweets.Last()));
+                // Descendの場合追加要素の方が小さかったらリストの対象箇所に挿入する
+                if (Descend)
+                {
+                    if (compare < 0)
+                    {
+                        for(var j = sortedAddTweets.Count - 1; -1 < j ; j--)
+                        {
+                            _tweets.Insert(i + j, sortedAddTweets.Last());
+                            sortedAddTweets.RemoveAt(j);
+                        }
+                    }
+                }
+                // ascendの場合追加要素の方が大きかったらリストの対象箇所に挿入する
+            }
         }
 
-        Func<Tweet, Tweet, bool> GetAddrulePredicate()
+        private void 
+
+        Func<Tweet, Tweet, bool> AddRulePredicate()
         {
-            switch(OrderKey) {
+            switch (SortKey) {
 
                 default:
-                    return 
+                    throw new NotImplementedException();
             }
         }
 
@@ -150,18 +174,27 @@ namespace HHFO.Models
         {
             await Task.Run(() =>Predicates.Remove(func)).ConfigureAwait(false);
         }
-
-
-        private IOrderedEnumerable<Tweet> Order(IEnumerable<Tweet> t)
+        private IOrderedEnumerable<Tweet> Sort(IEnumerable<Tweet> tweets)
         {
-            switch (OrderKey)
+            return Descend
+                 ? tweets.OrderByDescending(KeySelector)
+                 : tweets.OrderBy(KeySelector);
+        }
+
+        private IComparable KeySelector(Tweet tweet)
+        {
+            var isRt = tweet.IsRetweetedTweet;
+            return SortKey switch
             {
-                case nameof(Tweet.ScreenName):
-                    return Descend ? t.OrderByDescending(t => t.ScreenName) : t.OrderBy(t => t.ScreenName);
-                case nameof(Tweet.Id):
-                default:
-                    return Descend ? t.OrderByDescending(t => t.Id) : t.OrderBy(t => t.Id);
-            }
+                nameof(tweet.Id) => tweet.Id,
+                nameof(tweet.CreatedAt) => tweet.CreatedAt,
+                nameof(tweet.UserId) => isRt ? tweet.RetweetedUserId : tweet.UserId,
+                nameof(tweet.ScreenName) => isRt ? tweet.RetweetedUserScreenName : tweet.ScreenName,
+                nameof(tweet.UserName) => isRt ? tweet.RetweetedUserName : tweet.UserName,
+                nameof(tweet.FullText) => tweet.FullText,
+                nameof(tweet.Source) => tweet.Source,
+                _ => tweet.Id
+            };
         }
     }
 }
