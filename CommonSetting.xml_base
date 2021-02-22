@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<CommonSetting>
+	<Title>花発多風雨</Title>
+	<UserSettingPath>./Config/UserSetting.xml</UserSettingPath>
+	<ErrorMessagePath>HHFO.Core.ErrorMessage.xml</ErrorMessagePath>
+	<DispMessagePath>HHFO.Core.DispMessage.xml</DispMessagePath>
+	<ConsumerKey>hogehoge</ConsumerKey>
+	<ConsumerSecret>fugafuga</ConsumerSecret>
+	<Guid>fa939fda-106f-44b5-a1af-89a0b044c49d</Guid>
+	<MinThread>1</MinThread>
+	<MaxThread>1</MaxThread>	
+</CommonSetting>
